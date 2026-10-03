@@ -20,18 +20,24 @@ function stripSourceOnlyAssets(): Plugin {
   };
 }
 
-export default defineConfig({
-  base: './',
-  server: { port: 5173, open: false },
-  plugins: [stripSourceOnlyAssets()],
-  build: {
-    target: 'es2022',
-    // Phaser is ~1.5 MB minified; keep it in its own long-cacheable chunk.
-    chunkSizeWarningLimit: 1600,
-    rollupOptions: {
-      output: {
-        manualChunks: { phaser: ['phaser'] },
+export default defineConfig(({ mode }) => {
+  // `--mode single` is used by tools/build-single-file.mjs: one JS chunk, no
+  // public/ copy (assets get embedded into the HTML by that script instead).
+  const single = mode === 'single';
+  return {
+    base: './',
+    server: { port: 5173, open: false },
+    plugins: single ? [] : [stripSourceOnlyAssets()],
+    build: {
+      target: 'es2022',
+      outDir: single ? 'dist-single' : 'dist',
+      copyPublicDir: !single,
+      modulePreload: !single,
+      // Phaser is ~1.5 MB minified; keep it in its own long-cacheable chunk.
+      chunkSizeWarningLimit: single ? 4000 : 1600,
+      rollupOptions: {
+        output: single ? { inlineDynamicImports: true } : { manualChunks: { phaser: ['phaser'] } },
       },
     },
-  },
+  };
 });

@@ -21,12 +21,23 @@ npm run build    # type-check and build the production bundle into dist/
 npm run preview  # serve the production build locally
 ```
 
+### Single-file version (no server needed)
+
+```bash
+npm run build:single   # -> release/mishkontin-v0.1.html
+```
+
+Produces **one self-contained HTML file** (~3.5 MB) with the code, Mishkontin's frames and
+the icon embedded. Double-click it to play in a desktop browser; no server or other files
+are needed. A prebuilt copy is committed at `release/mishkontin-v0.1.html`.
+
 Other scripts:
 
 | Script              | Purpose                                                        |
 | ------------------- | -------------------------------------------------------------- |
 | `npm run typecheck` | TypeScript check only                                          |
 | `npm run atlas`     | Regenerate Mishkontin's game frames from the source sprite sheet |
+| `npm run build:single` | Build the single-file `release/mishkontin-v0.1.html`        |
 
 `dist/` is static and can be hosted on any static web server. Asset paths are relative (`base: './'`).
 

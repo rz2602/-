@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { AssetKeys, AssetPaths, GAME_HEIGHT, GAME_WIDTH, SceneKeys, UI_COLORS, UI_FONT_FAMILY } from '../config/constants';
 import { getMishkontinManifest, registerMishkontinAnimations } from '../entities/mishkontinAnimations';
+import { assetSource } from '../utils/assetSource';
 import { generatePlaceholderArt } from '../utils/placeholderArt';
 
 const BAR_WIDTH = 420;
@@ -17,7 +18,7 @@ export class PreloadScene extends Phaser.Scene {
 
     // Frame size comes from the preprocessing manifest (see tools/build-mishkontin-atlas.mjs).
     const manifest = getMishkontinManifest(this);
-    this.load.spritesheet(AssetKeys.mishkontin, AssetPaths.mishkontinFrames, {
+    this.load.spritesheet(AssetKeys.mishkontin, assetSource(AssetPaths.mishkontinFrames), {
       frameWidth: manifest.frameWidth,
       frameHeight: manifest.frameHeight,
     });

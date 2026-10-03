@@ -9,7 +9,8 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "atlas": "node tools/build-mishkontin-atlas.mjs"
+    "atlas": "node tools/build-mishkontin-atlas.mjs",
+    "build:single": "tsc --noEmit && node tools/build-single-file.mjs"
   },
   "dependencies": {
     "phaser": "^3.90.0"

@@ -72,3 +72,5 @@ First playable prototype: movement, animation and camera on one test level.
 
 ### Build
 - Phaser in a separate cacheable chunk. The raw source sprite sheet is excluded from `dist/`.
+- `npm run build:single`: one self-contained HTML file (`release/mishkontin-v0.1.html`) that
+  runs when opened directly from disk.
