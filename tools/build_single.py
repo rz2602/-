@@ -3,7 +3,7 @@ import base64, pathlib, re
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SRC = ROOT / 'deadly_forest_game'
-OUT = ROOT / 'smartonosnata-gora.html'
+OUT = ROOT / 'monsters-and-survivors.html'
 
 def data_uri(path, mime):
     return f"data:{mime};base64," + base64.b64encode(path.read_bytes()).decode()

@@ -922,7 +922,10 @@ function renderEnding() {
     ctx.textAlign = 'center'; ctx.font = '400 64px "Russo One",Rubik,system-ui';
     ctx.lineWidth = 8; ctx.strokeStyle = '#000a'; ctx.strokeText('СЛЕДВА: ЧАСТ 2', VW / 2, 330);
     ctx.fillStyle = '#ffd568'; ctx.fillText('СЛЕДВА: ЧАСТ 2', VW / 2, 330);
-    ctx.font = '700 20px Rubik,system-ui'; ctx.fillStyle = '#fff'; ctx.fillText('Благодарим ти, че освободи града!', VW / 2, 372);
+    const out = (txt, y, font, col) => { ctx.font = font; ctx.lineWidth = 5; ctx.strokeStyle = '#000c'; ctx.strokeText(txt, VW / 2, y); ctx.fillStyle = col; ctx.fillText(txt, VW / 2, y); };
+    out('Благодарим ти, че освободи града!', 372, '700 20px Rubik,system-ui', '#fff');
+    out('Monsters & Survivors', 430, '400 30px "Russo One",Rubik,system-ui', '#fff');
+    out('По идея на Радоил и приятели', 462, '700 18px Rubik,system-ui', '#d8ff8a');
   }
   ctx.textAlign = 'left';
 }
