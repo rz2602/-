@@ -1,0 +1,25 @@
+{
+  "name": "mishkontin",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Mishkontin and King Mortis the Rat \u2014 browser 2D platformer (v0.1 movement prototype)",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "atlas": "node tools/build-mishkontin-atlas.mjs"
+  },
+  "dependencies": {
+    "phaser": "^3.90.0"
+  },
+  "devDependencies": {
+    "pngjs": "^7.0.0",
+    "typescript": "~5.9.3",
+    "vite": "^6.4.3"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
