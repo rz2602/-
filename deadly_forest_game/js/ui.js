@@ -99,7 +99,7 @@ function showLevelIntro(li) {
   $('lvlEyebrow').textContent = `НИВО ${li + 1} ОТ ${LEVELS.length}`;
   $('lvlTitle').textContent = `${L.icon} ${L.name}`;
   $('lvlText').textContent = L.intro;
-  $('lvlFacts').innerHTML = `<div><span>Цел</span><b>${L.item.count} × ${L.item.name}</b></div><div><span>Бос</span><b>${L.boss.name}</b></div><div><span>Опасност</span><b>${L.hazard.name}</b></div><div><span>Чудовища</span><b>${L.enemies.map(e => e.name).filter((v, i, a) => a.indexOf(v) === i).join(', ')}</b></div>`;
+  $('lvlFacts').innerHTML = `<div><span>Цел</span><b>${L.item.count} × ${L.item.name}</b></div><div><span>Бос</span><b>${L.boss.name} (${L.boss.bg})</b></div><div><span>Опасност</span><b>${L.hazard.name}</b></div><div><span>Чудовища</span><b>${L.roster.map(r => r[0]).concat(L.mimics ? ['mimic'] : []).map(id => `${MONSTERS[id].name} (${MONSTERS[id].bg})`).join(', ')}</b></div>`;
   $('sLevel').style.setProperty('--ac', L.pal.accent);
   showScreen('sLevel');
 }

@@ -278,8 +278,8 @@ function aimAngle() {
     return Math.atan2(mouse.y + cam.y - (P.y - 6), mouse.x + cam.x - P.x);
   }
   let best = null, bd = 420;
-  const cands = lv.enemies.filter(e => !e.dead && e.active);
-  if (lv.boss.active && !lv.boss.dead) cands.push(lv.boss);
+  const cands = lv.enemies.filter(e => !e.dead && e.active && !e.hidden);
+  if (lv.boss.active && !lv.boss.dead && bossVulnerable(lv.boss)) cands.push(lv.boss);
   cands.forEach(e => { const d = Math.hypot(e.x - P.x, e.y - P.y); if (d < bd && los(P.x, P.y, e.x, e.y)) { bd = d; best = e; } });
   if (best) return Math.atan2(best.y - P.y, best.x - P.x);
   return P.aim;
@@ -344,17 +344,18 @@ function aoe(x, y, r, dmg) {
 
 function hitTarget(e, dmg, kx, ky) {
   if (e.dead) return;
-  e.hp -= dmg; e.flash = 0.15; e.active = true;
-  e.kbx += kx * (e === lv.boss ? 0.15 : 1); e.kby += ky * (e === lv.boss ? 0.15 : 1);
-  floater(e.x + (Math.random() - 0.5) * 16, e.y - e.r - 10, Math.round(dmg * 10) / 10, '#ffe680');
+  const isBoss = e === lv.boss;
+  if (isBoss) {
+    if (!bossVulnerable(e)) { if (Math.random() < 0.3) floater(e.x, e.y - e.h * 0.6, e.submerged ? 'Под водата!' : '✖', '#cfd8dc'); return; }
+    dmg *= bossDmgMul(e);
+  } else dmg *= enemyOnHit(e);
+  e.hp -= dmg; e.flash = 0.15;
+  e.kbx += kx * (isBoss ? 0.12 : 1); e.kby += ky * (isBoss ? 0.12 : 1);
+  floater(e.x + (Math.random() - 0.5) * 16, e.y - e.r - 20, Math.round(dmg * 10) / 10, '#ffe680');
   burst(e.x, e.y, e.color, 6, 120, 0.3);
   sfx('hit');
-  if (e === lv.boss) { checkBossPhase(); if (e.hp <= 0) killBoss(); return; }
-  if (e.hp <= 0) {
-    e.dead = true; stats.kills++; sfx('die');
-    burst(e.x, e.y, e.color, 22, 200, 0.6, 4); burst(e.x, e.y, '#000', 10, 80, 0.6, 6);
-    if (Math.random() < 0.13) lv.hearts.push({ x: e.x, y: e.y, got: false, amt: 1 });
-  }
+  if (isBoss) { checkBossPhase(); if (e.hp <= 0) { e.hp = 0; if (e.id === 'heart') checkBossPhase(); else killBoss(); } return; }
+  if (e.hp <= 0) killEnemy(e);
 }
 
 function hurt(amount, src) {
@@ -366,6 +367,7 @@ function hurt(amount, src) {
 }
 
 function interact() {
+  if (interactBossObj()) return;
   for (const n of lv.notes) {
     if (!n.got && Math.hypot(n.x - P.x, n.y - P.y) < 60) {
       n.got = true; stats.secrets++; sfx('note');
@@ -408,7 +410,10 @@ function update(dt) {
 
   // Атака / умение
   if ((keys.Space || keys.KeyJ || mouse.down || touch.atk) && P.cd <= 0) doAttack();
-  if ((keys.KeyQ || keys.KeyK || keys.ShiftLeft || keys.ShiftRight || mouse.right || touch.ab) && P.acd <= 0) doAbility();
+  const abKey = keys.KeyQ || keys.KeyK || keys.ShiftLeft || keys.ShiftRight || mouse.right || touch.ab;
+  if (abKey && lv.boss.st === 'exposed' && Math.hypot(lv.boss.x - P.x, lv.boss.y - P.y) < lv.boss.r + 90) startCleanse();
+  else if (abKey && P.acd <= 0) doAbility();
+  lv.flashT -= dt;
 
   // Опасни плочки
   if (tileAt(P.x, P.y) === 2) { P.hazT += dt; if (P.hazT > 0.15) hurt(1, L.hazard.name); } else P.hazT = 0;
@@ -432,8 +437,7 @@ function update(dt) {
   if (!B.active && !B.dead && room === br) {
     const tx = Math.floor(P.x / TILE), ty = Math.floor(P.y / TILE);
     if (tx > br.x && tx < br.x + br.w - 1 && ty > br.y && ty < br.y + br.h - 1) {
-      B.active = true; lv.arenaLocked = true; lv.gates.forEach(g => { lv.grid[g.y * lv.w + g.x] = 3; });
-      say(`⚠ ${B.name} ⚠`, 3, '#ff5f6a'); shake = 0.6; sfx('boom');
+      activateBoss(B);
     }
   }
 
@@ -441,22 +445,17 @@ function update(dt) {
   lv.flowT -= dt; if (lv.flowT <= 0) { lv.flowT = 0.25; computeFlow(); }
   lv.enemies.forEach(e => { if (!e.dead) updateEnemy(e, dt); });
   for (let i = 0; i < lv.enemies.length; i++) {
-    const a = lv.enemies[i]; if (a.dead || !a.active || a.kind === 'ghost') continue;
+    const a = lv.enemies[i]; if (a.dead || !a.active || a.hidden || a.st === 'node' || a.st === 'decoy') continue;
     for (let j = i + 1; j < lv.enemies.length; j++) {
-      const b = lv.enemies[j]; if (b.dead || !b.active || b.kind === 'ghost') continue;
+      const b = lv.enemies[j]; if (b.dead || !b.active || b.hidden || b.st === 'node' || b.st === 'decoy') continue;
       const dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy), m = a.r + b.r;
       if (d < m && d > 0.01) { const p = (m - d) / 2; moveCircle(a, -dx / d * p, -dy / d * p); moveCircle(b, dx / d * p, dy / d * p); }
     }
   }
-  if (B.active && !B.dead) updateBoss(B, dt);
+  if ((B.active && !B.dead) || B.st === 'cleansing') updateBoss(B, dt);
   if (lv.enemies.length > 120) lv.enemies = lv.enemies.filter(e => !e.dead);
 
-  // Шипове от корени (бос)
-  lv.spikes.forEach(s => {
-    s.t -= dt;
-    if (s.t <= 0 && !s.done) { s.done = true; burst(s.x, s.y, '#6a3a1a', 14, 200, 0.4, 5); if (Math.hypot(P.x - s.x, P.y - s.y) < 40) hurt(1, B.name); }
-  });
-  lv.spikes = lv.spikes.filter(s => s.t > -0.4);
+  updateZones(dt);
 
   // Снаряди на играча
   shots.forEach(s => {
@@ -501,164 +500,16 @@ function explodeShot(s) {
   if (s.splash) { ring(s.x, s.y, s.color, s.splash, 0.3); aoe(s.x, s.y, s.splash, s.dmg * 0.6); }
 }
 
-function updateEnemy(e, dt) {
-  e.flash -= dt; e.frozen -= dt; e.slow -= dt; e.windup -= dt;
-  if (e.kbx || e.kby) { if (e.kind === 'ghost') { e.x += e.kbx * dt; e.y += e.kby * dt; } else moveCircle(e, e.kbx * dt, e.kby * dt); e.kbx *= 0.85; e.kby *= 0.85; if (Math.abs(e.kbx) + Math.abs(e.kby) < 5) e.kbx = e.kby = 0; }
-  const dx = P.x - e.x, dy = P.y - e.y, d = Math.hypot(dx, dy) || 1;
-  if (!e.active) {
-    e.anim += dt;
-    if (d < 460 && (e.kind === 'ghost' || los(e.x, e.y, P.x, P.y))) e.active = true;
-    return;
-  }
-  if (e.frozen > 0) return;
-  e.anim += dt * 4;
-  const hidden = P.shadow > 0;
-  const sp = e.speed * (e.slow > 0 ? 0.45 : 1);
-  if (Math.abs(dx) > 4) e.face = dx < 0 ? -1 : 1;
-  if (hidden) {
-    e.wander += dt; moveCircle(e, Math.cos(e.wander) * sp * 0.3 * dt, Math.sin(e.wander * 1.3) * sp * 0.3 * dt);
-    return;
-  }
-  switch (e.kind) {
-    case 'chaser': case 'tank': {
-      const [vx, vy] = flowDir(e); moveCircle(e, vx * sp * dt, vy * sp * dt); break;
-    }
-    case 'ghost': {
-      e.x += dx / d * sp * dt; e.y += dy / d * sp * dt;
-      e.x = Math.max(TILE, Math.min(lv.w * TILE - TILE, e.x)); e.y = Math.max(TILE, Math.min(lv.h * TILE - TILE, e.y));
-      break;
-    }
-    case 'charger': {
-      e.stT -= dt;
-      if (e.st === 'walk') {
-        const [vx, vy] = flowDir(e); moveCircle(e, vx * sp * dt, vy * sp * dt);
-        if (d < 250 && e.stT <= 0 && los(e.x, e.y, P.x, P.y)) { e.st = 'wind'; e.stT = 0.55; e.windup = 0.55; }
-      } else if (e.st === 'wind') {
-        if (e.stT <= 0) { e.st = 'dash'; e.stT = 0.45; e.dx = dx / d; e.dy = dy / d; }
-      } else if (e.st === 'dash') {
-        if (!moveCircle(e, e.dx * sp * 4 * dt, e.dy * sp * 4 * dt)) e.stT = 0;
-        if (e.stT <= 0) { e.st = 'walk'; e.stT = 0.9; }
-      }
-      break;
-    }
-    case 'shooter': {
-      if (e.speed > 0) {
-        if (d > 330) { const [vx, vy] = flowDir(e); moveCircle(e, vx * sp * dt, vy * sp * dt); }
-        else if (d < 190) moveCircle(e, -dx / d * sp * dt, -dy / d * sp * dt);
-      }
-      e.cd -= dt;
-      if (e.cd <= 0 && d < 520 && los(e.x, e.y, P.x, P.y)) {
-        e.cd = 1.5 + Math.random() * 0.8; e.windup = 0.2;
-        const a = Math.atan2(dy, dx);
-        enemyBullet(e.x, e.y, a, 250 + lv.li * 12, e.color, e.name);
-        if (lv.li >= 3) { enemyBullet(e.x, e.y, a - 0.25, 240, e.color, e.name); enemyBullet(e.x, e.y, a + 0.25, 240, e.color, e.name); }
-      }
-      break;
-    }
-  }
-  if (d < e.r + P.r - 2 && !(e.kind === 'ghost' && P.shield > 0)) hurt(e.dmg, e.name);
-}
-
 function enemyBullet(x, y, a, speed, color, src, r = 7) {
   bullets.push({ x, y, vx: Math.cos(a) * speed, vy: Math.sin(a) * speed, r, color, life: 4, src });
   if (bullets.length % 4 === 0) sfx('ebullet');
 }
 
-// ---------- Бос ----------
-function checkBossPhase() {
-  const B = lv.boss;
-  if (B.phase === 1 && B.hp <= B.max / 2) {
-    B.phase = 2; shake = 0.8; sfx('boom'); say(`${B.name} побесня! (Фаза 2)`, 3, '#ff5f6a');
-    for (let i = 0; i < 18; i++) enemyBullet(B.x, B.y, i / 18 * Math.PI * 2, 200, lv.L.boss.bullet, B.name);
-  }
-}
-function killBoss() {
-  const B = lv.boss; B.dead = true; B.active = false;
-  shake = 1.2; sfx('boom'); setTimeout(() => sfx('win'), 400);
-  for (let i = 0; i < 5; i++) burst(B.x + (Math.random() - 0.5) * 60, B.y + (Math.random() - 0.5) * 60, i % 2 ? B.color : '#fff', 30, 320, 1, 5);
-  lv.enemies.forEach(e => { if (!e.dead && e.minion) { e.dead = true; burst(e.x, e.y, e.color, 12, 150, 0.5); } });
-  bullets = []; lv.spikes = [];
-  lv.arenaLocked = false; lv.gates.forEach(g => { lv.grid[g.y * lv.w + g.x] = 0; });
-  lv.portal = { x: B.x, y: B.y };
-  say(`${B.name} е победен!`, 3.5, '#7dff9a'); say('Влез в портала, за да продължиш.', 4);
-}
 function openGate() {
   if (lv.gateOpen) return;
   lv.gateOpen = true; sfx('gate'); shake = 0.3;
   lv.gates.forEach(g => { lv.grid[g.y * lv.w + g.x] = 0; burst(g.x * TILE + 20, g.y * TILE + 20, lv.L.pal.accent, 6, 120, 0.6); });
   say('Портата към боса се отвори! Виж картата горе вдясно.', 4, lv.L.pal.accent);
-}
-
-function updateBoss(B, dt) {
-  const L = lv.L;
-  B.flash -= dt; B.windup -= dt; B.frozen -= dt;
-  const rate = (B.phase === 2 ? 1.45 : 1) * (B.frozen > 0 ? 0.4 : 1);
-  const dx = P.x - B.x, dy = P.y - B.y, d = Math.hypot(dx, dy) || 1;
-  if (B.kbx || B.kby) { moveCircle(B, B.kbx * dt, B.kby * dt); B.kbx *= 0.85; B.kby *= 0.85; }
-
-  if (B.charge > 0) {
-    if (B.windup > 0) { /* подготовка */ }
-    else {
-      B.charge -= dt;
-      if (!moveCircle(B, B.cdx * 620 * dt, B.cdy * 620 * dt)) { B.charge = 0; shake = 0.4; burst(B.x, B.y, '#aaa', 16, 200, 0.5); }
-    }
-  } else {
-    const sp = B.speed * rate * (P.shadow > 0 ? 0.3 : 1);
-    if (d > 230) moveCircle(B, dx / d * sp * dt, dy / d * sp * dt);
-    else if (d < 140) moveCircle(B, -dx / d * sp * dt, -dy / d * sp * dt);
-    else moveCircle(B, -dy / d * sp * 0.6 * dt, dx / d * sp * 0.6 * dt);
-  }
-  if (B.spiral > 0) {
-    B.spiral -= dt; B.spiralCd -= dt;
-    if (B.spiralCd <= 0) {
-      B.spiralCd = 0.08; B.spin += 0.33;
-      const arms = B.phase === 2 ? 3 : 2;
-      for (let k = 0; k < arms; k++) enemyBullet(B.x, B.y, B.spin + k * Math.PI * 2 / arms, 200, L.boss.bullet, B.name);
-    }
-  }
-  B.cd -= dt * rate;
-  if (B.cd <= 0 && B.charge <= 0 && B.spiral <= 0) {
-    const pat = B.patterns[B.pi++ % B.patterns.length];
-    B.cd = Math.max(1.0, 2.1 - lv.li * 0.12);
-    const a = Math.atan2(dy, dx), col = L.boss.bullet;
-    switch (pat) {
-      case 'aim': { const n = B.phase === 2 ? 7 : 5; for (let i = 0; i < n; i++) enemyBullet(B.x, B.y, a + (i - (n - 1) / 2) * 0.16, 310, col, B.name, 8); break; }
-      case 'burst': { const n = B.phase === 2 ? 24 : 16; for (let i = 0; i < n; i++) enemyBullet(B.x, B.y, i / n * Math.PI * 2 + T, 210, col, B.name, 8); ring(B.x, B.y, col, 80, 0.3); break; }
-      case 'spiral': B.spiral = 2.2; break;
-      case 'summon': {
-        const alive = lv.enemies.filter(e => e.minion && !e.dead).length;
-        const n = Math.min(B.phase === 2 ? 3 : 2, 6 - alive);
-        for (let i = 0; i < n; i++) {
-          const ang = Math.random() * Math.PI * 2, def = L.enemies[i % Math.min(2, L.enemies.length)];
-          let ex = B.x + Math.cos(ang) * (B.r + 30), ey = B.y + Math.sin(ang) * (B.r + 30);
-          if (blocked(ex, ey, def.r)) { ex = B.x; ey = B.y; }
-          const m = makeEnemy(def, ex, ey, lv.li, DIFF); m.active = true; m.minion = true; lv.enemies.push(m);
-          burst(ex, ey, def.color, 14, 150, 0.5);
-        }
-        break;
-      }
-      case 'charge': B.windup = 0.65; B.charge = 0.65 + 0.7; B.cdx = dx / d; B.cdy = dy / d; break;
-      case 'teleport': {
-        const br = lv.bossRoom;
-        for (let i = 0; i < 20; i++) {
-          const x = (br.x + 2 + Math.random() * (br.w - 4)) * TILE, y = (br.y + 2 + Math.random() * (br.h - 4)) * TILE;
-          if (Math.hypot(x - P.x, y - P.y) > 220 && !blocked(x, y, B.r)) {
-            burst(B.x, B.y, B.color, 20, 200, 0.5); B.x = x; B.y = y; burst(x, y, B.color, 20, 200, 0.5);
-            for (let k = 0; k < 12; k++) enemyBullet(x, y, k / 12 * Math.PI * 2, 230, col, B.name, 8);
-            break;
-          }
-        }
-        break;
-      }
-      case 'roots': {
-        const n = B.phase === 2 ? 7 : 5;
-        lv.spikes.push({ x: P.x, y: P.y, t: 0.9 });
-        for (let i = 1; i < n; i++) lv.spikes.push({ x: P.x + (Math.random() - 0.5) * 260, y: P.y + (Math.random() - 0.5) * 260, t: 0.9 + i * 0.08 });
-        break;
-      }
-    }
-  }
-  if (d < B.r + P.r) hurt(1, B.name);
 }
 
 // ---------- Край на ниво / игра ----------
@@ -685,7 +536,9 @@ function pauseGame() { if (state !== 'play') return; state = 'paused'; showScree
 function resumeGame() { state = 'play'; showScreen(null); mouse.down = false; }
 
 // ---------- Рисуване ----------
+let renderDt = 0, renderLast = 0;
 function render() {
+  const now = performance.now(); renderDt = state === 'play' ? Math.min(0.05, (now - renderLast) / 1000) : 0; renderLast = now;
   if (state === 'ending') { renderEnding(); return; }
   if (!lv) { renderMenuBg(); return; }
   const L = lv.L;
@@ -703,10 +556,8 @@ function render() {
   lv.hazards.forEach(h => { if (inView(h.x * TILE, h.y * TILE)) drawHazard(ctx, L, h.x * TILE, h.y * TILE, T); });
   if (!lv.gateOpen || lv.arenaLocked) lv.gates.forEach(g => drawGate(ctx, L, g.x * TILE, g.y * TILE, T));
   if (lv.portal) drawPortal(ctx, lv.portal.x, lv.portal.y, T, L.pal.accent);
-  lv.spikes.forEach(s => {
-    if (s.t > 0) { ctx.strokeStyle = `rgba(255,60,60,${0.4 + 0.4 * Math.sin(T * 20)})`; ctx.lineWidth = 3; circle(ctx, s.x, s.y, 34 * (1 - s.t / 1.5)); ctx.stroke(); }
-    else { ctx.fillStyle = '#2a1608'; for (let i = 0; i < 5; i++) { const a = i / 5 * Math.PI * 2; ctx.beginPath(); ctx.moveTo(s.x + Math.cos(a) * 14, s.y + Math.sin(a) * 6); ctx.lineTo(s.x + Math.cos(a) * 4, s.y - 40); ctx.lineTo(s.x + Math.cos(a + 0.5) * 14, s.y + Math.sin(a + 0.5) * 6); ctx.fill(); } }
-  });
+  drawZones(ctx);
+  drawBossObjs(ctx, T);
   lv.items.forEach(it => { if (!it.got && inView(it.x, it.y)) drawItem(ctx, it, T, L); });
   lv.notes.forEach(n => { if (!n.got && inView(n.x, n.y)) drawNote(ctx, n, T); });
   lv.hearts.forEach(h => { if (!h.got && inView(h.x, h.y)) drawHeartPickup(ctx, h, T); });
@@ -714,7 +565,8 @@ function render() {
   // Обекти, сортирани по Y
   const ents = [];
   lv.enemies.forEach(e => { if (!e.dead && inView(e.x, e.y)) ents.push({ y: e.y, f: () => drawEnemy(ctx, e, T) }); });
-  if (!lv.boss.dead && inView(lv.boss.x, lv.boss.y, 200)) ents.push({ y: lv.boss.y, f: () => drawBoss(ctx, lv.boss, T) });
+  if ((!lv.boss.dead || lv.boss.cleansed) && inView(lv.boss.x, lv.boss.y, 260)) ents.push({ y: lv.boss.y, f: () => drawBossSprite(ctx, lv.boss, T) });
+  ents.push({ y: -1e9, f: () => drawCorpses(ctx, renderDt) });
   ents.push({ y: P.y, f: drawPlayer });
   ents.sort((a, b) => a.y - b.y).forEach(e => e.f());
 
@@ -735,12 +587,15 @@ function render() {
   });
   // подсказки
   lv.notes.forEach(n => { if (!n.got && Math.hypot(n.x - P.x, n.y - P.y) < 60) tag(ctx, document.body.classList.contains('touchMode') ? 'E — прочети' : '[E] Прочети', n.x, n.y - 34); });
+  const tm = document.body.classList.contains('touchMode');
+  lv.bossObjs.forEach(o => { if ((o.type === 'panel' || o.type === 'valve') && Math.hypot(o.x - P.x, o.y - P.y) < 70) tag(ctx, `${tm ? 'E —' : '[E]'} ${o.type === 'panel' ? 'Контролен панел' : 'Завърти вентила'}`, o.x, o.y - 40); });
   if (!lv.gateOpen && lv.gates.length && Math.hypot(lv.gates[0].x * TILE - P.x, lv.gates[0].y * TILE - P.y) < 140) tag(ctx, `Нужни са ${L.item.count} × ${L.item.name}`, lv.gates[0].x * TILE + 20, lv.gates[0].y * TILE - 16);
   floaters.forEach(f => { ctx.globalAlpha = Math.min(1, f.t * 2); ctx.font = '900 16px Rubik,system-ui'; ctx.textAlign = 'center'; ctx.lineWidth = 4; ctx.strokeStyle = '#000'; ctx.strokeText(f.text, f.x, f.y); ctx.fillStyle = f.color; ctx.fillText(f.text, f.x, f.y); ctx.globalAlpha = 1; });
   ctx.textAlign = 'left';
   ctx.restore();
 
   renderDarkness(cx - sx, cy - sy);
+  if (lv.flashT > 0) { ctx.fillStyle = `rgba(214,168,255,${lv.flashT * 1.6})`; ctx.fillRect(0, 0, VW, VH); }
   renderHUD();
 }
 
@@ -767,7 +622,7 @@ function drawPlayer() {
 }
 
 function renderDarkness(cx, cy) {
-  const dark = lv.L.dark; if (dark <= 0) return;
+  const dark = lv.lightsOut ? 0.9 : lv.L.dark; if (dark <= 0) return;
   const g = lightG;
   g.globalCompositeOperation = 'source-over'; g.clearRect(0, 0, VW, VH);
   g.fillStyle = `rgba(0,0,0,${dark})`; g.fillRect(0, 0, VW, VH);
@@ -781,7 +636,11 @@ function renderDarkness(cx, cy) {
   lv.items.forEach(it => { if (!it.got) light(it.x, it.y, 90, 0.8); });
   lv.notes.forEach(n => { if (!n.got) light(n.x, n.y, 60, 0.6); });
   if (lv.portal) light(lv.portal.x, lv.portal.y, 200);
-  if (lv.boss.active) light(lv.boss.x, lv.boss.y, 170, 0.7);
+  if (lv.boss.active && !lv.lightsOut) light(lv.boss.x, lv.boss.y, 170, 0.7);
+  if (lv.lightsOut) { const c = bossCenter(); for (let i = 0; i < 3; i++) { const a = T * (0.5 + i * 0.17) + i * 2.1; light(c.x + Math.cos(a) * 200, c.y + Math.sin(a * 1.3) * 130, 120, 0.95); } }
+  lv.orbs.forEach(o => { if (o.x !== undefined) light(o.x, o.y, 50, 0.7); });
+  lv.zones.forEach(z => { if (z.kind === 'circle' && z.t > 0) light(z.x, z.y, z.r + 20, 0.5); });
+  lv.bossObjs.forEach(o => light(o.x, o.y, 70, 0.6));
   shots.forEach(s => light(s.x, s.y, 60, 0.6));
   bullets.slice(0, 40).forEach(b => light(b.x, b.y, 36, 0.5));
   if (!lv.gateOpen || lv.arenaLocked) lv.gates.forEach((gt, i) => { if (i % 2 === 0) light(gt.x * TILE + 20, gt.y * TILE + 20, 70, 0.5); });
@@ -822,7 +681,10 @@ function renderHUD() {
   const B = lv.boss;
   let obj;
   if (stats.got < L.item.count) obj = `🎯 Събери ${L.item.plural.toLowerCase()}: ${stats.got}/${L.item.count}`;
-  else if (!B.dead && !B.active) obj = `🎯 Портата е отворена — намери ${B.name}`;
+  else if (!B.dead && !B.active && B.st !== 'cleansing') obj = `🎯 Портата е отворена — намери ${B.name}`;
+  else if (B.id === 'heart' && B.st === 'corrupt') obj = `✨ ПРЕЧИСТИ СЪРЦЕТО: възли ${lv.enemies.filter(e => e.id === 'node' && !e.dead).length}/4`;
+  else if (B.id === 'heart' && B.st === 'exposed') obj = `✨ Използвай умението си до Сърцето!`;
+  else if (B.st === 'cleansing') obj = '✨ Сърцето се пречиства…';
   else if (!B.dead) obj = `⚔ Победи ${B.name}!`;
   else obj = '✨ Влез в портала';
   ctx.font = '800 16px Rubik,system-ui'; const ow = ctx.measureText(obj).width + 30;
@@ -846,10 +708,18 @@ function renderHUD() {
   ctx.fillStyle = '#ffffffaa'; ctx.fillText(`☠ ${stats.kills}`, mx + mmw - 40, my + mmh + 20);
 
   // Бос
-  if (B.active && !B.dead) {
+  if (B.active && !B.dead && B.intro > 0) {
+    const k = Math.min(1, (2.2 - B.intro) * 3, B.intro * 3);
+    ctx.globalAlpha = Math.max(0, k); ctx.fillStyle = '#000b'; ctx.fillRect(0, VH / 2 - 80, VW, 150);
+    ctx.textAlign = 'center'; ctx.font = '400 54px "Russo One",Rubik,system-ui'; ctx.fillStyle = B.color; ctx.fillText(B.name.toUpperCase(), VW / 2, VH / 2);
+    ctx.font = '800 20px Rubik,system-ui'; ctx.fillStyle = '#fff'; ctx.fillText(`${B.bg} · ${L.name}`, VW / 2, VH / 2 + 32);
+    ctx.font = '700 15px Rubik,system-ui'; ctx.fillStyle = '#ffe680'; ctx.fillText(B.def.tip || '', VW / 2, VH / 2 + 56);
+    ctx.globalAlpha = 1; ctx.textAlign = 'left';
+  }
+  if (B.active && !B.dead && B.intro <= 0 && B.st !== 'cleansing') {
     const bw = 520, bx = VW / 2 - bw / 2, by = VH - 56;
     ctx.fillStyle = '#05090cd8'; rrect(ctx, bx - 10, by - 26, bw + 20, 50, 12); ctx.fill();
-    ctx.fillStyle = '#fff'; ctx.font = '900 14px Rubik,system-ui'; ctx.textAlign = 'center'; ctx.fillText(`${B.name}${B.phase === 2 ? ' — ФАЗА 2' : ''}`, VW / 2, by - 8);
+    ctx.fillStyle = '#fff'; ctx.font = '900 14px Rubik,system-ui'; ctx.textAlign = 'center'; ctx.fillText(`${B.name} · ${B.bg}${B.phase === 2 ? (B.id === 'heart' ? ' — ПРЕЧИСТИ СЪРЦЕТО' : ' — ФАЗА 2') : ''}`, VW / 2, by - 8);
     ctx.fillStyle = '#2a0d14'; rrect(ctx, bx, by, bw, 14, 7); ctx.fill();
     ctx.fillStyle = B.phase === 2 ? '#ff2a55' : B.color; rrect(ctx, bx, by, bw * Math.max(0, B.hp / B.max), 14, 7); ctx.fill();
     ctx.textAlign = 'left';

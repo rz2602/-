@@ -140,12 +140,15 @@ function buildLevel(li, diff) {
 
   // --- Врагове ---
   const enemies = [];
-  const weights = L.enemies.map(e => e.kind === 'tank' ? 0.35 : 1), wsum = weights.reduce((a, b) => a + b, 0);
-  const pickEnemy = () => { let r = rnd() * wsum; for (let i = 0; i < weights.length; i++) { r -= weights[i]; if (r <= 0) return L.enemies[i]; } return L.enemies[0]; };
+  const wsum = L.roster.reduce((s, r) => s + r[1], 0);
+  const pickEnemy = () => { let r = rnd() * wsum; for (const [id, wt] of L.roster) { r -= wt; if (r <= 0) return id; } return L.roster[0][0]; };
   normalRooms.forEach(r => {
     const n = Math.max(1, Math.round((L.roomEnemies + rnd() * 1.5) * diff.count));
-    for (let k = 0; k < n; k++) { const p = free(r); enemies.push(makeEnemy(pickEnemy(), p.x, p.y, li, diff, rnd)); }
+    for (let k = 0; k < n; k++) { const p = free(r); enemies.push(makeEnemy(pickEnemy(), p.x, p.y, li, diff)); }
   });
+  // Мимиците се правят на сандъци из стаите
+  const mimicRooms = shuffle(normalRooms.slice());
+  for (let k = 0; k < L.mimics; k++) { const p = free(mimicRooms[k % mimicRooms.length]); enemies.push(makeEnemy('mimic', p.x, p.y, li, diff)); }
 
   // --- Декорация ---
   const decor = [];
@@ -156,31 +159,16 @@ function buildLevel(li, diff) {
     }
   });
 
-  const B = L.boss;
-  const boss = {
-    x: br.cx * TILE + TILE / 2, y: br.cy * TILE + TILE / 2, r: B.r, hp: B.hp * diff.enemyHp, max: B.hp * diff.enemyHp,
-    look: B.look, color: B.color, name: B.name, speed: B.speed, patterns: B.patterns, bullet: B.bullet,
-    phase: 1, active: false, dead: false, cd: 1.5, pi: 0, flash: 0, windup: 0, charge: 0, spiral: 0, spiralCd: 0, spin: 0, frozen: 0, kbx: 0, kby: 0,
-  };
+  const boss = makeBoss(L.boss, br.cx * TILE + TILE / 2, br.cy * TILE + TILE / 2, diff);
 
   const lv = {
     L, li, w, h, grid, rooms, startRoom, bossRoom: br, gates, gateOpen: false, arenaLocked: false,
-    items, notes, hearts, enemies, boss, decor, props, hazards, start, portal: null, spikes: [],
+    items, notes, hearts, enemies, boss, decor, props, hazards, start, portal: null, zones: [], corpses: [], bossObjs: [], orbs: [], lightsOut: false, flashT: 0,
     flow: new Int16Array(w * h), flowT: 0, rnd,
   };
   lv.mapCanvas = renderMap(lv);
   lv.minimap = renderMinimap(lv);
   return lv;
-}
-
-function makeEnemy(def, x, y, li, diff, rnd = Math.random) {
-  const hp = def.hp * (1 + li * 0.12) * diff.enemyHp;
-  return {
-    x, y, r: def.r, hp, max: hp, kind: def.kind, look: def.look, color: def.color, name: def.name,
-    speed: def.speed * (1 + li * 0.05), dmg: def.dmg, face: rnd() < 0.5 ? -1 : 1, anim: rnd() * 6,
-    active: false, dead: false, cd: 1 + rnd() * 1.5, st: 'walk', stT: 0, flash: 0, frozen: 0, slow: 0, windup: 0,
-    dx: 0, dy: 0, kbx: 0, kby: 0, wander: rnd() * 6,
-  };
 }
 
 function renderMinimap(lv) {
