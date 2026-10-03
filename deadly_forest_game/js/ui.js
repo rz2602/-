@@ -110,7 +110,9 @@ $('btnContinue').onclick = () => { audioInit(); showMap(); };
 $('btnHelp').onclick = () => { showScreen('sHelp'); };
 $('helpBack').onclick = () => { if (state === 'paused') showScreen('sPause'); else goTitle(); };
 $('btnReset').onclick = () => {
-  if (!confirm('Да изтрия ли целия прогрес?')) return;
+  const b = $('btnReset');
+  if (!b.dataset.armed) { b.dataset.armed = '1'; b.textContent = 'Сигурен ли си? Натисни пак'; setTimeout(() => { delete b.dataset.armed; b.textContent = 'Изтрий прогреса'; }, 3000); return; }
+  delete b.dataset.armed; b.textContent = 'Изтрий прогреса';
   save = Object.assign({}, SAVE_DEFAULT, { mute: save.mute }); writeSave(); goTitle();
 };
 $('storyNext').onclick = () => { if (storyPage < INTRO_PAGES.length - 1) showStory(storyPage + 1); else { state = 'select'; buildSelect(); showScreen('sSelect'); } };
@@ -132,6 +134,7 @@ $('overRetry').onclick = () => startLevel(lv.li);
 $('overMap').onclick = () => showMap();
 $('endMenu').onclick = () => goTitle();
 $('endMap').onclick = () => showMap();
+document.querySelectorAll('.fsBtn').forEach(b => b.onclick = () => goFullscreen());
 document.querySelectorAll('.muteBtn').forEach(b => b.onclick = () => { audioInit(); setMute(!save.mute); });
 setMute(save.mute);
 goTitle();

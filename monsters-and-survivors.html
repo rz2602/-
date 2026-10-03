@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;600;700;800;900&family=Russo+One&display=swap">
 <style>
-:root{
+:root{color-scheme:dark;
   --bg:#050a07; --panel:#0d1712f2; --line:#ffffff22; --text:#eef5ee; --muted:#a9bcae;
   --accent:#a6ff5c; --warm:#ffb347; --red:#ff4f6a;
 }
@@ -132,6 +132,15 @@ button.danger{color:#ff8fa0;border-color:#ff4f6a66}
 .keys span{color:var(--muted);margin-left:8px}
 kbd{background:#1f3326;border:1px solid #ffffff33;border-bottom-width:3px;border-radius:7px;padding:2px 8px;font:700 13px Rubik,system-ui;color:#fff}
 
+.touchOnly{display:none}
+body.touchMode .touchOnly{display:inline-block}
+#rotate{display:none;position:fixed;inset:0;z-index:50;background:#020604f2;color:var(--text);flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:24px}
+#rotate .phone{font-size:64px;animation:rot 1.8s ease-in-out infinite}
+#rotate b{font-family:"Russo One",Rubik,system-ui;font-weight:400;font-size:22px;color:#ffd27a}
+#rotate span{color:var(--muted)}
+@keyframes rot{0%,30%{transform:rotate(0)}60%,100%{transform:rotate(-90deg)}}
+@media (orientation:portrait){body.touchMode.playing #rotate{display:flex}}
+@media (prefers-reduced-motion:reduce){#rotate .phone{animation:none}}
 .endBtns{position:absolute;bottom:6%;left:0;right:0}
 
 /* Сензорно управление */
@@ -152,6 +161,45 @@ kbd{background:#1f3326;border:1px solid #ffffff33;border-bottom-width:3px;border
   .panel{padding:20px 16px}
   p{font-size:15px}
   #storyText{font-size:16px}
+}
+@media (max-height:520px){
+  .screen{padding:10px}
+  .panel{padding:14px 18px;border-radius:18px}
+  h2{font-size:22px;margin:4px 0 6px}
+  p,#storyText{font-size:14px;line-height:1.45;min-height:0}
+  .titleBox{margin-bottom:0;padding:6px 12px}
+  .titleBox h1{font-size:44px}
+  .subtitle{font-size:16px}
+  .tag{font-size:14px;margin:6px auto 8px}
+  .btns{margin-top:10px;gap:8px}
+  .btns.col{flex-direction:row;flex-wrap:wrap}
+  .btns.col button{min-width:0}
+  button{padding:10px 16px;font-size:14px}
+  .selectLayout{grid-template-columns:1.3fr 1fr;gap:10px;margin-top:6px}
+  #heroGrid{grid-template-columns:repeat(3,1fr);gap:6px}
+  .heroCard{min-height:0;padding:2px 4px 6px}
+  .heroCard canvas{width:72px;height:66px}
+  .heroCard b{font-size:12px}
+  #heroBig{max-width:170px}
+  #heroInfo{padding:8px 12px}
+  #heroInfo h2{font-size:18px}
+  #heroInfo p{font-size:12px;margin:4px 0}
+  .stat{margin:2px 0}
+  .abil{font-size:12px;margin-top:3px}
+  .selectBottom{margin-top:8px;gap:14px}
+  .skinBtn canvas{width:40px;height:40px}
+  #mapList{grid-template-columns:repeat(3,1fr);gap:8px}
+  .loc{min-height:0;padding:10px 8px}
+  .loc .ic{font-size:28px}
+  .loc b{font-size:14px}
+  .facts{grid-template-columns:1fr 1fr;gap:6px}
+  .facts.three{grid-template-columns:repeat(3,1fr)}
+  .facts div{padding:6px 10px}
+  .facts.three b{font-size:20px}
+  .keys div{padding:6px 10px;font-size:13px}
+  #stick{width:130px;height:130px}
+  #tbtns button{width:60px;height:60px;font-size:22px}
+  #tAtk{width:76px!important;height:76px!important}
 }
 @media (max-width:480px){
   #heroGrid{grid-template-columns:repeat(2,1fr)}
@@ -174,6 +222,8 @@ kbd{background:#1f3326;border:1px solid #ffffff33;border-bottom-width:3px;border
     </div>
   </div>
 
+  <div id="rotate"><div class="phone">📱</div><b>Завърти телефона хоризонтално</b><span>Играта се играе най-добре легнало.</span></div>
+
   <!-- Начален екран -->
   <section id="sTitle" class="screen poster">
     <div class="titleBox">
@@ -187,6 +237,7 @@ kbd{background:#1f3326;border:1px solid #ffffff33;border-bottom-width:3px;border
         <button id="btnContinue" class="hidden">⟳ Продължи</button>
         <button id="btnHelp">❔ Как се играе</button>
         <button class="muteBtn">🔊 Звук: вкл.</button>
+        <button class="fsBtn touchOnly">⛶ Цял екран</button>
       </div>
     </div>
   </section>
@@ -265,6 +316,7 @@ kbd{background:#1f3326;border:1px solid #ffffff33;border-bottom-width:3px;border
         <button id="pRestart">⟳ Започни нивото отначало</button>
         <button id="pHelp">❔ Управление</button>
         <button class="muteBtn">🔊 Звук: вкл.</button>
+        <button class="fsBtn touchOnly">⛶ Цял екран</button>
         <button id="pMap" class="ghost">← Карта на града</button>
       </div>
     </div>
@@ -302,7 +354,7 @@ kbd{background:#1f3326;border:1px solid #ffffff33;border-bottom-width:3px;border
         <div><kbd>Q</kbd> / <kbd>Shift</kbd> / <kbd>десен бутон</kbd><span>специално умение</span></div>
         <div><kbd>E</kbd><span>прочети бележка (тайна)</span></div>
         <div><kbd>Esc</kbd> / <kbd>P</kbd><span>пауза</span> · <kbd>M</kbd><span>звук</span></div>
-        <div><kbd>📱 Телефон</kbd><span>джойстик вляво, бутони вдясно</span></div>
+        <div><kbd>📱 Телефон</kbd><span>джойстик вляво · ⚔ атака (насочва се сама) · ✦ умение · E бележка · ❚❚ пауза</span></div>
       </div>
       <p class="muted">Във всяко ниво събери нужните предмети, за да отвориш портата към боса. Пази се от опасните зони. Търси бележките — те разказват какво наистина се е случило с града. Победи боса и влез в портала.</p>
       <p class="credit small">Monsters &amp; Survivors · по идея на <b>Радоил и приятели</b></p>
@@ -1324,7 +1376,7 @@ function renderMinimap(lv) {
 // ===================== Смъртоносната гора — основна логика =====================
 
 const cv = document.getElementById('game'), ctx = cv.getContext('2d');
-const VW = 1280, VH = 720;
+let VW = 1280, VH = 720;
 const $ = id => document.getElementById(id);
 
 // ---------- Запис ----------
@@ -1446,6 +1498,22 @@ cv.addEventListener('contextmenu', e => e.preventDefault());
 // Сензорно управление
 const stick = $('stick'), knob = $('knob');
 function showTouch() { $('touch').classList.remove('hidden'); document.body.classList.add('touchMode'); }
+const IS_TOUCH = (() => { try { return matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window; } catch (e) { return false; } })();
+if (IS_TOUCH) showTouch();
+// На телефон показваме по-малка част от света, за да са героите и надписите по-едри
+function setRes(w, h) {
+  if (VW === w && VH === h) return;
+  VW = w; VH = h; cv.width = w; cv.height = h; lightC.width = w; lightC.height = h; resize();
+}
+function goFullscreen() {
+  try {
+    const el = document.documentElement, req = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (!req || document.fullscreenElement || document.webkitFullscreenElement) return;
+    const p = req.call(el);
+    const lock = () => { try { const o = screen.orientation; if (o && o.lock) o.lock('landscape').catch(() => { }); } catch (e) { } };
+    if (p && p.then) p.then(lock).catch(() => { }); else lock();
+  } catch (e) { }
+}
 addEventListener('touchstart', () => { if (!document.body.classList.contains('touchMode')) showTouch(); }, { passive: true });
 stick.addEventListener('pointerdown', e => { e.preventDefault(); touch.id = e.pointerId; stick.setPointerCapture(e.pointerId); moveStick(e); });
 stick.addEventListener('pointermove', e => { if (touch.id === e.pointerId) moveStick(e); });
@@ -1490,6 +1558,8 @@ function showScreen(id) {
 function startLevel(li) {
   audioInit();
   DIFF = DIFFICULTIES[save.diff] || DIFFICULTIES[1];
+  setRes(...(document.body.classList.contains('touchMode') ? [960, 540] : [1280, 720]));
+  if (document.body.classList.contains('touchMode')) goFullscreen();
   lv = buildLevel(li, DIFF);
   const H = HEROES[save.hero];
   P = {
@@ -2179,6 +2249,7 @@ function renderMenuBg() {
 let ending = null;
 const ENDING_BLD = [[40, 330, 120, 390], [170, 280, 80, 440], [260, 360, 160, 360], [430, 250, 70, 470], [520, 340, 140, 380], [880, 310, 110, 410], [1000, 270, 90, 450], [1100, 350, 160, 370]];
 function startEnding() {
+  setRes(1280, 720);
   state = 'ending'; showScreen('sEnd'); $('endBtns').classList.add('hidden');
   save.finished = true; writeSave();
   ending = { t: 0, line: -1, windows: [] };
@@ -2259,6 +2330,7 @@ function loop(now) {
   update(dt);
   render();
   if (state === 'select') renderPreviews();
+  document.body.classList.toggle('playing', state === 'play' || state === 'paused');
   requestAnimationFrame(loop);
 }
 requestAnimationFrame(loop);
@@ -2377,7 +2449,9 @@ $('btnContinue').onclick = () => { audioInit(); showMap(); };
 $('btnHelp').onclick = () => { showScreen('sHelp'); };
 $('helpBack').onclick = () => { if (state === 'paused') showScreen('sPause'); else goTitle(); };
 $('btnReset').onclick = () => {
-  if (!confirm('Да изтрия ли целия прогрес?')) return;
+  const b = $('btnReset');
+  if (!b.dataset.armed) { b.dataset.armed = '1'; b.textContent = 'Сигурен ли си? Натисни пак'; setTimeout(() => { delete b.dataset.armed; b.textContent = 'Изтрий прогреса'; }, 3000); return; }
+  delete b.dataset.armed; b.textContent = 'Изтрий прогреса';
   save = Object.assign({}, SAVE_DEFAULT, { mute: save.mute }); writeSave(); goTitle();
 };
 $('storyNext').onclick = () => { if (storyPage < INTRO_PAGES.length - 1) showStory(storyPage + 1); else { state = 'select'; buildSelect(); showScreen('sSelect'); } };
@@ -2399,6 +2473,7 @@ $('overRetry').onclick = () => startLevel(lv.li);
 $('overMap').onclick = () => showMap();
 $('endMenu').onclick = () => goTitle();
 $('endMap').onclick = () => showMap();
+document.querySelectorAll('.fsBtn').forEach(b => b.onclick = () => goFullscreen());
 document.querySelectorAll('.muteBtn').forEach(b => b.onclick = () => { audioInit(); setMute(!save.mute); });
 setMute(save.mute);
 goTitle();

@@ -22,3 +22,15 @@ html = re.sub(r'<script src="([^"]+)"></script>', inline_script, html)
 assert 'src="js/' not in html and 'href="style.css"' not in html
 OUT.write_text(html, encoding='utf-8')
 print(OUT, round(OUT.stat().st_size / 1024), 'KB')
+
+# Версия за публикуване като страница (без собствен doctype/html/head/body)
+import sys
+if '--page' in sys.argv:
+    page = html
+    for tag in ['<!doctype html>', '<html lang="bg">', '<head>', '</head>', '<body>', '</body>', '</html>',
+                '<meta charset="utf-8">',
+                '<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">']:
+        page = page.replace(tag, '')
+    out = pathlib.Path(sys.argv[sys.argv.index('--page') + 1])
+    out.write_text(page.strip() + '\n', encoding='utf-8')
+    print(out, round(out.stat().st_size / 1024), 'KB')

@@ -2,7 +2,7 @@
 // ===================== Смъртоносната гора — основна логика =====================
 
 const cv = document.getElementById('game'), ctx = cv.getContext('2d');
-const VW = 1280, VH = 720;
+let VW = 1280, VH = 720;
 const $ = id => document.getElementById(id);
 
 // ---------- Запис ----------
@@ -124,6 +124,22 @@ cv.addEventListener('contextmenu', e => e.preventDefault());
 // Сензорно управление
 const stick = $('stick'), knob = $('knob');
 function showTouch() { $('touch').classList.remove('hidden'); document.body.classList.add('touchMode'); }
+const IS_TOUCH = (() => { try { return matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window; } catch (e) { return false; } })();
+if (IS_TOUCH) showTouch();
+// На телефон показваме по-малка част от света, за да са героите и надписите по-едри
+function setRes(w, h) {
+  if (VW === w && VH === h) return;
+  VW = w; VH = h; cv.width = w; cv.height = h; lightC.width = w; lightC.height = h; resize();
+}
+function goFullscreen() {
+  try {
+    const el = document.documentElement, req = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (!req || document.fullscreenElement || document.webkitFullscreenElement) return;
+    const p = req.call(el);
+    const lock = () => { try { const o = screen.orientation; if (o && o.lock) o.lock('landscape').catch(() => { }); } catch (e) { } };
+    if (p && p.then) p.then(lock).catch(() => { }); else lock();
+  } catch (e) { }
+}
 addEventListener('touchstart', () => { if (!document.body.classList.contains('touchMode')) showTouch(); }, { passive: true });
 stick.addEventListener('pointerdown', e => { e.preventDefault(); touch.id = e.pointerId; stick.setPointerCapture(e.pointerId); moveStick(e); });
 stick.addEventListener('pointermove', e => { if (touch.id === e.pointerId) moveStick(e); });
@@ -168,6 +184,8 @@ function showScreen(id) {
 function startLevel(li) {
   audioInit();
   DIFF = DIFFICULTIES[save.diff] || DIFFICULTIES[1];
+  setRes(...(document.body.classList.contains('touchMode') ? [960, 540] : [1280, 720]));
+  if (document.body.classList.contains('touchMode')) goFullscreen();
   lv = buildLevel(li, DIFF);
   const H = HEROES[save.hero];
   P = {
@@ -857,6 +875,7 @@ function renderMenuBg() {
 let ending = null;
 const ENDING_BLD = [[40, 330, 120, 390], [170, 280, 80, 440], [260, 360, 160, 360], [430, 250, 70, 470], [520, 340, 140, 380], [880, 310, 110, 410], [1000, 270, 90, 450], [1100, 350, 160, 370]];
 function startEnding() {
+  setRes(1280, 720);
   state = 'ending'; showScreen('sEnd'); $('endBtns').classList.add('hidden');
   save.finished = true; writeSave();
   ending = { t: 0, line: -1, windows: [] };
@@ -937,6 +956,7 @@ function loop(now) {
   update(dt);
   render();
   if (state === 'select') renderPreviews();
+  document.body.classList.toggle('playing', state === 'play' || state === 'paused');
   requestAnimationFrame(loop);
 }
 requestAnimationFrame(loop);
