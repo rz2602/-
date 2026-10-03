@@ -4,7 +4,13 @@ Ideas collected during v0.1. **None of these are implemented.** Each belongs to 
 version and should be planned before implementation.
 
 ## Art & animation
-- Replace placeholder environment art with the final warm storybook woodland art (same texture keys).
+- Replace the temporary, low-resolution kit-derived forest art with final art at 2-3x
+  resolution under the same keys (see `art/README.md`). Priorities: parallax strips (most
+  visibly soft), terrain cap/soil, big trees, waterfall.
+- Dedicated terrain pieces: cliff faces for tall walls, platform undersides, slope/ramp art.
+- Real waterfall animation frames (current: UV-scrolled overlay on a static image).
+- Pack forest pieces into a texture atlas (fewer textures/draw calls) and ship WebP.
+- Final menu button/UI art (still a placeholder).
 - Fix or redraw TURN frame 4 in the source sheet (Mishkontin holds a staff in *both* hands).
 - Use the TURN sequence for direction changes while standing still (it is already registered as an animation).
 - Contextual idle animations: look around, check the satchel, sit down, yawn
@@ -22,7 +28,7 @@ version and should be planned before implementation.
 - Per-surface feel (mud, leaves, logs).
 
 ## Camera
-- Camera zones (lock vertical framing in specific areas, zoom for vistas).
+- Camera zones (lock vertical framing in specific areas, zoom for vistas; the finish pan is a first step).
 - Gentle vertical look-down while crouching.
 
 ## Levels & world
@@ -31,7 +37,9 @@ version and should be planned before implementation.
 - Story levels and Sirengrad (later versions).
 
 ## Systems
-- Audio: music, ambience, UI and footstep sounds, volume settings.
+- Audio: music, ambience, UI and footstep sounds, volume settings. Hook into
+  `GameEvents.CheckpointActivated` and `GameEvents.WaterSplash`.
+- Swimming / water traversal (water is a respawn zone for now).
 - Settings: volume, language, accessibility (reduced motion, larger UI text, key remapping).
 - Save slots, save migration tests when `SAVE_VERSION` changes.
 - Virtues, collectibles and story flags (fields already reserved in the save data).

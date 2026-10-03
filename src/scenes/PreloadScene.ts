@@ -3,6 +3,8 @@ import { AssetKeys, AssetPaths, GAME_HEIGHT, GAME_WIDTH, SceneKeys, UI_COLORS, U
 import { getMishkontinManifest, registerMishkontinAnimations } from '../entities/mishkontinAnimations';
 import { assetSource } from '../utils/assetSource';
 import { generatePlaceholderArt } from '../utils/placeholderArt';
+import { getForestManifest } from '../levels/forest/forestAssets';
+import { generateForestFx } from '../levels/forest/forestFx';
 
 const BAR_WIDTH = 420;
 const BAR_HEIGHT = 14;
@@ -22,10 +24,16 @@ export class PreloadScene extends Phaser.Scene {
       frameWidth: manifest.frameWidth,
       frameHeight: manifest.frameHeight,
     });
+
+    // Forest environment pieces, listed by tools/extract-forest-kit.mjs.
+    for (const [key, entry] of Object.entries(getForestManifest(this).assets)) {
+      this.load.image(key, assetSource(entry.path));
+    }
   }
 
   create(): void {
     generatePlaceholderArt(this);
+    generateForestFx(this);
     registerMishkontinAnimations(this, getMishkontinManifest(this));
     this.scene.start(SceneKeys.MainMenu);
   }

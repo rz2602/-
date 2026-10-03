@@ -5,7 +5,7 @@
 
 export const GAME_WIDTH = 1280;
 export const GAME_HEIGHT = 720;
-export const GAME_VERSION = '0.1';
+export const GAME_VERSION = '0.1.1';
 
 export const SceneKeys = {
   Boot: 'BootScene',
@@ -19,11 +19,21 @@ export const SceneKeys = {
 export const AssetKeys = {
   mishkontinManifest: 'mishkontin-frames-manifest',
   mishkontin: 'mishkontin',
+  forestManifest: 'forest-assets-manifest',
 } as const;
 
 export const AssetPaths = {
   mishkontinManifest: 'assets/characters/mishkontin/generated/mishkontin-frames.json',
   mishkontinFrames: 'assets/characters/mishkontin/generated/mishkontin-frames.png',
+  forestManifest: 'assets/environments/forest/forest-assets.json',
+} as const;
+
+/** Scene events other systems (e.g. future audio) can listen to. */
+export const GameEvents = {
+  /** Payload: CheckpointDef. Sound hook - nothing plays yet. */
+  CheckpointActivated: 'checkpoint-activated',
+  /** Payload: x position. Sound hook - nothing plays yet. */
+  WaterSplash: 'water-splash',
 } as const;
 
 /** World gravity (px/s^2). Applied by Arcade Physics to every dynamic body. */
@@ -101,11 +111,16 @@ export const CAMERA = {
   lookAheadResponsiveness: 2.2,
   /** Player screen position bias: slightly below centre so more of the sky/platforms above are visible. */
   followOffsetY: 60,
+  /** Finish: how far the camera rises to reveal the distant view, and how slowly. */
+  viewpointRisePx: 150,
+  viewpointPanMs: 2600,
 } as const;
 
 export const RESPAWN = {
   /** How far below the world bottom the player must fall before respawning. */
   fallMarginPx: 120,
+  /** How far below the river surface Mishkontin sinks before the respawn starts. */
+  waterDepthPx: 26,
   fadeOutMs: 260,
   fadeInMs: 320,
   messageDurationMs: 1600,

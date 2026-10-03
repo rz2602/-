@@ -1,0 +1,399 @@
+{
+  "generatedBy": "tools/extract-forest-kit.mjs",
+  "source": "art/source/forest-environment-kit-v1.png",
+  "status": "TEMPORARY reference-derived art (low resolution) - replace with final art",
+  "assets": {
+    "bg_sky": {
+      "path": "assets/environments/forest/background/bg_sky.png",
+      "width": 886,
+      "height": 48
+    },
+    "bg_mountains": {
+      "path": "assets/environments/forest/background/bg_mountains.png",
+      "width": 418,
+      "height": 77
+    },
+    "bg_forest_distant": {
+      "path": "assets/environments/forest/background/bg_forest_distant.png",
+      "width": 866,
+      "height": 88
+    },
+    "bg_forest_mid": {
+      "path": "assets/environments/forest/background/bg_forest_mid.png",
+      "width": 906,
+      "height": 91
+    },
+    "tree_large_01": {
+      "path": "assets/environments/forest/trees/tree_large_01.png",
+      "width": 266,
+      "height": 227
+    },
+    "tree_large_02": {
+      "path": "assets/environments/forest/trees/tree_large_02.png",
+      "width": 181,
+      "height": 220
+    },
+    "tree_medium": {
+      "path": "assets/environments/forest/trees/tree_medium.png",
+      "width": 101,
+      "height": 207
+    },
+    "pine_tree": {
+      "path": "assets/environments/forest/trees/pine_tree.png",
+      "width": 99,
+      "height": 224
+    },
+    "bush_01": {
+      "path": "assets/environments/forest/plants/bush_01.png",
+      "width": 83,
+      "height": 35
+    },
+    "bush_02": {
+      "path": "assets/environments/forest/plants/bush_02.png",
+      "width": 72,
+      "height": 47
+    },
+    "bush_03": {
+      "path": "assets/environments/forest/plants/bush_03.png",
+      "width": 72,
+      "height": 59
+    },
+    "bush_blue": {
+      "path": "assets/environments/forest/plants/bush_blue.png",
+      "width": 55,
+      "height": 44
+    },
+    "grass_tall": {
+      "path": "assets/environments/forest/plants/grass_tall.png",
+      "width": 46,
+      "height": 40
+    },
+    "bush_small": {
+      "path": "assets/environments/forest/plants/bush_small.png",
+      "width": 48,
+      "height": 31
+    },
+    "bush_wide": {
+      "path": "assets/environments/forest/plants/bush_wide.png",
+      "width": 139,
+      "height": 53
+    },
+    "plant_small": {
+      "path": "assets/environments/forest/plants/plant_small.png",
+      "width": 43,
+      "height": 27
+    },
+    "grass_patch": {
+      "path": "assets/environments/forest/plants/grass_patch.png",
+      "width": 57,
+      "height": 28
+    },
+    "mushroom_red": {
+      "path": "assets/environments/forest/plants/mushroom_red.png",
+      "width": 52,
+      "height": 47
+    },
+    "mushroom_orange": {
+      "path": "assets/environments/forest/plants/mushroom_orange.png",
+      "width": 34,
+      "height": 40
+    },
+    "mushroom_small": {
+      "path": "assets/environments/forest/plants/mushroom_small.png",
+      "width": 25,
+      "height": 30
+    },
+    "flowers_white": {
+      "path": "assets/environments/forest/plants/flowers_white.png",
+      "width": 45,
+      "height": 41
+    },
+    "flowers_blue": {
+      "path": "assets/environments/forest/plants/flowers_blue.png",
+      "width": 27,
+      "height": 36
+    },
+    "flowers_pink": {
+      "path": "assets/environments/forest/plants/flowers_pink.png",
+      "width": 42,
+      "height": 43
+    },
+    "grass_tuft": {
+      "path": "assets/environments/forest/plants/grass_tuft.png",
+      "width": 47,
+      "height": 31
+    },
+    "grass_tuft_02": {
+      "path": "assets/environments/forest/plants/grass_tuft_02.png",
+      "width": 50,
+      "height": 29
+    },
+    "fern": {
+      "path": "assets/environments/forest/plants/fern.png",
+      "width": 61,
+      "height": 42
+    },
+    "flowers_purple": {
+      "path": "assets/environments/forest/plants/flowers_purple.png",
+      "width": 32,
+      "height": 38
+    },
+    "flowers_pink_02": {
+      "path": "assets/environments/forest/plants/flowers_pink_02.png",
+      "width": 31,
+      "height": 42
+    },
+    "rock_mossy": {
+      "path": "assets/environments/forest/rocks/rock_mossy.png",
+      "width": 80,
+      "height": 44
+    },
+    "rock_large": {
+      "path": "assets/environments/forest/rocks/rock_large.png",
+      "width": 113,
+      "height": 75
+    },
+    "rock_medium": {
+      "path": "assets/environments/forest/rocks/rock_medium.png",
+      "width": 62,
+      "height": 42
+    },
+    "rock_small": {
+      "path": "assets/environments/forest/rocks/rock_small.png",
+      "width": 50,
+      "height": 41
+    },
+    "fallen_log": {
+      "path": "assets/environments/forest/rocks/fallen_log.png",
+      "width": 121,
+      "height": 55
+    },
+    "rock_round": {
+      "path": "assets/environments/forest/rocks/rock_round.png",
+      "width": 64,
+      "height": 41
+    },
+    "tree_stump": {
+      "path": "assets/environments/forest/rocks/tree_stump.png",
+      "width": 67,
+      "height": 45
+    },
+    "rocks_pair": {
+      "path": "assets/environments/forest/rocks/rocks_pair.png",
+      "width": 70,
+      "height": 41
+    },
+    "terrain_long": {
+      "path": "assets/environments/forest/terrain/terrain_long.png",
+      "width": 269,
+      "height": 57
+    },
+    "terrain_medium": {
+      "path": "assets/environments/forest/terrain/terrain_medium.png",
+      "width": 112,
+      "height": 55
+    },
+    "terrain_short": {
+      "path": "assets/environments/forest/terrain/terrain_short.png",
+      "width": 98,
+      "height": 61
+    },
+    "floating_platform_small": {
+      "path": "assets/environments/forest/terrain/floating_platform_small.png",
+      "width": 64,
+      "height": 56
+    },
+    "floating_platform_medium": {
+      "path": "assets/environments/forest/terrain/floating_platform_medium.png",
+      "width": 81,
+      "height": 72
+    },
+    "floating_island_round": {
+      "path": "assets/environments/forest/terrain/floating_island_round.png",
+      "width": 95,
+      "height": 56
+    },
+    "cliff_pillar": {
+      "path": "assets/environments/forest/terrain/cliff_pillar.png",
+      "width": 110,
+      "height": 150
+    },
+    "terrain_cap": {
+      "path": "assets/environments/forest/terrain/terrain_cap.png",
+      "width": 380,
+      "height": 60,
+      "anchors": {
+        "walkY": [
+          -45,
+          14
+        ]
+      }
+    },
+    "terrain_cap_left": {
+      "path": "assets/environments/forest/terrain/terrain_cap_left.png",
+      "width": 40,
+      "height": 60,
+      "anchors": {
+        "walkY": [
+          -5,
+          14
+        ]
+      }
+    },
+    "terrain_cap_right": {
+      "path": "assets/environments/forest/terrain/terrain_cap_right.png",
+      "width": 40,
+      "height": 60,
+      "anchors": {
+        "walkY": [
+          -235,
+          14
+        ]
+      }
+    },
+    "terrain_fill": {
+      "path": "assets/environments/forest/terrain/terrain_fill.png",
+      "width": 220,
+      "height": 80
+    },
+    "waterfall_large": {
+      "path": "assets/environments/forest/water/waterfall_large.png",
+      "width": 198,
+      "height": 113,
+      "anchors": {
+        "fallA": [
+          34,
+          10,
+          89,
+          70
+        ],
+        "fallB": [
+          115,
+          5,
+          167,
+          70
+        ],
+        "pool": [
+          2,
+          80
+        ]
+      }
+    },
+    "waterfall_small": {
+      "path": "assets/environments/forest/water/waterfall_small.png",
+      "width": 63,
+      "height": 58
+    },
+    "waterfall_rocks": {
+      "path": "assets/environments/forest/water/waterfall_rocks.png",
+      "width": 95,
+      "height": 65
+    },
+    "water_pool_rocks": {
+      "path": "assets/environments/forest/water/water_pool_rocks.png",
+      "width": 156,
+      "height": 64
+    },
+    "water_strip": {
+      "path": "assets/environments/forest/water/water_strip.png",
+      "width": 260,
+      "height": 32
+    },
+    "water_fall_band": {
+      "path": "assets/environments/forest/water/water_fall_band.png",
+      "width": 42,
+      "height": 27
+    },
+    "wooden_sign": {
+      "path": "assets/environments/forest/props/wooden_sign.png",
+      "width": 95,
+      "height": 110
+    },
+    "fence_post": {
+      "path": "assets/environments/forest/props/fence_post.png",
+      "width": 42,
+      "height": 35
+    },
+    "wooden_fence": {
+      "path": "assets/environments/forest/props/wooden_fence.png",
+      "width": 72,
+      "height": 48
+    },
+    "rope_bridge": {
+      "path": "assets/environments/forest/props/rope_bridge.png",
+      "width": 198,
+      "height": 83,
+      "anchors": {
+        "deckTop": [
+          100,
+          44
+        ],
+        "deckLeft": [
+          17,
+          44
+        ],
+        "deckRight": [
+          184,
+          44
+        ]
+      }
+    },
+    "lantern_post": {
+      "path": "assets/environments/forest/props/lantern_post.png",
+      "width": 84,
+      "height": 117,
+      "anchors": {
+        "light": [
+          21,
+          37
+        ]
+      }
+    },
+    "waystone": {
+      "path": "assets/environments/forest/props/waystone.png",
+      "width": 163,
+      "height": 161,
+      "anchors": {
+        "glyph": [
+          81,
+          44
+        ]
+      }
+    },
+    "wooden_crate": {
+      "path": "assets/environments/forest/props/wooden_crate.png",
+      "width": 78,
+      "height": 62
+    },
+    "barrel": {
+      "path": "assets/environments/forest/props/barrel.png",
+      "width": 46,
+      "height": 50
+    },
+    "wooden_cart": {
+      "path": "assets/environments/forest/props/wooden_cart.png",
+      "width": 121,
+      "height": 53
+    },
+    "wooden_crate_small": {
+      "path": "assets/environments/forest/props/wooden_crate_small.png",
+      "width": 39,
+      "height": 40
+    },
+    "fg_leaves_left": {
+      "path": "assets/environments/forest/foreground/fg_leaves_left.png",
+      "width": 192,
+      "height": 104
+    },
+    "fg_leaves_blur": {
+      "path": "assets/environments/forest/foreground/fg_leaves_blur.png",
+      "width": 150,
+      "height": 104
+    },
+    "fg_trunk_right": {
+      "path": "assets/environments/forest/foreground/fg_trunk_right.png",
+      "width": 192,
+      "height": 104
+    }
+  }
+}

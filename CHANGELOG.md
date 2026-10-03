@@ -1,5 +1,56 @@
 # Changelog
 
+# v0.1.1 - Forest art pass
+
+Visual pass over ForestTestScene. Movement, physics, assists, collision body, camera feel,
+checkpoints, saving and debug mode are unchanged (all v0.1 checks still pass).
+
+### Art pipeline
+- References stored in `art/` (not shipped): Forest Art Direction (reference only) and the
+  Forest Environment Kit sheet.
+- `tools/extract-forest-kit.mjs` (`npm run forest-kit`): 66 pieces cut by connected
+  components, touching objects split by seeded edge-aware flood fill, label pills removed,
+  strips mirror-tiled and feathered, anchors exported to `forest-assets.json`.
+- The Mickey-Mouse-head symbol on the kit's sign and waystone is clone-stamped out; the banner
+  is not used.
+- Assets organised under `public/assets/environments/forest/{background,terrain,trees,plants,rocks,props,water,foreground}`.
+- All kit-derived art is marked TEMPORARY (low resolution).
+
+### Rendering
+- 8 explicit visual layers with parallax: sky 0.04, mountains + Sirengrad 0.10, distant forest
+  0.20, mid forest 0.40, back decoration 0.85, terrain 1.0, gameplay 1.0, foreground 1.12.
+- Modular terrain over unchanged simple collision: grass cap with its walk line on the
+  collision top, rounded ends, synthesised non-repeating soil, depth and side shading, ravine
+  walls in gaps.
+- One-way platforms drawn as grassy slabs. New rope bridge (flat, predictable collision).
+- Animated river below the level (visible in every gap), animated waterfalls with foam,
+  splash particles.
+- Lighting: bright sky gradient, warm sun wash, soft sun shafts, atmospheric haze, cooler
+  distant layers, light shafts on the checkpoint and the viewpoint, glowing lanterns.
+- Sirengrad on the distant mountains, framed to appear at the final viewpoint.
+- Sparse foreground leaves at the bottom screen edges.
+- Menu backdrop uses the same forest layers.
+
+### Level composition
+- Areas: A forest entrance, B stream gap, C vertical platforms with a waterfall, E checkpoint
+  clearing, D rope bridge over the river, F final viewpoint cliff (new climb at the end).
+- Water acts as a respawn zone: splash, quick fade, back to the checkpoint.
+
+### Checkpoint
+- Magical forest waystone: idle low glow and motes; on activation a golden paw glyph, bright
+  glow and spark burst. `GameEvents.CheckpointActivated` / `WaterSplash` sound hooks.
+- `CheckpointSystem` takes a visual factory, so it stays level-agnostic.
+
+### Camera
+- At the finish the camera glides up to open the view toward Sirengrad.
+
+### Debug
+- Second debug panel: current area plus every layer with its scroll factors.
+- `L` (debug only) shows one visual layer at a time.
+
+### Fixes
+- A visual tween can no longer leave Mishkontin invisible after a respawn.
+
 # v0.1
 
 First playable prototype: movement, animation and camera on one test level.

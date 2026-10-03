@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { AssetKeys, DEPTH, GAME_WIDTH, SceneKeys, STRINGS, UI_COLORS, UI_FONT_FAMILY } from '../config/constants';
 import { getMishkontinManifest, MishkontinAnims } from '../entities/mishkontinAnimations';
 import { MenuList } from '../ui/MenuList';
-import { addMenuBackdrop } from '../ui/menuBackdrop';
+import { addMenuBackdrop, MENU_GROUND_Y } from '../ui/menuBackdrop';
 
 /** Temporary main menu: title, Mishkontin idling, PLAY and SETTINGS. */
 export class MainMenuScene extends Phaser.Scene {
@@ -34,7 +34,7 @@ export class MainMenuScene extends Phaser.Scene {
 
     const { anchor } = getMishkontinManifest(this);
     this.add
-      .sprite(330, 600, AssetKeys.mishkontin)
+      .sprite(330, MENU_GROUND_Y, AssetKeys.mishkontin)
       .setOrigin(anchor.originX, anchor.originY)
       .setScale(1.25)
       .setDepth(DEPTH.player)

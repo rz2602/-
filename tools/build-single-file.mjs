@@ -30,6 +30,12 @@ execSync('npx vite build --mode single', { cwd: ROOT, stdio: 'inherit' });
 
 const dataUri = (file, mime) => `data:${mime};base64,${fs.readFileSync(file).toString('base64')}`;
 
+// Forest environment pieces are listed in their own manifest.
+const FOREST_MANIFEST = 'assets/environments/forest/forest-assets.json';
+INLINE_ASSETS[FOREST_MANIFEST] = 'json';
+const forest = JSON.parse(fs.readFileSync(path.join(ROOT, 'public', FOREST_MANIFEST), 'utf8'));
+for (const entry of Object.values(forest.assets)) INLINE_ASSETS[entry.path] = 'image/png';
+
 const inline = {};
 for (const [assetPath, type] of Object.entries(INLINE_ASSETS)) {
   const file = path.join(ROOT, 'public', assetPath);
@@ -52,6 +58,8 @@ html = html
 
 fs.mkdirSync(RELEASE_DIR, { recursive: true });
 const out = path.join(RELEASE_DIR, `mishkontin-v${version.replace(/\.0$/, '')}.html`);
+// Keep only the current release file.
+for (const old of fs.readdirSync(RELEASE_DIR)) if (old.endsWith('.html')) fs.rmSync(path.join(RELEASE_DIR, old));
 fs.writeFileSync(out, html);
 fs.rmSync(BUILD_DIR, { recursive: true, force: true });
 console.log(`\nwrote ${path.relative(ROOT, out)} (${(fs.statSync(out).size / 1024 / 1024).toFixed(1)} MB)`);

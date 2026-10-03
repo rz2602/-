@@ -41,6 +41,16 @@ export class CameraController {
     cam.centerOn(this.target.x - cam.followOffset.x, this.target.y - cam.followOffset.y);
   }
 
+  /**
+   * Finish moment: stop following and glide up a little so the distant view
+   * (mountains, Sirengrad) opens up above Mishkontin.
+   */
+  showViewpoint(): void {
+    const cam = this.camera;
+    cam.stopFollow();
+    cam.pan(cam.midPoint.x, cam.midPoint.y - CAMERA.viewpointRisePx, CAMERA.viewpointPanMs, 'Sine.easeInOut');
+  }
+
   private applyOffset(): void {
     // Phaser subtracts the follow offset from the target position.
     this.camera.setFollowOffset(-this.lookAhead, CAMERA.followOffsetY);

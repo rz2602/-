@@ -2,8 +2,8 @@
 
 *Mishkontin and King Mortis the Rat*: a browser-based 2D action-adventure platformer for children.
 
-**Current version: v0.1**, a movement, animation and camera prototype with one test level
-(`ForestTestScene`). See [CHANGELOG.md](CHANGELOG.md) for what is included and
+**Current version: v0.1.1**, a movement, animation and camera prototype with one test level
+(`ForestTestScene`), now with a first storybook-forest art pass. See [CHANGELOG.md](CHANGELOG.md) for what is included and
 [TODO.md](TODO.md) for ideas planned for later versions.
 
 ## Requirements
@@ -24,12 +24,12 @@ npm run preview  # serve the production build locally
 ### Single-file version (no server needed)
 
 ```bash
-npm run build:single   # -> release/mishkontin-v0.1.html
+npm run build:single   # -> release/mishkontin-v0.1.1.html
 ```
 
-Produces **one self-contained HTML file** (~3.5 MB) with the code, Mishkontin's frames and
-the icon embedded. Double-click it to play in a desktop browser; no server or other files
-are needed. A prebuilt copy is committed at `release/mishkontin-v0.1.html`.
+Produces **one self-contained HTML file** (~5.5 MB) with the code, Mishkontin's frames, the
+forest art and the icon embedded. Double-click it to play in a desktop browser; no server or
+other files are needed. A prebuilt copy is committed at `release/mishkontin-v0.1.1.html`.
 
 Other scripts:
 
@@ -37,7 +37,8 @@ Other scripts:
 | ------------------- | -------------------------------------------------------------- |
 | `npm run typecheck` | TypeScript check only                                          |
 | `npm run atlas`     | Regenerate Mishkontin's game frames from the source sprite sheet |
-| `npm run build:single` | Build the single-file `release/mishkontin-v0.1.html`        |
+| `npm run forest-kit` | Re-extract the forest environment pieces from the kit sheet    |
+| `npm run build:single` | Build the single-file `release/mishkontin-v0.1.1.html`      |
 
 `dist/` is static and can be hosted on any static web server. Asset paths are relative (`base: './'`).
 
@@ -52,6 +53,7 @@ Other scripts:
 | Pause         | `ESC`                        |
 | Debug overlay | `F3` or `` ` `` (backtick)   |
 | Test HURT animation | `H` (only while the debug overlay is visible) |
+| Solo one visual layer | `L` (only while the debug overlay is visible) |
 
 Menus work with the mouse or with `↑`/`↓` + `ENTER`/`SPACE`.
 
@@ -67,6 +69,12 @@ index.html                 page shell (#game container)
 vite.config.ts             Vite config (+ strips source-only assets from dist/)
 tools/
   build-mishkontin-atlas.mjs   sprite-sheet preprocessor (see below)
+  extract-forest-kit.mjs       forest environment kit extractor (see below)
+  build-single-file.mjs        single-file HTML build
+art/                       source/reference art, NOT shipped (see art/README.md)
+  source/forest-environment-kit-v1.png
+  reference/forest-art-direction-v1.webp
+release/                   prebuilt single-file game
 public/
   favicon.png
   assets/
@@ -74,15 +82,18 @@ public/
       mishkontin-gameplay-v1.png        supplied source artwork (not loaded by the game)
       generated/mishkontin-frames.png   uniform, foot-aligned frames (generated)
       generated/mishkontin-frames.json  frame size, foot anchor, sequences (generated)
-    environments/  audio/  ui/          reserved for final art and audio
+    environments/forest/                generated forest pieces (temporary, reference-derived)
+      forest-assets.json                manifest: key -> path, size, anchors
+      background/ terrain/ trees/ plants/ rocks/ props/ water/ foreground/
+    audio/  ui/                         reserved for final art and audio
 src/
   main.ts                  creates the Phaser game
   config/
     gameConfig.ts          Phaser config: 1280x720, FIT scaling, Arcade Physics
     constants.ts           ALL tuning values: movement, assists, body, camera, UI text...
   scenes/
-    BootScene.ts           loads the frame manifest
-    PreloadScene.ts        loads the frames, generates placeholder art, registers animations
+    BootScene.ts           loads the frame and forest manifests
+    PreloadScene.ts        loads frames + forest art, generates FX textures, registers animations
     MainMenuScene.ts       title + ИГРАЙ / НАСТРОЙКИ
     SettingsScene.ts       debug info, fullscreen, reset progress
     ForestTestScene.ts     the test level; only wires systems together
@@ -95,8 +106,16 @@ src/
   levels/
     LevelTypes.ts          data types for levels
     forestTestLevel.ts     ForestTest layout as pure data
-    LevelBuilder.ts        turns level data into terrain, one-way platforms, props
-    ParallaxBackground.ts  cheap screen-fixed parallax layers
+    LevelBuilder.ts        simple collision bodies + delegates all artwork to forest/
+    forest/
+      forestLayers.ts      the 8 visual layers: depth + scroll factors (single source of truth)
+      forestAssets.ts      forest manifest access (keys, sizes, anchors)
+      forestFx.ts          procedural FX textures: sky, haze, light, glow, sparks, paw glyph, soil
+      ForestBackdrop.ts    layers 0-3: sky, mountains + Sirengrad, distant + mid forest, light
+      TerrainRenderer.ts   grass cap / soil / shading over plain rectangles; platforms; bridge; ravines
+      DecorationPlacer.ts  back / ground / foreground decorations (+ parallax placement), scatter
+      ForestWater.ts       animated river (respawn zone), waterfalls, splashes
+      WaystoneVisual.ts    the checkpoint waystone
   systems/
     InputSystem.ts         keyboard -> per-frame intent snapshot (no allocations)
     SaveSystem.ts          versioned localStorage save
@@ -107,9 +126,10 @@ src/
   ui/
     HUD.ts                 toasts, controls hint, finish sequence
     MenuList.ts            mouse + keyboard menu buttons
-    menuBackdrop.ts        menu background
+    menuBackdrop.ts        menu background (same forest layers)
   utils/
-    placeholderArt.ts      TEMPORARY environment art drawn on canvases
+    assetSource.ts         resolves asset paths (inline data in the single-file build)
+    placeholderArt.ts      TEMPORARY menu button texture
 ```
 
 Design notes:
@@ -155,11 +175,50 @@ Its bottom edge sits exactly on the feet (the sprite's `y` is the feet position)
 `src/config/constants.ts` → `PLAYER_BODY` (width, standing and crouch height, horizontal
 offset), in unscaled frame pixels.
 
-### Placeholder environment art
+### Forest art (v0.1.1)
 
-All environment graphics are **temporary** and drawn at startup in `src/utils/placeholderArt.ts`.
-Every texture has a key in `PlaceholderTextures`. To swap in final art, load an image with the
-same key in `PreloadScene`; generation is skipped for keys that already exist.
+The forest follows two references in `art/`: the **Forest Art Direction** painting (composition,
+light and colour target; reference only, since it is one flat image) and the **Forest Environment
+Kit** sheet (transparent background, labelled groups of pieces).
+
+`tools/extract-forest-kit.mjs` (`npm run forest-kit`) cuts the kit into 66 pieces by connected
+components, not rectangles. Neighbouring objects, labels and specks never leak in, and touching
+objects (tree crowns, shared grass bases) are split by an edge-aware flood fill from seed
+points. Background strips are cropped clear of their labels, mirror-tiled for seamless
+repetition and feathered so the layers blend. The manifest stores sizes and **anchors** (grass
+walk line, bridge deck, lantern light, waystone glyph, waterfall columns) so code can line art
+up with physics and effects. Add `--preview out.png` for a contact sheet.
+
+> **IP note.** The kit's wooden sign, waystone and banner carry a Mickey-Mouse-head symbol (a
+> third-party trademark). The tool clone-stamps it out of the sign and waystone, and the banner
+> is not used. The waystone shows a code-drawn golden paw glyph instead.
+
+**All kit-derived pieces are TEMPORARY.** The sheet is only 1125x750, so pieces are scaled up
+1.3-3x in game and look soft. Final art replaces the PNGs under the same keys; see
+`art/README.md`.
+
+**Visual layers** (back to front, defined in `src/levels/forest/forestLayers.ts`):
+
+| # | Layer | Scroll X / Y | Content |
+|---|-------|--------------|---------|
+| 0 | Sky | 0.04 / 0.02 | gradient + clouds |
+| 1 | Mountains | 0.10 / 0.05 | mountains, Sirengrad (in view only at the final viewpoint), haze |
+| 2 | Distant forest | 0.20 / 0.10 | pines in haze, sun shafts |
+| 3 | Mid forest | 0.40 / 0.20 | canopy + dark understory |
+| 4 | Back decoration | 0.85 / 0.85 | big trees, waterfalls (ravine walls just behind) |
+| 5 | Terrain | 1.0 | river, grass caps, soil, platforms, bridge |
+| 6 | Mishkontin + objects | 1.0 | ground props (behind him), waystone, effects |
+| 7 | Foreground | 1.12 / 1.0 | sparse leaves at the bottom screen edge only |
+
+Tiled layers are screen-sized TileSprites whose texture offset follows the camera, so each
+costs one quad regardless of level length. Back and foreground decorations use Phaser scroll
+factors and are positioned for the camera the player will have near them, so they appear where
+the level data puts them.
+
+**Readability rules:** the collision is plain rectangles (visual shape is not physics shape),
+the grass cap's walk line sits exactly on the collision top, decorations never collide and
+always draw behind Mishkontin, foreground pieces stay below the ground line, and every gap
+shows the river (touching it respawns, with a splash and the usual "Хайде още веднъж!").
 
 ## Debug mode
 
@@ -171,8 +230,11 @@ Debug information is never shown in normal play. Enable it in any of these ways:
 
 The overlay shows FPS, player position, velocity, grounded state, state machine state,
 current animation, facing, remaining coyote time and the active checkpoint. It also draws
-the Arcade physics bodies and the checkpoint/respawn markers. While it is visible, `H`
-plays the HURT reaction (v0.1 has no enemies).
+the Arcade physics bodies and the checkpoint/respawn markers. A second panel lists the
+current composition area (A-F) and all visual layers with their scroll factors.
+
+While it is visible, `H` plays the HURT reaction (there are no enemies yet), and `L` cycles
+**layer solo**: only one visual layer is shown at a time (then all again).
 
 In development builds the Phaser game instance is available in the browser console as
 `window.__MISHKONTIN__`.

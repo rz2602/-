@@ -10,6 +10,7 @@ export class BootScene extends Phaser.Scene {
 
   preload(): void {
     this.load.json(AssetKeys.mishkontinManifest, jsonAssetSource(AssetPaths.mishkontinManifest));
+    this.load.json(AssetKeys.forestManifest, jsonAssetSource(AssetPaths.forestManifest));
   }
 
   create(): void {

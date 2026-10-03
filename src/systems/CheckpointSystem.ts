@@ -1,21 +1,30 @@
 import Phaser from 'phaser';
-import { DEPTH } from '../config/constants';
+import { GameEvents } from '../config/constants';
 import type { CheckpointDef, PointDef } from '../levels/LevelTypes';
-import { PlaceholderTextures } from '../utils/placeholderArt';
 import { SaveSystem } from './SaveSystem';
 
 const TRIGGER_WIDTH = 80;
 const TRIGGER_HEIGHT = 200;
 
+/** Level-specific look of a checkpoint (e.g. the forest waystone). */
+export interface CheckpointVisual {
+  /** `animate` is false when restoring state silently (level start, loading a save). */
+  setActive(active: boolean, animate: boolean): void;
+}
+
+export type CheckpointVisualFactory = (scene: Phaser.Scene, def: CheckpointDef) => CheckpointVisual;
+
 interface Checkpoint {
   def: CheckpointDef;
-  sprite: Phaser.GameObjects.Image;
+  visual: CheckpointVisual;
   zone: Phaser.GameObjects.Zone;
 }
 
 /**
- * Level-agnostic checkpoints: creates the markers, activates them on touch,
- * persists the last one via SaveSystem and answers "where do I respawn?".
+ * Level-agnostic checkpoints: creates the markers (via a visual factory),
+ * activates them on touch, persists the last one via SaveSystem and answers
+ * "where do I respawn?". Emits GameEvents.CheckpointActivated on the scene
+ * (sound hook for later versions).
  */
 export class CheckpointSystem {
   private readonly checkpoints: Checkpoint[] = [];
@@ -26,22 +35,20 @@ export class CheckpointSystem {
     private readonly levelId: string,
     private readonly start: PointDef,
     defs: CheckpointDef[],
+    createVisual: CheckpointVisualFactory,
     private readonly onActivated: (def: CheckpointDef) => void,
   ) {
     for (const def of defs) {
-      const sprite = scene.add
-        .image(def.x, def.y + 2, PlaceholderTextures.checkpointOff)
-        .setOrigin(0.5, 1)
-        .setDepth(DEPTH.props);
+      const visual = createVisual(scene, def);
       const zone = scene.add.zone(def.x, def.y - TRIGGER_HEIGHT / 2, TRIGGER_WIDTH, TRIGGER_HEIGHT);
       scene.physics.add.existing(zone, true);
-      this.checkpoints.push({ def, sprite, zone });
+      this.checkpoints.push({ def, visual, zone });
     }
 
     // Resume from a saved checkpoint of this level, silently.
     const saved = SaveSystem.getCheckpoint(levelId);
     const savedCheckpoint = this.checkpoints.find((c) => c.def.id === saved);
-    if (savedCheckpoint) this.markActive(savedCheckpoint);
+    if (savedCheckpoint) this.markActive(savedCheckpoint, false);
   }
 
   /** Registers overlap triggers for the player. */
@@ -70,15 +77,15 @@ export class CheckpointSystem {
 
   private activate(checkpoint: Checkpoint): void {
     if (this.activeId === checkpoint.def.id) return;
-    this.markActive(checkpoint);
+    this.markActive(checkpoint, true);
     SaveSystem.setCheckpoint(this.levelId, checkpoint.def.id);
-    this.scene.tweens.add({ targets: checkpoint.sprite, scaleY: 1.12, duration: 120, yoyo: true, ease: 'Sine.easeOut' });
+    this.scene.events.emit(GameEvents.CheckpointActivated, checkpoint.def);
     this.onActivated(checkpoint.def);
   }
 
-  private markActive(checkpoint: Checkpoint): void {
-    for (const c of this.checkpoints) c.sprite.setTexture(PlaceholderTextures.checkpointOff);
-    checkpoint.sprite.setTexture(PlaceholderTextures.checkpointOn);
+  private markActive(checkpoint: Checkpoint, animate: boolean): void {
+    for (const c of this.checkpoints) if (c !== checkpoint) c.visual.setActive(false, false);
+    checkpoint.visual.setActive(true, animate);
     this.activeId = checkpoint.def.id;
   }
 }

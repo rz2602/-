@@ -1,9 +1,12 @@
 import Phaser from 'phaser';
-import { RESPAWN, SceneKeys, STRINGS } from '../config/constants';
+import { GameEvents, RESPAWN, SceneKeys, STRINGS } from '../config/constants';
 import { Mishkontin } from '../entities/Mishkontin';
 import { FOREST_TEST_LEVEL } from '../levels/forestTestLevel';
 import { buildLevel } from '../levels/LevelBuilder';
-import { ParallaxBackground } from '../levels/ParallaxBackground';
+import { ForestBackdrop } from '../levels/forest/ForestBackdrop';
+import { FOREST_LAYER_LIST } from '../levels/forest/forestLayers';
+import { ForestWater } from '../levels/forest/ForestWater';
+import { WaystoneVisual } from '../levels/forest/WaystoneVisual';
 import { CameraController } from '../systems/CameraController';
 import { CheckpointSystem } from '../systems/CheckpointSystem';
 import { DebugOverlay } from '../systems/DebugOverlay';
@@ -18,7 +21,8 @@ const KeyCodes = Phaser.Input.Keyboard.KeyCodes;
 export class ForestTestScene extends Phaser.Scene {
   private controls!: InputSystem;
   private player!: Mishkontin;
-  private parallax!: ParallaxBackground;
+  private backdrop!: ForestBackdrop;
+  private water!: ForestWater;
   private cameraController!: CameraController;
   private checkpoints!: CheckpointSystem;
   private respawner!: RespawnController;
@@ -45,13 +49,19 @@ export class ForestTestScene extends Phaser.Scene {
     this.physics.world.setBounds(0, 0, level.width, level.height);
     this.physics.world.setBoundsCollision(true, true, false, false);
 
-    this.parallax = new ParallaxBackground(this, level.cameraBottom);
+    this.backdrop = new ForestBackdrop(this, { worldWidth: level.width, cameraBottom: level.cameraBottom });
     const built = buildLevel(this, level);
+    this.water = new ForestWater(this, level, built.decorations);
     this.hud = new HUD(this);
     this.controls = new InputSystem(this);
 
-    this.checkpoints = new CheckpointSystem(this, level.id, level.spawn, level.checkpoints, () =>
-      this.hud.showToast(STRINGS.checkpoint),
+    this.checkpoints = new CheckpointSystem(
+      this,
+      level.id,
+      level.spawn,
+      level.checkpoints,
+      (scene, def) => new WaystoneVisual(scene, def),
+      () => this.hud.showToast(STRINGS.checkpoint),
     );
     const start = this.checkpoints.respawnPoint;
     this.player = new Mishkontin(this, start.x, start.y, this.controls);
@@ -64,17 +74,29 @@ export class ForestTestScene extends Phaser.Scene {
     this.cameraController = new CameraController(this.cameras.main, this.player, level.width, level.cameraBottom);
     this.cameraController.snapToTarget();
 
-    this.respawner = new RespawnController(this, this.player, this.checkpoints, this.controls, level.height, () => {
-      this.cameraController.snapToTarget();
-      this.hud.showToast(STRINGS.retry, RESPAWN.messageDurationMs);
+    this.respawner = new RespawnController(this, this.player, this.checkpoints, this.controls, RespawnController.killYFor(level), {
+      onFall: (x) => {
+        if (level.waterSurfaceY === undefined) return;
+        this.water.splash(x);
+        this.events.emit(GameEvents.WaterSplash, x);
+        this.tweens.add({ targets: this.player, alpha: 0, duration: 160 });
+      },
+      onRespawned: () => {
+        this.cameraController.snapToTarget();
+        this.hud.showToast(STRINGS.retry, RESPAWN.messageDurationMs);
+      },
     });
 
     const debugFromUrl = new URLSearchParams(window.location.search).has('debug');
-    this.debug = new DebugOverlay(this, this.player, this.checkpoints, debugFromUrl || SaveSystem.settings.debugMode);
+    this.debug = new DebugOverlay(this, this.player, this.checkpoints, debugFromUrl || SaveSystem.settings.debugMode, {
+      layers: FOREST_LAYER_LIST,
+      areas: level.areas,
+    });
 
     this.controls.onKey(KeyCodes.ESC, () => this.pauseGame());
     this.controls.onKey(KeyCodes.F3, () => this.debug.toggle());
     this.controls.onKey(KeyCodes.BACKTICK, () => this.debug.toggle());
+    this.controls.onKey(KeyCodes.L, () => this.debug.cycleLayerSolo());
     this.controls.onKey(KeyCodes.H, () => {
       if (this.debug.isVisible && !this.finished) this.player.hurt();
     });
@@ -89,7 +111,8 @@ export class ForestTestScene extends Phaser.Scene {
     this.player.update(this.simTimeMs, delta);
     this.respawner.update();
     this.cameraController.update(delta);
-    this.parallax.update(this.cameras.main);
+    this.backdrop.update(this.cameras.main);
+    this.water.update(this.cameras.main, delta);
     this.debug.update(delta);
   }
 
@@ -105,6 +128,7 @@ export class ForestTestScene extends Phaser.Scene {
     this.controls.setEnabled(false);
     this.player.setFrozen(true);
     this.checkpoints.clearProgress();
+    this.cameraController.showViewpoint();
 
     void this.hud.playFinishSequence().then(() => {
       let leaving = false;

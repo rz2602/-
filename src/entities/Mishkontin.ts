@@ -166,6 +166,9 @@ export class Mishkontin extends Phaser.Physics.Arcade.Sprite {
   respawnAt(x: number, y: number): void {
     this.body.reset(x, y);
     this.body.setAcceleration(0, 0);
+    // A visual tween (e.g. fading out in water) must never outlive the respawn.
+    this.scene.tweens.killTweensOf(this);
+    this.setAlpha(1);
     this.hurtUntil = 0;
     this.grounded = false;
     this.lastGroundedAt = -Infinity;
