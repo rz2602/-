@@ -27,9 +27,47 @@ const SUN_WASH_ALPHA = 0.35;
 /** Distant layer tints: cooler and softer further away (atmospheric perspective). */
 const TINTS = { distant: 0xdce8f2, mid: 0xf2f5ea };
 
+/** Overlap between neighbouring strip images (logical px) so no seam shows at fractional positions. */
+const STRIP_OVERLAP = 1;
+
+/**
+ * A horizontally repeating strip drawn as a row of plain images, repositioned
+ * every frame. Unlike a TileSprite, each image samples its (non power-of-two)
+ * texture 1:1 - Phaser would first stretch a TileSprite texture to the next
+ * power of two, an extra resampling pass that softens the art.
+ */
+class ImageStrip {
+  private readonly images: Phaser.GameObjects.Image[] = [];
+  private readonly step: number;
+
+  constructor(scene: Phaser.Scene, key: string, scale: number, depth: number) {
+    const frame = scene.textures.getFrame(key);
+    this.step = frame.width * scale - STRIP_OVERLAP;
+    const count = Math.ceil(GAME_WIDTH / this.step) + 1;
+    for (let i = 0; i < count; i++) {
+      this.images.push(scene.add.image(0, 0, key).setOrigin(0).setScale(scale).setScrollFactor(0).setDepth(depth));
+    }
+  }
+
+  get height(): number {
+    return this.images[0].displayHeight;
+  }
+
+  setTint(color: number): this {
+    for (const image of this.images) image.setTint(color);
+    return this;
+  }
+
+  /** `offsetX` = how far the layer has scrolled (logical px). */
+  place(offsetX: number, y: number): void {
+    const start = -(((offsetX % this.step) + this.step) % this.step);
+    this.images.forEach((image, i) => image.setPosition(start + i * this.step, y));
+  }
+}
+
 interface TiledLayer {
-  /** TileSprites scroll their texture; plain images (haze) only move vertically. */
-  sprite: Phaser.GameObjects.TileSprite | Phaser.GameObjects.Image;
+  /** Strips and TileSprites scroll horizontally; plain images (haze) only move vertically. */
+  sprite: ImageStrip | Phaser.GameObjects.TileSprite | Phaser.GameObjects.Image;
   scrollX: number;
   scrollY: number;
   screenY: number;
@@ -40,9 +78,9 @@ interface TiledLayer {
  * Background layers 0-3 (sky, mountains + Sirengrad, distant forest, mid
  * forest) plus haze, sun shafts and a warm sunlight wash.
  *
- * Tiled layers are screen-sized TileSprites whose tile offset follows the
- * camera by the layer's scroll factor: one quad per layer regardless of level
- * length. The mountains are real images with Phaser scroll factors, laid out
+ * Repeating layers are screen-wide rows of images (ImageStrip) whose offset
+ * follows the camera by the layer's scroll factor - a few quads per layer
+ * regardless of level length, each sampling its texture 1:1. The mountains are real images with Phaser scroll factors, laid out
  * so Sirengrad appears once - in view at the end of the level.
  */
 export class ForestBackdrop {
@@ -112,21 +150,21 @@ export class ForestBackdrop {
     const rise = this.cameraBottom - GAME_HEIGHT - camera.scrollY;
     for (const layer of this.tiled) {
       const sprite = layer.sprite;
+      const y = layer.screenY + rise * layer.scrollY;
+      if (sprite instanceof ImageStrip) {
+        sprite.place(camera.scrollX * layer.scrollX, y);
+        continue;
+      }
       if (sprite instanceof Phaser.GameObjects.TileSprite) sprite.tilePositionX = (camera.scrollX * layer.scrollX) / layer.tileScale;
-      sprite.y = layer.screenY + rise * layer.scrollY;
+      sprite.y = y;
     }
   }
 
-  private addTiled(key: string, layer: VisualLayer, scale: number, screenY: number): Phaser.GameObjects.TileSprite {
-    const height = this.scene.textures.getFrame(key).height * scale;
-    const sprite = this.scene.add
-      .tileSprite(0, screenY, GAME_WIDTH, height, key)
-      .setOrigin(0)
-      .setTileScale(scale)
-      .setScrollFactor(0)
-      .setDepth(layer.depth);
-    this.tiled.push({ sprite, scrollX: layer.scrollX, scrollY: layer.scrollY, screenY, tileScale: scale });
-    return sprite;
+  private addTiled(key: string, layer: VisualLayer, scale: number, screenY: number): ImageStrip {
+    const strip = new ImageStrip(this.scene, key, scale, layer.depth);
+    strip.place(0, screenY);
+    this.tiled.push({ sprite: strip, scrollX: layer.scrollX, scrollY: layer.scrollY, screenY, tileScale: scale });
+    return strip;
   }
 
   private buildMountains(worldWidth: number): void {

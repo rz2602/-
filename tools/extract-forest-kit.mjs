@@ -141,7 +141,8 @@ const PIECES = [
   { key: 'floating_island_round', folder: 'terrain', rect: [500, 400, 598, 465] },
   { key: 'cliff_pillar', folder: 'terrain', rect: [295, 465, 405, 618] },
   // Seamless sub-parts for the modular terrain renderer:
-  { key: 'terrain_cap', folder: 'terrain', mode: 'region', rect: [45, 402, 235, 462], mirrorTile: true },
+  // Tiled textures must be power-of-two sized: Phaser stretches other sizes to POT (extra resampling).
+  { key: 'terrain_cap', folder: 'terrain', mode: 'region', rect: [45, 402, 173, 466], mirrorTile: true }, // 256x64
   { key: 'terrain_cap_left', folder: 'terrain', mode: 'region', rect: [5, 402, 45, 462] },
   { key: 'terrain_cap_right', folder: 'terrain', mode: 'region', rect: [235, 402, 275, 462] },
   { key: 'terrain_fill', folder: 'terrain', mode: 'strip', rect: [95, 505, 205, 545], mirrorTile: true, mirrorTileY: true },
@@ -151,8 +152,8 @@ const PIECES = [
   { key: 'waterfall_small', folder: 'water', rect: [188, 636, 242, 694] },
   { key: 'waterfall_rocks', folder: 'water', rect: [350, 640, 442, 703] },
   { key: 'water_pool_rocks', folder: 'water', rect: [448, 640, 600, 692] },
-  { key: 'water_strip', folder: 'water', mode: 'strip', rect: [210, 712, 340, 744], mirrorTile: true },
-  { key: 'water_fall_band', folder: 'water', mode: 'strip', rect: [194, 645, 236, 672], featherLeft: 10, featherRight: 10 },
+  { key: 'water_strip', folder: 'water', mode: 'strip', rect: [210, 712, 338, 744], mirrorTile: true }, // 256x32 POT
+  { key: 'water_fall_band', folder: 'water', mode: 'strip', rect: [196, 645, 228, 677], featherLeft: 8, featherRight: 8 }, // 32x32 POT
 
   // ---- props ----
   { key: 'wooden_sign', folder: 'props', rect: [688, 428, 790, 545], clip: [688, 428, 788, 545] },

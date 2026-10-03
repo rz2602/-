@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { DEPTH, UI_COLORS, UI_FONT_FAMILY } from '../config/constants';
-import { PlaceholderTextures } from '../utils/placeholderArt';
+import { BUTTON_TEXTURE_RESOLUTION, PlaceholderTextures } from '../utils/placeholderArt';
 
 export interface MenuItem {
   label: string | (() => string);
@@ -76,7 +76,7 @@ export class MenuList {
     this.buttons.forEach((b, i) => {
       const on = i === index;
       b.text.setColor(on ? UI_COLORS.buttonHover : UI_COLORS.button);
-      b.bg.setScale(on ? 1.05 : 1);
+      b.bg.setScale((on ? 1.05 : 1) / BUTTON_TEXTURE_RESOLUTION);
     });
   }
 

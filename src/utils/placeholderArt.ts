@@ -12,6 +12,9 @@ export const PlaceholderTextures = {
   button: 'ph-button',
 } as const;
 
+/** The button is drawn at this multiple of its logical size so it stays crisp at high render scales. */
+export const BUTTON_TEXTURE_RESOLUTION = 3;
+
 const GOLD = '#e8b443';
 
 function makeTexture(scene: Phaser.Scene, key: string, w: number, h: number, paint: (ctx: CanvasRenderingContext2D) => void): void {
@@ -23,7 +26,9 @@ function makeTexture(scene: Phaser.Scene, key: string, w: number, h: number, pai
 }
 
 export function generatePlaceholderArt(scene: Phaser.Scene): void {
-  makeTexture(scene, PlaceholderTextures.button, 360, 72, (ctx) => {
+  const r = BUTTON_TEXTURE_RESOLUTION;
+  makeTexture(scene, PlaceholderTextures.button, 360 * r, 72 * r, (ctx) => {
+    ctx.scale(r, r);
     ctx.fillStyle = 'rgba(59, 42, 22, 0.85)';
     ctx.beginPath();
     ctx.roundRect(2, 2, 356, 68, 18);

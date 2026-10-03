@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
-import { GAME_HEIGHT, GAME_WIDTH, GRAVITY_Y } from './constants';
+import { GRAVITY_Y } from './constants';
+import { RenderScale } from '../systems/RenderScale';
 import { BootScene } from '../scenes/BootScene';
 import { PreloadScene } from '../scenes/PreloadScene';
 import { MainMenuScene } from '../scenes/MainMenuScene';
@@ -10,16 +11,19 @@ import { PauseScene } from '../scenes/PauseScene';
 export const gameConfig: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO, // WebGL with automatic Canvas fallback
   parent: 'game',
-  width: GAME_WIDTH,
-  height: GAME_HEIGHT,
+  // Backbuffer at real device resolution; cameras zoom the 1280x720 logical view (RenderScale).
+  width: RenderScale.canvasWidth,
+  height: RenderScale.canvasHeight,
   backgroundColor: '#1d2a1f',
   banner: false,
   scale: {
     mode: Phaser.Scale.FIT, // responsive, keeps 16:9
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
+  // Illustrated art: smooth (LINEAR) filtering, no pixel snapping.
   render: {
     antialias: true,
+    antialiasGL: true,
     pixelArt: false,
     roundPixels: false,
   },

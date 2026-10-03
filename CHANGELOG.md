@@ -2,6 +2,27 @@
 
 # v0.1.1 - Forest art pass
 
+## High-resolution rendering pass
+
+- **Real device-resolution canvas.** The backbuffer is no longer a fixed 1280x720 stretched by
+  CSS. It is sized to the displayed device pixels (1920x1080 at 1080p, 2560x1440 at 1440p, up to
+  3x on HiDPI/4K) and cameras zoom the unchanged logical 1280x720 view. It updates on window
+  resize and monitor DPR changes.
+- Camera follow, dead-zone, look-ahead, bounds and the finish pan are reimplemented in
+  `CameraController` for the zoomed origin-(0,0) cameras. The feel is unchanged.
+- Text rasterised at the render scale. The UI button texture is drawn at 3x.
+- No extra resampling: tiled textures cut at power-of-two sizes, wide background strips drawn as
+  1:1 image rows.
+- Filtering verified LINEAR (`antialias`, `antialiasGL`, `pixelArt: false`, `roundPixels: false`).
+- **Asset scale audit** (debug `R`) and `art/ASSET_RESOLUTION_REPORT.md`: all 54 kit-derived
+  textures, and Mishkontin's frames, exceed 125% magnification at 1440p and are flagged for
+  replacement. Nothing was upscaled or artificially sharpened. (No AI image generation was used,
+  at the user's request.)
+- Tested at 1920x1080, 2560x1440 and 1440x900 @2x: backbuffer equals device pixels, mouse
+  input maps correctly, all gameplay checks pass.
+
+## Forest art pass
+
 Visual pass over ForestTestScene. Movement, physics, assists, collision body, camera feel,
 checkpoints, saving and debug mode are unchanged (all v0.1 checks still pass).
 

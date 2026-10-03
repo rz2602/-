@@ -54,6 +54,7 @@ Other scripts:
 | Debug overlay | `F3` or `` ` `` (backtick)   |
 | Test HURT animation | `H` (only while the debug overlay is visible) |
 | Solo one visual layer | `L` (only while the debug overlay is visible) |
+| Asset resolution audit | `R` (only while the debug overlay is visible; console table) |
 
 Menus work with the mouse or with `↑`/`↓` + `ENTER`/`SPACE`.
 
@@ -117,6 +118,8 @@ src/
       ForestWater.ts       animated river (respawn zone), waterfalls, splashes
       WaystoneVisual.ts    the checkpoint waystone
   systems/
+    RenderScale.ts         device-resolution backbuffer + camera zoom + crisp text
+    AssetScaleAudit.ts     measures on-screen magnification of every texture
     InputSystem.ts         keyboard -> per-frame intent snapshot (no allocations)
     SaveSystem.ts          versioned localStorage save
     CameraController.ts    smooth follow, dead-zone, eased look-ahead
@@ -133,6 +136,15 @@ src/
 ```
 
 Design notes:
+
+- **High-resolution rendering.** Logic and layout use a fixed *logical* 1280x720, but the canvas
+  backbuffer matches the real device pixels (CSS size x devicePixelRatio, up to 3x: 1920x1080 at
+  1080p, 2560x1440 at 1440p). Every camera is zoomed by that render scale (`src/systems/RenderScale.ts`),
+  so the browser never stretches a small canvas. Text is rasterised at the render scale. Cameras
+  use origin (0, 0); `CameraController` does the follow (dead-zone, lerp, look-ahead, bounds).
+  Filtering is LINEAR (`antialias: true`, `pixelArt: false`, `roundPixels: false`).
+- **One resampling step.** Tiled textures are power-of-two sized (otherwise Phaser stretches them
+  to POT first), and wide background strips are rows of images sampled 1:1.
 
 - **Scenes are thin.** Gameplay logic lives in entities and systems, and levels are data
   (`LevelDef`), so adding a level means adding a data file.
@@ -193,9 +205,11 @@ up with physics and effects. Add `--preview out.png` for a contact sheet.
 > third-party trademark). The tool clone-stamps it out of the sign and waystone, and the banner
 > is not used. The waystone shows a code-drawn golden paw glyph instead.
 
-**All kit-derived pieces are TEMPORARY.** The sheet is only 1125x750, so pieces are scaled up
-1.3-3x in game and look soft. Final art replaces the PNGs under the same keys; see
-`art/README.md`.
+**All kit-derived pieces are TEMPORARY.** The sheet is only 1125x750, so pieces are magnified
+on screen far beyond the 125% limit (up to about 640% at 1440p) and look soft. They are
+**flagged for replacement, not upscaled**. **[art/ASSET_RESOLUTION_REPORT.md](art/ASSET_RESOLUTION_REPORT.md)**
+lists every texture with its measured magnification and the source size needed for 1440p and
+4K. Final art replaces the PNGs under the same keys; see `art/README.md`.
 
 **Visual layers** (back to front, defined in `src/levels/forest/forestLayers.ts`):
 
@@ -233,8 +247,11 @@ current animation, facing, remaining coyote time and the active checkpoint. It a
 the Arcade physics bodies and the checkpoint/respawn markers. A second panel lists the
 current composition area (A-F) and all visual layers with their scroll factors.
 
-While it is visible, `H` plays the HURT reaction (there are no enemies yet), and `L` cycles
-**layer solo**: only one visual layer is shown at a time (then all again).
+While it is visible, `H` plays the HURT reaction (there are no enemies yet), `L` cycles
+**layer solo** (only one visual layer is shown at a time, then all again), and `R` runs the
+**asset resolution audit**. The audit logs every raster texture's on-screen magnification and the
+source size needed (see `art/ASSET_RESOLUTION_REPORT.md`). The panel also shows the current render
+scale and backbuffer size, plus how many textures are above 125% right now.
 
 In development builds the Phaser game instance is available in the browser console as
 `window.__MISHKONTIN__`.

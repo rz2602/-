@@ -97,6 +97,9 @@ export class ForestTestScene extends Phaser.Scene {
     this.controls.onKey(KeyCodes.F3, () => this.debug.toggle());
     this.controls.onKey(KeyCodes.BACKTICK, () => this.debug.toggle());
     this.controls.onKey(KeyCodes.L, () => this.debug.cycleLayerSolo());
+    this.controls.onKey(KeyCodes.R, () => {
+      if (this.debug.isVisible) this.debug.runAssetAudit();
+    });
     this.controls.onKey(KeyCodes.H, () => {
       if (this.debug.isVisible && !this.finished) this.player.hurt();
     });

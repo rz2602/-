@@ -4,9 +4,13 @@ Ideas collected during v0.1. **None of these are implemented.** Each belongs to 
 version and should be planned before implementation.
 
 ## Art & animation
-- Replace the temporary, low-resolution kit-derived forest art with final art at 2-3x
-  resolution under the same keys (see `art/README.md`). Priorities: parallax strips (most
-  visibly soft), terrain cap/soil, big trees, waterfall.
+- Replace the temporary, low-resolution kit-derived forest art with high-resolution final art
+  under the same keys. Exact sizes and priorities: `art/ASSET_RESOLUTION_REPORT.md` (P1 first:
+  background strips, waterfall, hero trees).
+- Higher-resolution master sprite set for Mishkontin (about 2x current frame size for 1440p, 3x
+  for 4K); the current atlas is drawn at 170% on 1440p.
+- Optional: ship two texture sets (1440p and 4K) and pick by render scale; mipmaps for POT
+  textures when drawn below native size.
 - Dedicated terrain pieces: cliff faces for tall walls, platform undersides, slope/ramp art.
 - Real waterfall animation frames (current: UV-scrolled overlay on a static image).
 - Pack forest pieces into a texture atlas (fewer textures/draw calls) and ship WebP.

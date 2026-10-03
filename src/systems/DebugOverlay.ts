@@ -1,9 +1,11 @@
 import Phaser from 'phaser';
-import { DEPTH, UI_COLORS } from '../config/constants';
+import { DEPTH, GAME_WIDTH, UI_COLORS } from '../config/constants';
 import type { Mishkontin } from '../entities/Mishkontin';
 import type { VisualLayer } from '../levels/forest/forestLayers';
 import type { AreaDef } from '../levels/LevelTypes';
+import { auditAssetScale, MAX_ALLOWED_MAGNIFICATION, type AssetScaleRow } from './AssetScaleAudit';
 import type { CheckpointSystem } from './CheckpointSystem';
+import { RenderScale } from './RenderScale';
 
 export interface DebugVisualInfo {
   /** Visual layers back to front (listed, and soloable with L). */
@@ -27,6 +29,7 @@ export class DebugOverlay {
   /** -1 = all layers shown; otherwise index into visual.layers. */
   private soloIndex = -1;
   private readonly savedVisibility = new Map<Phaser.GameObjects.GameObject, boolean>();
+  private auditSummary = '';
   private readonly markers: Phaser.GameObjects.Graphics;
   private sinceRefreshMs = TEXT_REFRESH_MS;
 
@@ -48,7 +51,7 @@ export class DebugOverlay {
       .setScrollFactor(0)
       .setDepth(DEPTH.debug);
     this.layerText = scene.add
-      .text(scene.scale.gameSize.width - 12, 12, '', {
+      .text(GAME_WIDTH - 12, 12, '', {
         fontFamily: 'monospace',
         fontSize: '14px',
         color: UI_COLORS.debug,
@@ -83,6 +86,7 @@ export class DebugOverlay {
     world.drawDebug = visible;
     if (!visible) world.debugGraphic?.clear();
     if (visible) {
+      this.refreshAuditSummary();
       this.drawMarkers();
       this.sinceRefreshMs = TEXT_REFRESH_MS;
     }
@@ -107,10 +111,38 @@ export class DebugOverlay {
       `facing     ${p.facingDirection > 0 ? 'right' : 'left'}`,
       `coyote     ${p.coyoteRemainingMs().toFixed(0)} ms`,
       `checkpoint ${this.checkpoints.activeCheckpointId ?? 'start'} @ ${respawn.x}, ${respawn.y}`,
-      `F3/\` hide   H test hurt   L solo layer`,
+      `render     x${RenderScale.value} (${RenderScale.canvasWidth}x${RenderScale.canvasHeight})`,
+      `textures   ${this.auditSummary}`,
+      `F3/\` hide  H hurt  L solo layer  R scale audit`,
     ]);
     this.layerText.setText(this.layerReport(p.x));
     this.drawMarkers();
+  }
+
+  /**
+   * Resolution audit: logs every raster texture's on-screen magnification
+   * (console table) and returns the rows. Assets above ~125% at 2560x1440
+   * need higher-resolution source art.
+   */
+  runAssetAudit(): AssetScaleRow[] {
+    const rows = auditAssetScale(this.scene, RenderScale.value);
+    this.refreshAuditSummary(rows);
+    console.table(rows.map((r) => ({
+      key: r.key,
+      native: `${r.nativeWidth}x${r.nativeHeight}`,
+      'drawn at (logical)': r.logicalScale,
+      'magnified now': r.magnification,
+      'magnified @1440p': r.magnificationQhd,
+      status: r.ok ? 'OK' : 'REPLACE',
+      'source for 1440p': r.sourceForQhd.join('x'),
+      'source for 4K': r.sourceForUhd.join('x'),
+    })));
+    return rows;
+  }
+
+  private refreshAuditSummary(rows = auditAssetScale(this.scene, RenderScale.value)): void {
+    const over = rows.filter((r) => r.magnification > MAX_ALLOWED_MAGNIFICATION).length;
+    this.auditSummary = `${over}/${rows.length} over ${Math.round(MAX_ALLOWED_MAGNIFICATION * 100)}% now`;
   }
 
   /** Cycles: all layers -> layer 0 only -> ... -> last layer only -> all. */
