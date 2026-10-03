@@ -29,7 +29,7 @@ function drawBossThumb(c) {
 
 // Височина на всяко чудовище в играта (пиксели)
 const MON_H = { gloomy: 58, glitch: 56, brute: 104, watcher: 80, screecher: 54, mimic: 52 };
-const ANIM_FPS = { idle: 7, walk: 10, hurt: 10, die: 10, teleport: 12, reveal: 10, attack: 10, punch: 9, charge: 10, slam: 7, shoot: 7, attack1: 6, attack2: 6, special: 7, phase2: 4 };
+const ANIM_FPS = { idle: 7, walk: 10, hurt: 10, die: 10, teleport: 12, reveal: 10, attack: 10, punch: 9, charge: 10, slam: 7, shoot: 7, attack1: 6, attack2: 6, special: 8, phase2: 7 };
 const idleHCache = {};
 function monIdleH(name) {
   if (!idleHCache[name]) { const hs = MON_META[name].anims.idle.map(f => f[3]).sort((a, b) => a - b); idleHCache[name] = hs[hs.length >> 1]; }
@@ -858,7 +858,8 @@ function drawBossSprite(g, B, t) {
   if (B.st === 'exposed') o.flash = 0.06 + 0.06 * Math.sin(t * 8);
   let anim = B.an;
   if (B.cleansed) anim = 'idle';
-  if (B.phase === 2 && anim === 'idle' && B.id !== 'heart') anim = 'walk';
+  // Във фаза 2 босът изглежда различно (кадрите от реда „Phase 2“)
+  if (B.phase === 2 && !B.cleansed && B.st !== 'cleansing' && (anim === 'idle' || anim === 'walk')) anim = 'phase2';
   drawMon(g, B.id, anim, B.at, B.x, feet, B.face > 0, B.h, o);
   if (B.exposed > 0) { g.strokeStyle = `rgba(93,255,192,${0.5 + 0.4 * Math.sin(t * 10)})`; g.lineWidth = 3; circle(g, B.x, feet - B.h * 0.5, B.h * 0.55); g.stroke(); }
   if (B.st === 'exposed' && Math.hypot(P.x - B.x, P.y - B.y) < B.r + 90) tag(g, document.body.classList.contains('touchMode') ? '✦ Пречисти сърцето' : '[Q] Пречисти сърцето', B.x, feet - B.h - 18);
