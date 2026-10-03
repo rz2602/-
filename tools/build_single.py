@@ -16,6 +16,7 @@ html = html.replace('<link rel="stylesheet" href="style.css">', '<style>\n' + cs
 def inline_script(m):
     js = (SRC / m.group(1)).read_text(encoding='utf-8')
     js = js.replace("'assets/heroes.png'", "'" + data_uri(SRC / 'assets/heroes.png', 'image/png') + "'")
+    js = js.replace("'assets/boss_portraits.jpg'", "'" + data_uri(SRC / 'assets/boss_portraits.jpg', 'image/jpeg') + "'")
     js = js.replace("'assets/monsters.webp'", "'" + data_uri(SRC / 'assets/monsters.webp', 'image/webp') + "'")
     return '<script>\n' + js + '\n</script>'
 

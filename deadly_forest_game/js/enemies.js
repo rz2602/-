@@ -7,6 +7,26 @@ let monReady = false;
 monAtlas.onload = () => { monReady = true; };
 monAtlas.src = 'assets/monsters.webp';
 
+// Големите портрети на босовете (за началната им сцена)
+const bossPortraits = new Image();
+let portraitsReady = false;
+bossPortraits.onload = () => { portraitsReady = true; document.querySelectorAll('canvas.bossThumb').forEach(drawBossThumb); };
+bossPortraits.src = 'assets/boss_portraits.jpg';
+const PORTRAIT = { doll: [0, 296], crane: [296, 271], maestro: [567, 233], leviathan: [800, 234], queen: [1034, 229], heart: [1263, 236] }, PORTRAIT_H = 320;
+function portraitW(id, h) { return PORTRAIT[id][1] * h / PORTRAIT_H; }
+function drawPortrait(g, id, x, y, h, color) {
+  if (!portraitsReady || !PORTRAIT[id]) return;
+  const [sx, sw] = PORTRAIT[id], w = portraitW(id, h);
+  glow(g, x + w / 2, y + h / 2, Math.max(w, h) * 0.75, color, 0.35);
+  g.save(); rrect(g, x, y, w, h, Math.min(18, h * 0.08)); g.clip();
+  g.drawImage(bossPortraits, sx, 0, sw, PORTRAIT_H, x, y, w, h); g.restore();
+  g.strokeStyle = color; g.lineWidth = Math.max(2, h / 110); rrect(g, x, y, w, h, Math.min(18, h * 0.08)); g.stroke();
+}
+function drawBossThumb(c) {
+  const g = c.getContext('2d'), id = c.dataset.boss; g.clearRect(0, 0, c.width, c.height);
+  const h = c.height - 6, w = portraitW(id, h); drawPortrait(g, id, (c.width - w) / 2, 3, h, c.dataset.color || '#fff');
+}
+
 // Височина на всяко чудовище в играта (пиксели)
 const MON_H = { gloomy: 58, glitch: 56, brute: 104, watcher: 80, screecher: 54, mimic: 52 };
 const ANIM_FPS = { idle: 7, walk: 10, hurt: 10, die: 10, teleport: 12, reveal: 10, attack: 10, punch: 9, charge: 10, slam: 7, shoot: 7, attack1: 6, attack2: 6, special: 7, phase2: 4 };
@@ -463,8 +483,9 @@ function bossRoomPoint(margin = 2) {
 }
 function bossCenter() { return { x: lv.bossRoom.cx * TILE + 20, y: lv.bossRoom.cy * TILE + 20 }; }
 
+const BOSS_INTRO = 3.2;
 function activateBoss(B) {
-  B.active = true; B.intro = 2.2; lv.arenaLocked = true;
+  B.active = true; B.intro = BOSS_INTRO; lv.arenaLocked = true;
   lv.gates.forEach(g => { lv.grid[g.y * lv.w + g.x] = 3; });
   shake = 0.7; sfx('boom');
   const br = lv.bossRoom, c = bossCenter(), x0 = (br.x + 2) * TILE + 20, x1 = (br.x + br.w - 3) * TILE + 20, y0 = (br.y + 2) * TILE + 20, y1 = (br.y + br.h - 3) * TILE + 20;

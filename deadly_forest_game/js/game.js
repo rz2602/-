@@ -709,16 +709,23 @@ function renderHUD() {
 
   // Бос
   if (B.active && !B.dead && B.intro > 0) {
-    const k = Math.min(1, (2.2 - B.intro) * 3, B.intro * 3);
-    ctx.globalAlpha = Math.max(0, k); ctx.fillStyle = '#000b'; ctx.fillRect(0, VH / 2 - 80, VW, 150);
-    ctx.textAlign = 'center'; ctx.font = '400 54px "Russo One",Rubik,system-ui'; ctx.fillStyle = B.color; ctx.fillText(B.name.toUpperCase(), VW / 2, VH / 2);
-    ctx.font = '800 20px Rubik,system-ui'; ctx.fillStyle = '#fff'; ctx.fillText(`${B.bg} · ${L.name}`, VW / 2, VH / 2 + 32);
-    ctx.font = '700 15px Rubik,system-ui'; ctx.fillStyle = '#ffe680'; ctx.fillText(B.def.tip || '', VW / 2, VH / 2 + 56);
-    ctx.globalAlpha = 1; ctx.textAlign = 'left';
+    // Начална сцена: голям портрет, който влиза отляво, и името на боса
+    const el = BOSS_INTRO - B.intro, k = Math.max(0, Math.min(1, el * 3, B.intro * 3)), slide = 1 - Math.pow(1 - Math.min(1, el * 2.2), 3);
+    ctx.globalAlpha = k; ctx.fillStyle = '#000000d0'; ctx.fillRect(0, 0, VW, VH);
+    const ph = Math.min(VH * 0.72, 450), pw = portraitW(B.id, ph), px = VW * 0.07 - (1 - slide) * (pw + 80), py = (VH - ph) / 2;
+    drawPortrait(ctx, B.id, px, py, ph, B.color);
+    const tx = VW * 0.07 + pw + 44, maxW = VW - tx - 30;
+    ctx.globalAlpha = k * Math.min(1, Math.max(0, el - 0.3) * 3);
+    ctx.font = '800 14px Rubik,system-ui'; ctx.fillStyle = '#ffffffaa'; ctx.fillText(`БОС · НИВО ${lv.li + 1}`, tx, VH / 2 - 70);
+    ctx.font = '400 50px "Russo One",Rubik,system-ui'; ctx.fillStyle = B.color; ctx.fillText(B.name.toUpperCase(), tx, VH / 2 - 18, maxW);
+    ctx.font = '800 22px Rubik,system-ui'; ctx.fillStyle = '#fff'; ctx.fillText(`${B.bg} · ${L.name}`, tx, VH / 2 + 18, maxW);
+    ctx.font = '700 16px Rubik,system-ui'; ctx.fillStyle = '#ffe680'; ctx.fillText(B.def.tip || '', tx, VH / 2 + 52, maxW);
+    ctx.globalAlpha = 1;
   }
   if (B.active && !B.dead && B.intro <= 0 && B.st !== 'cleansing') {
     const bw = 520, bx = VW / 2 - bw / 2, by = VH - 56;
     ctx.fillStyle = '#05090cd8'; rrect(ctx, bx - 10, by - 26, bw + 20, 50, 12); ctx.fill();
+    if (PORTRAIT[B.id]) { const th = 58, tw = portraitW(B.id, th); ctx.fillStyle = '#05090cd8'; rrect(ctx, bx - tw - 22, by - 30, tw + 8, th + 8, 10); ctx.fill(); drawPortrait(ctx, B.id, bx - tw - 18, by - 26, th, B.color); }
     ctx.fillStyle = '#fff'; ctx.font = '900 14px Rubik,system-ui'; ctx.textAlign = 'center'; ctx.fillText(`${B.name} · ${B.bg}${B.phase === 2 ? (B.id === 'heart' ? ' — ПРЕЧИСТИ СЪРЦЕТО' : ' — ФАЗА 2') : ''}`, VW / 2, by - 8);
     ctx.fillStyle = '#2a0d14'; rrect(ctx, bx, by, bw, 14, 7); ctx.fill();
     ctx.fillStyle = B.phase === 2 ? '#ff2a55' : B.color; rrect(ctx, bx, by, bw * Math.max(0, B.hp / B.max), 14, 7); ctx.fill();
@@ -726,7 +733,7 @@ function renderHUD() {
   }
 
   // Съобщения
-  msgs.forEach((m, i) => {
+  if (!(B.active && B.intro > 0)) msgs.forEach((m, i) => {
     const a = Math.min(1, m.t * 2, (m.max - m.t) * 4);
     ctx.globalAlpha = a; ctx.font = '900 22px Rubik,system-ui'; ctx.textAlign = 'center';
     ctx.lineWidth = 5; ctx.strokeStyle = '#000c'; ctx.strokeText(m.text, VW / 2, 130 + i * 32);

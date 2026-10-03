@@ -106,6 +106,9 @@ button.danger{color:#ff8fa0;border-color:#ff4f6a66}
 .facts.three{grid-template-columns:repeat(3,1fr);text-align:center}
 .facts div{background:#ffffff0c;border:1px solid var(--line);border-radius:14px;padding:10px 14px}
 .facts span{display:block;font-size:11px;letter-spacing:.16em;color:var(--muted);text-transform:uppercase;font-weight:800}
+.facts .bossFact{display:flex;align-items:center;gap:12px;grid-row:span 2}
+.facts .bossFact>div{background:none;border:0;padding:0}
+.facts .bossFact canvas{width:74px;height:100px;flex:none}
 .facts b{font-size:15px;color:var(--ac,#ffd27a)}
 .facts.three b{display:block;font-size:28px;color:#ffd27a}
 #sLevel h2{color:var(--ac)}
