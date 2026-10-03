@@ -6,7 +6,7 @@ const CELL_W = 256, CELL_H = 128, ANCHOR_X = 72; // атлас assets/heroes.png
 
 const HEROES = [
   {
-    id: 'bear', name: 'Робот Бер', en: 'Robot Bear', row: 0,
+    id: 'bear', name: 'Robot Bear', en: 'Робот мечок', row: 0,
     frames: { idle: [0], walk: [1, 2, 3, 4, 5, 6], attack: [7, 8, 9] },
     hp: 8, speed: 190, color: '#5fd4ff',
     desc: 'Бронирана мечка-робот с енергиен бластер. Издръжлив и надежден.',
@@ -21,7 +21,7 @@ const HEROES = [
     ],
   },
   {
-    id: 'snow', name: 'Снежната жена', en: 'Snow Woman', row: 1,
+    id: 'snow', name: 'Snow woman', en: 'Снежната жена', row: 1,
     frames: { idle: [0], walk: [1, 2, 3, 4, 5], attack: [6, 7, 8] },
     hp: 6, speed: 210, color: '#9fe8ff',
     desc: 'Повелителка на леда. Ледените ѝ кристали забавят чудовищата.',
@@ -36,7 +36,7 @@ const HEROES = [
     ],
   },
   {
-    id: 'hen', name: 'Роботик Хен', en: 'Robotic Hen', row: 2,
+    id: 'hen', name: 'Robotic Hand', en: 'Роботската ръка', row: 2,
     frames: { idle: [0], walk: [1, 2, 3, 4, 5], attack: [6, 7, 8] },
     hp: 6, speed: 205, color: '#ff9a3c',
     desc: 'Малък, но смел робот. Изстрелва огнени кълба, които избухват.',
@@ -51,7 +51,7 @@ const HEROES = [
     ],
   },
   {
-    id: 'hand', name: 'Лудият убиец с роботска ръка', short: 'Роботската ръка', en: 'Robotic Hand', row: 3,
+    id: 'hand', name: 'Crazy Killer', en: 'Лудият убиец', row: 3,
     frames: { idle: [0], walk: [1, 2, 3, 4, 5], attack: [6, 7, 8] },
     hp: 7, speed: 200, color: '#ff5a36',
     desc: 'Безразсъден боец с огромен механичен юмрук. Удря от близо – и много силно.',
@@ -66,7 +66,7 @@ const HEROES = [
     ],
   },
   {
-    id: 'archey', name: 'Archey.exe', en: 'Rh.exe', row: 4,
+    id: 'archey', name: 'Rh.Exe', en: 'Хакнатият робот', row: 4,
     frames: { idle: [0], walk: [1, 2, 3, 4, 5], attack: [6, 7, 8] },
     hp: 5, speed: 215, color: '#b45cff',
     desc: 'Хакнат робот от неизвестен произход. Енергийните му лъчи пронизват всичко.',
@@ -81,7 +81,7 @@ const HEROES = [
     ],
   },
   {
-    id: 'tiny', name: 'Тайният човек', en: 'Tiny Man', row: 5,
+    id: 'tiny', name: 'Tiny man', en: 'Тайнственият човек', row: 5,
     frames: { idle: [0], walk: [1, 2, 3, 4, 5], attack: [6, 7, 8] },
     hp: 5, speed: 255, color: '#ffb13b',
     desc: 'Мистериозен герой, за когото почти нищо не се знае. Бърз като сянка.',

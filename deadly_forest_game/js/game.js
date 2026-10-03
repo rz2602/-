@@ -678,7 +678,7 @@ function levelComplete() {
 }
 function gameOver(src) {
   state = 'over'; stopMusic(); sfx('boom');
-  $('overText').textContent = `${P.H.short || P.H.name} падна в битката${src ? ' (' + src + ')' : ''}. Но експедицията не се отказва!`;
+  $('overText').textContent = `${P.H.name} падна в битката${src ? ' (' + src + ')' : ''}. Но експедицията не се отказва!`;
   setTimeout(() => showScreen('sOver'), 600);
 }
 function pauseGame() { if (state !== 'play') return; state = 'paused'; showScreen('sPause'); }
@@ -805,7 +805,7 @@ function renderHUD() {
   ctx.save(); ctx.beginPath(); ctx.rect(20, 18, 70, 84); ctx.clip();
   if (atlasReady) drawHeroFrame(ctx, P.hi, P.si, H.frames.idle[0], 52, 100, 0.66, false);
   ctx.restore();
-  ctx.fillStyle = '#fff'; ctx.font = '800 15px Rubik,system-ui'; ctx.fillText(H.short || H.name, 92, 36);
+  ctx.fillStyle = '#fff'; ctx.font = '800 15px Rubik,system-ui'; ctx.fillText(H.name, 92, 36);
   for (let i = 0; i < P.max; i++) {
     const x = 102 + i * 22, y = 56, fill = Math.max(0, Math.min(1, P.hp - i));
     heartShape(ctx, x, y, 8, '#3a1d24');
