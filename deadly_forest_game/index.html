@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="bg">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Смъртоносната гора</title>
+<meta name="description" content="2D приключенска игра: освободи изоставения град от чудовищата – от фабриката за играчки до Смъртоносната гора.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;600;700;800;900&family=Russo+One&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="wrap">
+  <canvas id="game" width="1280" height="720"></canvas>
+
+  <div id="touch" class="hidden">
+    <div id="stick"><div id="knob"></div></div>
+    <div id="tbtns">
+      <button id="tPause" aria-label="Пауза">❚❚</button>
+      <button id="tE" aria-label="Действие">E</button>
+      <button id="tAb" aria-label="Умение">✦</button>
+      <button id="tAtk" aria-label="Атака">⚔</button>
+    </div>
+  </div>
+
+  <!-- Начален екран -->
+  <section id="sTitle" class="screen poster">
+    <div class="titleBox">
+      <div class="eyebrow">ЕКСПЕДИЦИЯТА ЗАПОЧВА</div>
+      <h1>Смъртоносната<br><span>гора</span></h1>
+      <p class="tag">Освободи изоставения град от чудовищата. Шест места. Шест боса. Една гора, която пази тайна.</p>
+      <div class="btns col">
+        <button id="btnNew" class="primary">▶ Нова експедиция</button>
+        <button id="btnContinue" class="hidden">⟳ Продължи</button>
+        <button id="btnHelp">❔ Как се играе</button>
+        <button class="muteBtn">🔊 Звук: вкл.</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- История -->
+  <section id="sStory" class="screen poster dim">
+    <div class="panel story">
+      <div class="eyebrow">ИСТОРИЯТА</div>
+      <h2 id="storyTitle"></h2>
+      <p id="storyText" class="pre"></p>
+      <div id="storyDots" class="dots"></div>
+      <div class="btns"><button id="storySkip" class="ghost">Пропусни</button><button id="storyNext" class="primary">Напред →</button></div>
+    </div>
+  </section>
+
+  <!-- Избор на герой -->
+  <section id="sSelect" class="screen dark">
+    <div class="panel wide select">
+      <div class="eyebrow">ИЗБЕРИ СВОЯ ГЕРОЙ И СКИН</div>
+      <div class="selectLayout">
+        <div id="heroGrid"></div>
+        <div id="heroInfo">
+          <canvas id="heroBig" width="300" height="200"></canvas>
+          <h2 id="heroName"></h2><div id="heroEn" class="muted"></div>
+          <p id="heroDesc"></p>
+          <div id="heroStats"></div>
+        </div>
+      </div>
+      <div class="selectBottom">
+        <div><div class="label">Скин</div><div id="skinRow"></div></div>
+        <div><div class="label">Трудност</div><div id="diffRow" class="seg"></div></div>
+      </div>
+      <div class="btns"><button id="selectBack" class="ghost">← Назад</button><button id="selectGo" class="primary">Към картата на града →</button></div>
+    </div>
+  </section>
+
+  <!-- Карта на града -->
+  <section id="sMap" class="screen poster dim">
+    <div class="panel wide">
+      <div class="eyebrow">КАРТА НА ИЗОСТАВЕНИЯ ГРАД</div>
+      <h2>Накъде ще поеме експедицията?</h2>
+      <p id="mapStatus" class="muted"></p>
+      <div id="mapList"></div>
+      <p class="muted small">Герой: <span id="mapHero"></span></p>
+      <div class="btns"><button id="mapBack" class="ghost">← Меню</button><button id="mapHeroBtn">Смени героя / скина</button></div>
+    </div>
+  </section>
+
+  <!-- Въведение към ниво -->
+  <section id="sLevel" class="screen dark">
+    <div class="panel story">
+      <div class="eyebrow" id="lvlEyebrow"></div>
+      <h2 id="lvlTitle"></h2>
+      <p id="lvlText" class="pre"></p>
+      <div id="lvlFacts" class="facts"></div>
+      <div class="btns"><button id="lvlBack" class="ghost">← Карта</button><button id="lvlGo" class="primary">Влез ⚔</button></div>
+    </div>
+  </section>
+
+  <!-- Бележка / тайна -->
+  <section id="sNote" class="screen">
+    <div class="panel note">
+      <div class="eyebrow" id="noteCount">ОТКРИТА ТАЙНА</div>
+      <h2 id="noteTitle"></h2>
+      <p id="noteText"></p>
+      <div class="btns"><button id="noteClose" class="primary">Продължи</button></div>
+    </div>
+  </section>
+
+  <!-- Пауза -->
+  <section id="sPause" class="screen">
+    <div class="panel small">
+      <div class="eyebrow">ПАУЗА</div><h2>Експедицията чака</h2>
+      <div class="btns col">
+        <button id="pResume" class="primary">▶ Продължи</button>
+        <button id="pRestart">⟳ Започни нивото отначало</button>
+        <button id="pHelp">❔ Управление</button>
+        <button class="muteBtn">🔊 Звук: вкл.</button>
+        <button id="pMap" class="ghost">← Карта на града</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Ниво завършено -->
+  <section id="sDone" class="screen dark">
+    <div class="panel story">
+      <div class="eyebrow">МЯСТОТО Е ОСВОБОДЕНО</div>
+      <h2 id="doneTitle"></h2>
+      <p id="doneText" class="pre"></p>
+      <div id="doneStats" class="facts three"></div>
+      <div class="btns"><button id="doneMap" class="ghost">Карта</button><button id="doneNext" class="primary">Напред</button></div>
+    </div>
+  </section>
+
+  <!-- Загуба -->
+  <section id="sOver" class="screen dark">
+    <div class="panel small">
+      <div class="eyebrow red">ЕКСПЕДИЦИЯТА СЕ ПРОВАЛИ</div>
+      <h2>Чудовищата победиха… засега</h2>
+      <p id="overText"></p>
+      <div class="btns"><button id="overMap" class="ghost">Карта</button><button id="overRetry" class="primary">⟳ Опитай отново</button></div>
+    </div>
+  </section>
+
+  <!-- Помощ -->
+  <section id="sHelp" class="screen dark">
+    <div class="panel">
+      <div class="eyebrow">КАК СЕ ИГРАЕ</div>
+      <h2>Управление</h2>
+      <div class="keys">
+        <div><kbd>W A S D</kbd> / <kbd>стрелки</kbd><span>движение</span></div>
+        <div><kbd>Мишка</kbd> / <kbd>Space</kbd> / <kbd>J</kbd><span>атака (насочва се към мишката или най-близкото чудовище)</span></div>
+        <div><kbd>Q</kbd> / <kbd>Shift</kbd> / <kbd>десен бутон</kbd><span>специално умение</span></div>
+        <div><kbd>E</kbd><span>прочети бележка (тайна)</span></div>
+        <div><kbd>Esc</kbd> / <kbd>P</kbd><span>пауза</span> · <kbd>M</kbd><span>звук</span></div>
+        <div><kbd>📱 Телефон</kbd><span>джойстик вляво, бутони вдясно</span></div>
+      </div>
+      <p class="muted">Във всяко ниво събери нужните предмети, за да отвориш портата към боса. Пази се от опасните зони. Търси бележките — те разказват какво наистина се е случило с града. Победи боса и влез в портала.</p>
+      <div class="btns"><button id="btnReset" class="ghost danger">Изтрий прогреса</button><button id="helpBack" class="primary">Разбрах</button></div>
+    </div>
+  </section>
+
+  <!-- Финал -->
+  <section id="sEnd" class="screen clear">
+    <div id="endBtns" class="btns hidden endBtns"><button id="endMap" class="ghost">Карта на града</button><button id="endMenu" class="primary">Към менюто</button></div>
+  </section>
+</div>
+<script src="js/data.js"></script>
+<script src="js/art.js"></script>
+<script src="js/world.js"></script>
+<script src="js/game.js"></script>
+<script src="js/ui.js"></script>
+</body>
+</html>
