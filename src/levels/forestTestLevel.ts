@@ -86,7 +86,7 @@ export const FOREST_TEST_LEVEL: LevelDef = {
 
   decorations: [
     // ---- A forest entrance ----
-    { key: 'tree_large_01', x: 150, y: 1100, scale: 2.4 },
+    { key: 'tree_oak_01', x: 150, y: 1100, height: 545 },
     { key: 'lantern_post', x: 380, y: 1100 },
     { key: 'wooden_sign', x: 470, y: 1100 },
     { key: 'mushroom_red', x: 40, y: 1100 },
@@ -95,8 +95,8 @@ export const FOREST_TEST_LEVEL: LevelDef = {
     { key: 'bush_01', x: 700, y: 1100 },
     { key: 'rock_large', x: 1020, y: 1100 },
     { key: 'bush_wide', x: 1280, y: 1100 },
-    { key: 'pine_tree', layer: 'back', x: 760, y: 1100, scale: 2.2 },
-    { key: 'tree_large_02', layer: 'back', x: 1180, y: 1100, scale: 2.1 },
+    { key: 'tree_pine_01', layer: 'back', x: 760, y: 1100, height: 490 },
+    { key: 'tree_oak_02', layer: 'back', x: 1180, y: 1100, height: 460 },
     { key: 'fg_leaves_left', layer: 'foreground', x: 140, y: 1100 },
     // ---- B first gap (stream) ----
     { key: 'rocks_pair', x: 1455, y: 1100 },
@@ -115,11 +115,12 @@ export const FOREST_TEST_LEVEL: LevelDef = {
     { key: 'rock_large', x: 3620, y: 900 },
     { key: 'mushroom_red', x: 3900, y: 900 },
     { key: 'flowers_purple', x: 4040, y: 900 },
-    { key: 'tree_large_02', layer: 'back', x: 3760, y: 900, scale: 2.3 },
-    { key: 'pine_tree', layer: 'back', x: 4080, y: 900, scale: 2.0 },
+    { key: 'tree_oak_03', layer: 'back', x: 3760, y: 900, height: 505 },
+    { key: 'tree_pine_01', layer: 'back', x: 4080, y: 900, height: 450 },
     // ---- E checkpoint clearing ----
-    { key: 'tree_large_01', layer: 'back', x: 4200, y: 1100, scale: 2.0 },
-    { key: 'tree_large_02', layer: 'back', x: 5120, y: 1100, scale: 2.0, flipX: true },
+    { key: 'tree_oak_01', layer: 'back', x: 4200, y: 1100, height: 455 },
+    { key: 'tree_oak_03', layer: 'back', x: 5120, y: 1100, height: 440, flipX: true },
+    { key: 'tree_ancient_01', layer: 'back', x: 4880, y: 1100, height: 400 },
     { key: 'rock_medium', x: 4330, y: 1100 },
     { key: 'flowers_white', x: 4440, y: 1100 },
     { key: 'flowers_blue', x: 4690, y: 1100 },
@@ -127,7 +128,7 @@ export const FOREST_TEST_LEVEL: LevelDef = {
     { key: 'bush_blue', x: 4960, y: 1100 },
     { key: 'fg_trunk_right', layer: 'foreground', x: 4950, y: 1100 },
     // ---- gap series ----
-    { key: 'pine_tree', layer: 'back', x: 5500, y: 1080, scale: 1.9 },
+    { key: 'tree_pine_01', layer: 'back', x: 5500, y: 1080, height: 425 },
     { key: 'tree_medium', layer: 'back', x: 5900, y: 1050, scale: 1.9 },
     { key: 'mushroom_small', x: 5520, y: 1080 },
     { key: 'grass_patch', x: 5880, y: 1050 },
@@ -141,12 +142,12 @@ export const FOREST_TEST_LEVEL: LevelDef = {
     // ---- lookout ----
     { key: 'bush_03', x: 7200, y: 1070 },
     { key: 'mushroom_red', x: 7640, y: 765 },
-    { key: 'tree_large_02', layer: 'back', x: 7520, y: 1070, scale: 2.4 },
+    { key: 'tree_oak_02', layer: 'back', x: 7520, y: 1070, height: 528 },
     { key: 'fg_leaves_blur', layer: 'foreground', x: 7360, y: 1070 },
     // ---- D bridge ----
     { key: 'lantern_post', x: 7940, y: 1070 },
     { key: 'fence_post', x: 8205, y: 1100 },
-    { key: 'pine_tree', layer: 'back', x: 8330, y: 1100, scale: 2.2 },
+    { key: 'tree_pine_01', layer: 'back', x: 8330, y: 1100, height: 490 },
     { key: 'wooden_fence', x: 8330, y: 1100 },
     { key: 'flowers_white', x: 8470, y: 1100 },
     { key: 'mushroom_orange', x: 8640, y: 1100 },
@@ -159,7 +160,7 @@ export const FOREST_TEST_LEVEL: LevelDef = {
     { key: 'wooden_sign', x: 9800, y: 1080 },
     { key: 'bush_02', x: 10080, y: 1080 },
     { key: 'wooden_crate_small', x: 10330, y: 1080 },
-    { key: 'tree_large_01', x: 11120, y: 850, scale: 2.1 },
+    { key: 'tree_oak_03', x: 11120, y: 850, height: 477 },
     { key: 'rock_mossy', x: 10560, y: 850 },
     { key: 'mushroom_red', x: 11010, y: 700 },
     { key: 'flowers_pink', x: 11470, y: 930 },
@@ -167,7 +168,7 @@ export const FOREST_TEST_LEVEL: LevelDef = {
     { key: 'fg_leaves_left', layer: 'foreground', x: 10000, y: 1080, flipX: true },
     // ---- F final viewpoint ----
     { key: 'tree_stump', x: 12000, y: 1080 },
-    { key: 'pine_tree', layer: 'back', x: 12230, y: 1080, scale: 2.0 },
+    { key: 'tree_pine_01', layer: 'back', x: 12230, y: 1080, height: 450 },
     { key: 'lantern_post', x: 12440, y: 870 },
     { key: 'flowers_white', x: 12530, y: 870 },
     { key: 'flowers_pink', x: 12700, y: 870 },
@@ -178,8 +179,8 @@ export const FOREST_TEST_LEVEL: LevelDef = {
   ],
 
   waterfalls: [
-    { x: 3030, y: 1100, scale: 2.4 }, // C distant waterfall
-    { x: 8080, y: 1110, scale: 2.7 }, // D behind the bridge, pouring into the river
+    { x: 3030, y: 1100, height: 267 }, // C distant waterfall (same world width as before: ~475)
+    { x: 8080, y: 1110, height: 301 }, // D behind the bridge (~535 wide, as before)
   ],
 
   lights: [

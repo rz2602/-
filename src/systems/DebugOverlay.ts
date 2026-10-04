@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { DEPTH, GAME_WIDTH, UI_COLORS } from '../config/constants';
+import { DEPTH, GAME_HEIGHT, GAME_WIDTH, UI_COLORS } from '../config/constants';
 import type { Mishkontin } from '../entities/Mishkontin';
 import type { VisualLayer } from '../levels/forest/forestLayers';
 import type { AreaDef } from '../levels/LevelTypes';
@@ -30,6 +30,8 @@ export class DebugOverlay {
   private soloIndex = -1;
   private readonly savedVisibility = new Map<Phaser.GameObjects.GameObject, boolean>();
   private auditSummary = '';
+  private readonly inspectText: Phaser.GameObjects.Text;
+  private readonly inspectBox: Phaser.GameObjects.Graphics;
   private readonly markers: Phaser.GameObjects.Graphics;
   private sinceRefreshMs = TEXT_REFRESH_MS;
 
@@ -62,6 +64,19 @@ export class DebugOverlay {
       .setScrollFactor(0)
       .setDepth(DEPTH.debug);
     this.markers = scene.add.graphics().setDepth(DEPTH.debug);
+    this.inspectBox = scene.add.graphics().setDepth(DEPTH.debug);
+    this.inspectText = scene.add
+      .text(12, GAME_HEIGHT - 12, '', {
+        fontFamily: 'monospace',
+        fontSize: '14px',
+        color: UI_COLORS.debug,
+        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+        padding: { x: 8, y: 6 },
+      })
+      .setOrigin(0, 1)
+      .setScrollFactor(0)
+      .setDepth(DEPTH.debug);
+    scene.input.on(Phaser.Input.Events.POINTER_UP, (pointer: Phaser.Input.Pointer) => this.inspectAt(pointer));
     this.setVisible(initiallyVisible);
   }
 
@@ -78,6 +93,8 @@ export class DebugOverlay {
     this.visible = visible;
     this.text.setVisible(visible);
     this.layerText.setVisible(visible);
+    this.inspectText.setVisible(visible);
+    this.inspectBox.setVisible(visible);
     this.markers.setVisible(visible);
     if (!visible && this.soloIndex !== -1) this.setSolo(-1);
 
@@ -113,7 +130,7 @@ export class DebugOverlay {
       `checkpoint ${this.checkpoints.activeCheckpointId ?? 'start'} @ ${respawn.x}, ${respawn.y}`,
       `render     x${RenderScale.value} (${RenderScale.canvasWidth}x${RenderScale.canvasHeight})`,
       `textures   ${this.auditSummary}`,
-      `F3/\` hide  H hurt  L solo layer  R scale audit`,
+      `F3/\` hide  H hurt  L solo  R audit  click: inspect`,
     ]);
     this.layerText.setText(this.layerReport(p.x));
     this.drawMarkers();
@@ -131,6 +148,7 @@ export class DebugOverlay {
       key: r.key,
       native: `${r.nativeWidth}x${r.nativeHeight}`,
       'drawn at (logical)': r.logicalScale,
+      'rendered @1440p': `${Math.round(r.nativeWidth * r.magnificationQhd)}x${Math.round(r.nativeHeight * r.magnificationQhd)}`,
       'magnified now': r.magnification,
       'magnified @1440p': r.magnificationQhd,
       status: r.ok ? 'OK' : 'REPLACE',
@@ -153,7 +171,56 @@ export class DebugOverlay {
     this.sinceRefreshMs = TEXT_REFRESH_MS;
   }
 
+  /**
+   * Art inspector: the top-most textured world object under the pointer
+   * (respecting each object's parallax scroll factor) - texture, native and
+   * rendered size, render scale %, anchor, world position, scroll factor and
+   * physics body. Development only.
+   */
+  inspectAt(pointer: Phaser.Input.Pointer): string | null {
+    if (!this.visible) return null;
+    const cam = this.scene.cameras.main;
+    const world = cam.getWorldPoint(pointer.x, pointer.y);
+    const hits = this.scene.children.list
+      .filter((o): o is Phaser.GameObjects.Image | Phaser.GameObjects.Sprite | Phaser.GameObjects.TileSprite =>
+        (o instanceof Phaser.GameObjects.Image || o instanceof Phaser.GameObjects.Sprite || o instanceof Phaser.GameObjects.TileSprite) &&
+        o.visible && o.depth < DEPTH.hud && !o.texture.key.startsWith('fx-') && !o.texture.key.startsWith('__'))
+      .sort((a, b) => b.depth - a.depth);
+    for (const o of hits) {
+      // Screen position of an object with scroll factor s: world - scroll * s.
+      const px = world.x - cam.scrollX * (1 - o.scrollFactorX);
+      const py = world.y - cam.scrollY * (1 - o.scrollFactorY);
+      if (!o.getBounds().contains(px, py)) continue;
+      const tile = o instanceof Phaser.GameObjects.TileSprite;
+      const frame = tile ? (o as unknown as { displayFrame: Phaser.Textures.Frame }).displayFrame : o.frame;
+      const scale = tile ? o.tileScaleX : Math.abs(o.scaleX);
+      const pct = (s: number) => `${Math.round(s * 100)}%`;
+      const body = (o.body as Phaser.Physics.Arcade.Body | null) ?? null;
+      const lines = [
+        `texture   ${frame.texture.key}${frame.name !== '__BASE' ? ` [${frame.name}]` : ''}`,
+        `native    ${frame.realWidth} x ${frame.realHeight}`,
+        `rendered  ${Math.round(o.displayWidth)} x ${Math.round(o.displayHeight)} logical  (${Math.round(o.displayWidth * RenderScale.value)} x ${Math.round(o.displayHeight * RenderScale.value)} device)`,
+        `scale     ${pct(scale)} logical / ${pct(scale * RenderScale.value)} now / ${pct(scale * 2)} @1440p`,
+        `anchor    ${o.originX.toFixed(3)}, ${o.originY.toFixed(3)} (normalized origin)`,
+        `world     ${Math.round(o.x)}, ${Math.round(o.y)}   depth ${o.depth}`,
+        `scroll    ${o.scrollFactorX} / ${o.scrollFactorY}`,
+        `physics   ${body ? `${Math.round(body.width)} x ${Math.round(body.height)} @ ${Math.round(body.x)}, ${Math.round(body.y)}` : 'none (decorative)'}`,
+      ];
+      if (o === (this.player as unknown)) lines.push(`state     ${this.player.playerState} / ${this.player.anims.currentAnim?.key ?? '-'}`);
+      this.inspectText.setText(lines);
+      const b = o.getBounds();
+      this.inspectBox.clear().lineStyle(2, 0xffd36b, 1)
+        .strokeRect(b.x - cam.scrollX * (o.scrollFactorX - 1), b.y - cam.scrollY * (o.scrollFactorY - 1), b.width, b.height);
+      return lines.join('\n');
+    }
+    this.inspectText.setText('nothing textured under the pointer');
+    this.inspectBox.clear();
+    return null;
+  }
+
   destroy(): void {
+    this.inspectText.destroy();
+    this.inspectBox.destroy();
     this.layerText.destroy();
     this.text.destroy();
     this.markers.destroy();

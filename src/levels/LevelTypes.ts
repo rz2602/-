@@ -41,7 +41,10 @@ export interface DecorationDef extends PointDef {
   /** Forest texture key (see forest-assets.json). */
   key: string;
   layer?: DecorationLayer;
+  /** Legacy kit art: display scale. */
   scale?: number;
+  /** Production art: world height in logical px (resolution-independent). */
+  height?: number;
   flipX?: boolean;
 }
 
@@ -74,8 +77,8 @@ export interface LevelDef {
   checkpoints: CheckpointDef[];
   finish: PointDef;
   decorations: DecorationDef[];
-  /** Animated waterfalls on the back layer; `y` is where the pool meets the river. */
-  waterfalls: Array<PointDef & { scale: number }>;
+  /** Static waterfall artwork on the back layer; `y` = ground contact of its pool. */
+  waterfalls: Array<PointDef & { height: number }>;
   lights: LightDef[];
   areas: AreaDef[];
   /** Terrain segments (indices) that get small scattered plants. */

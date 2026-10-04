@@ -444,6 +444,12 @@ for (const piece of PIECES) {
     for (const [name, v] of Object.entries(ANCHORS[piece.key])) {
       entry.anchors[name] = v.map((n, i) => n - (i % 2 === 0 ? originX : originY));
     }
+    // Same anchors normalized to the texture size (0..1), so a higher-resolution
+    // re-export of the SAME artwork keeps its placement: px = norm * newSize.
+    entry.anchorsNormalized = {};
+    for (const [name, v] of Object.entries(entry.anchors)) {
+      entry.anchorsNormalized[name] = v.map((n, i) => Math.round((n / (i % 2 === 0 ? img.width : img.height)) * 1e4) / 1e4);
+    }
   }
   manifest.assets[piece.key] = entry;
   previews.push({ key: piece.key, img });

@@ -20,12 +20,19 @@ export const AssetKeys = {
   mishkontinManifest: 'mishkontin-frames-manifest',
   mishkontin: 'mishkontin',
   forestManifest: 'forest-assets-manifest',
+  productionManifest: 'production-assets-manifest',
+  /** Official brand assets: screen-space UI only. */
+  brandWordmark: 'brand-wordmark',
+  brandEmblem: 'brand-emblem',
 } as const;
 
 export const AssetPaths = {
   mishkontinManifest: 'assets/characters/mishkontin/generated/mishkontin-frames.json',
   mishkontinFrames: 'assets/characters/mishkontin/generated/mishkontin-frames.png',
   forestManifest: 'assets/environments/forest/forest-assets.json',
+  productionManifest: 'assets/production-assets.json',
+  brandWordmark: 'assets/ui/branding/mishkontin-wordmark.png',
+  brandEmblem: 'assets/ui/branding/mishkontin-emblem.png',
 } as const;
 
 /** Scene events other systems (e.g. future audio) can listen to. */
@@ -126,6 +133,31 @@ export const RESPAWN = {
   messageDurationMs: 1600,
 } as const;
 
+/** Boot / loading presentation with the official emblem. */
+export const BOOT = {
+  background: '#0b140e',
+  emblemSize: 300,
+  fadeInMs: 450,
+  fadeOutMs: 380,
+  /** Shortest time the emblem is shown, including loading (ms). */
+  minimumShowMs: 1300,
+  /** The progress line only appears if loading is still running after this long. */
+  showProgressAfterMs: 600,
+  barWidth: 220,
+  barTrack: 0x2a3a2c,
+  barFill: 0xd9a948,
+} as const;
+
+/** Main Menu layout around the official wordmark (logical px). */
+export const MENU_LAYOUT = {
+  wordmarkTop: 34,
+  wordmarkMaxWidth: 680,
+  wordmarkMaxHeight: 220,
+  subtitleGap: 18,
+  buttonsTop: 382,
+  mishkontinX: 240,
+} as const;
+
 export const FINISH = {
   dimAlpha: 0.45,
   dimDurationMs: 900,
@@ -162,8 +194,8 @@ export const UI_COLORS = {
 } as const;
 
 export const STRINGS = {
-  title: 'МИШКОНТИН',
-  subtitle: 'и кралят плъх Мортис',
+  // The title itself is the official wordmark image (src/ui/Brand.ts) - never typed text.
+  subtitle: 'И КРАЛЯТ ПЛЪХ МОРТИС',
   play: 'ИГРАЙ',
   settings: 'НАСТРОЙКИ',
   back: 'НАЗАД',

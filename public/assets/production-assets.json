@@ -1,0 +1,260 @@
+{
+  "generatedBy": "tools/build-production-assets.mjs",
+  "displayFactor": 2.4,
+  "assets": {
+    "bg_layer_sky": {
+      "path": "assets/backgrounds/bg_sky.webp",
+      "role": "layer",
+      "width": 2172,
+      "height": 724,
+      "master": "art/masters/backgrounds/bg_sky_master.png",
+      "masterSize": [
+        2172,
+        724
+      ],
+      "masterSha256": "8676debbcace373027ebb8a810b9f5c89e5ab9f15739ee6dd83d35e9f59b40f9",
+      "encoding": "lossy q95, PSNR 39.4 dB",
+      "alphaCleanup": {
+        "solid": 0,
+        "specks": 0
+      },
+      "bytes": 406236,
+      "supersedes": [
+        "bg_sky"
+      ]
+    },
+    "bg_layer_mountains": {
+      "path": "assets/backgrounds/bg_mountains_sirengrad.webp",
+      "role": "layer",
+      "width": 2172,
+      "height": 724,
+      "master": "art/masters/backgrounds/bg_mountains_sirengrad_master.png",
+      "masterSize": [
+        2172,
+        724
+      ],
+      "masterSha256": "21c09586f2b953b09e54160002ed47b5864c80b0faf22153253a0f15c52a18e8",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 12792,
+        "specks": 0
+      },
+      "bytes": 1114926,
+      "contentBand": {
+        "top": 0.395,
+        "bottom": 0.837
+      },
+      "solidColumns": {
+        "left": 0.1911,
+        "right": 0.8154
+      },
+      "castleFreeEnd": 0.4466,
+      "supersedes": [
+        "bg_mountains"
+      ]
+    },
+    "bg_layer_forest_distant": {
+      "path": "assets/backgrounds/bg_forest_distant.webp",
+      "role": "layer",
+      "width": 2172,
+      "height": 724,
+      "master": "art/masters/backgrounds/bg_forest_distant_master.png",
+      "masterSize": [
+        2172,
+        724
+      ],
+      "masterSha256": "4ef01134f42df32d1601056491bde08189dbadf314bfd17013126b0a04035bb9",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 882241,
+        "specks": 13988
+      },
+      "bytes": 1436676,
+      "contentBand": {
+        "top": 0.4365,
+        "bottom": 1
+      },
+      "solidColumns": {
+        "left": 0,
+        "right": 0.9995
+      },
+      "supersedes": [
+        "bg_forest_distant"
+      ]
+    },
+    "bg_layer_forest_mid": {
+      "path": "assets/backgrounds/bg_forest_mid.webp",
+      "role": "layer",
+      "width": 2172,
+      "height": 724,
+      "master": "art/masters/backgrounds/bg_forest_mid_master.png",
+      "masterSize": [
+        2172,
+        724
+      ],
+      "masterSha256": "1e413ee0981f12249cf83ca24ce73ed805416ecdff3a72a664ee0061184f8f70",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 4025,
+        "specks": 0
+      },
+      "bytes": 1765612,
+      "contentBand": {
+        "top": 0.4392,
+        "bottom": 1
+      },
+      "solidColumns": {
+        "left": 0,
+        "right": 0.9995
+      },
+      "supersedes": [
+        "bg_forest_mid"
+      ]
+    },
+    "tree_oak_01": {
+      "path": "assets/trees/tree_oak_01.webp",
+      "role": "tree",
+      "width": 897,
+      "height": 1344,
+      "master": "art/masters/trees/tree_oak_01_master.png",
+      "masterSize": [
+        1024,
+        1535
+      ],
+      "masterSha256": "641d0ebbbee60044a6f357eea04014152b3a8a3f0b216ab4e3eb07500db7e02f",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 860098,
+        "specks": 60289
+      },
+      "bytes": 1654468,
+      "anchor": {
+        "x": 0.4872,
+        "y": 0.9836
+      },
+      "supersedes": [
+        "tree_large_01"
+      ]
+    },
+    "tree_oak_02": {
+      "path": "assets/trees/tree_oak_02.webp",
+      "role": "tree",
+      "width": 896,
+      "height": 1344,
+      "master": "art/masters/trees/tree_oak_02_master.png",
+      "masterSize": [
+        1024,
+        1536
+      ],
+      "masterSha256": "65c9a8e8f13f67cded1216c5e40f7534947de53367a0b223ccf0527810ff3771",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 945286,
+        "specks": 65890
+      },
+      "bytes": 1799986,
+      "anchor": {
+        "x": 0.5162,
+        "y": 0.9799
+      },
+      "supersedes": [
+        "tree_large_02"
+      ]
+    },
+    "tree_oak_03": {
+      "path": "assets/trees/tree_oak_03.webp",
+      "role": "tree",
+      "width": 896,
+      "height": 1344,
+      "master": "art/masters/trees/tree_oak_03_master.png",
+      "masterSize": [
+        1024,
+        1536
+      ],
+      "masterSha256": "1857bf7c0eb9ce52d91c67a8d92d75306efcaf32c8b25a0b49cfd25cb04dbe02",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 985786,
+        "specks": 63988
+      },
+      "bytes": 1868158,
+      "anchor": {
+        "x": 0.5887,
+        "y": 0.9926
+      }
+    },
+    "tree_pine_01": {
+      "path": "assets/trees/tree_pine_01.webp",
+      "role": "tree",
+      "width": 833,
+      "height": 1248,
+      "master": "art/masters/trees/tree_pine_01_master.png",
+      "masterSize": [
+        1024,
+        1535
+      ],
+      "masterSha256": "ba284f9b5f5a56b99a68243c48e565edcd95e1351d7a30c6de57d197ab5cdac5",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 695382,
+        "specks": 73823
+      },
+      "bytes": 1200214,
+      "anchor": {
+        "x": 0.5234,
+        "y": 0.9848
+      },
+      "supersedes": [
+        "pine_tree"
+      ]
+    },
+    "tree_ancient_01": {
+      "path": "assets/trees/tree_ancient_01.webp",
+      "role": "tree",
+      "width": 1536,
+      "height": 1024,
+      "master": "art/masters/trees/tree_ancient_01_master.png",
+      "masterSize": [
+        1536,
+        1024
+      ],
+      "masterSha256": "cf4d9a359ec60deb07aff80f2114501163d2d10de36251b2f4af5157ff5d745e",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 869624,
+        "specks": 97577
+      },
+      "bytes": 2184476,
+      "anchor": {
+        "x": 0.4873,
+        "y": 0.9756
+      }
+    },
+    "waterfall_01": {
+      "path": "assets/water/waterfall_01.webp",
+      "role": "water",
+      "width": 1344,
+      "height": 756,
+      "master": "art/masters/water/waterfall_large_master.png",
+      "masterSize": [
+        1672,
+        941
+      ],
+      "masterSha256": "0d02569b9964ff9b3f4808708cce418899657d1fcdc9ec3fd9a1a6817e48ba55",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 1160542,
+        "specks": 32865
+      },
+      "bytes": 1549792,
+      "anchor": {
+        "x": 0.5751,
+        "y": 0.9934
+      },
+      "supersedes": [
+        "waterfall_large",
+        "water_fall_band"
+      ]
+    }
+  }
+}

@@ -27,7 +27,7 @@ npm run preview  # serve the production build locally
 npm run build:single   # -> release/mishkontin-v0.1.1.html
 ```
 
-Produces **one self-contained HTML file** (~5.5 MB) with the code, Mishkontin's frames, the
+Produces **one self-contained HTML file** (~25 MB with the high-resolution art) with the code, Mishkontin's frames, the
 forest art and the icon embedded. Double-click it to play in a desktop browser; no server or
 other files are needed. A prebuilt copy is committed at `release/mishkontin-v0.1.1.html`.
 
@@ -37,7 +37,8 @@ Other scripts:
 | ------------------- | -------------------------------------------------------------- |
 | `npm run typecheck` | TypeScript check only                                          |
 | `npm run atlas`     | Regenerate Mishkontin's game frames from the source sprite sheet |
-| `npm run forest-kit` | Re-extract the forest environment pieces from the kit sheet    |
+| `npm run production-assets` | Build runtime copies of the production masters (`art/masters/`) |
+| `npm run forest-kit` | Re-extract the legacy forest pieces from the kit sheet         |
 | `npm run build:single` | Build the single-file `release/mishkontin-v0.1.1.html`      |
 
 `dist/` is static and can be hosted on any static web server. Asset paths are relative (`base: './'`).
@@ -187,7 +188,25 @@ Its bottom edge sits exactly on the feet (the sprite's `y` is the feet position)
 `src/config/constants.ts` → `PLAYER_BODY` (width, standing and crouch height, horizontal
 offset), in unscaled frame pixels.
 
-### Forest art (v0.1.1)
+### Production art & branding (v0.1.1 Ultra Detail pass)
+
+High-resolution masters live in `art/masters/` (never edited, SHA-256 in `MANIFEST.json`).
+`npm run production-assets` creates the runtime copies listed in
+`public/assets/production-assets.json` (normalized anchors, world size in logical px).
+
+- **Parallax:** four independent transparent layers: sky 0.05, mountains + Sirengrad 0.10,
+  distant forest 0.20, mid forest 0.40. Then gameplay 1.0 and foreground 1.12. Sirengrad appears
+  exactly once, at the final viewpoint.
+- **Trees & waterfall:** three large oaks, a pine, an ancient tree and a static waterfall, all
+  decorative (no collision).
+- **Branding (screen-space UI, `src/ui/Brand.ts`):** the official wordmark is the Main Menu title.
+  The official emblem is shown on the boot/loading screen. Both are image-only, never
+  re-typed, with aspect ratio preserved.
+- **Mishkontin:** the legacy multi-frame atlas is kept. High-res key poses are reference only.
+
+Reports: `art/INTEGRATION_REPORT_v0.1.1.md`, `art/ASSET_RESOLUTION_REPORT.md`, `art/README.md`.
+
+### Legacy forest kit art (v0.1.1 first art pass)
 
 The forest follows two references in `art/`: the **Forest Art Direction** painting (composition,
 light and colour target; reference only, since it is one flat image) and the **Forest Environment
@@ -248,7 +267,9 @@ the Arcade physics bodies and the checkpoint/respawn markers. A second panel lis
 current composition area (A-F) and all visual layers with their scroll factors.
 
 While it is visible, `H` plays the HURT reaction (there are no enemies yet), `L` cycles
-**layer solo** (only one visual layer is shown at a time, then all again), and `R` runs the
+**layer solo** (only one visual layer is shown at a time, then all again), a mouse **click**
+opens the art inspector for the object under the pointer (texture, native/rendered size,
+scale %, normalized anchor, world position, scroll factor, physics body), and `R` runs the
 **asset resolution audit**. The audit logs every raster texture's on-screen magnification and the
 source size needed (see `art/ASSET_RESOLUTION_REPORT.md`). The panel also shows the current render
 scale and backbuffer size, plus how many textures are above 125% right now.

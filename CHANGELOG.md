@@ -2,6 +2,29 @@
 
 # v0.1.1 - Forest art pass
 
+## Ultra Detail production art + official branding
+
+- Production masters stored byte-identical in `art/masters/` with SHA-256 manifest. Runtime
+  copies come from `tools/build-production-assets.mjs` (`npm run production-assets`): checksum
+  verification, runtime-only alpha cleanup, size = max display × 2.4, lossless WebP for alpha
+  art, q95 WebP for the opaque sky, PNG for brand assets.
+- **Independent parallax layers** from the new masters: sky 0.05, mountains + Sirengrad 0.10,
+  distant forest 0.20, mid forest 0.40. Image rows are sampled 1:1 with mirrored joins.
+  Sirengrad appears once (castle-free extension joined on mountain peaks). All four are ≤125 %
+  at 1440p.
+- New trees (3 large oaks incl. the former `tree_medium_master`, pine, ancient tree) and a
+  **static** high-resolution waterfall. Old scrolling waterfall overlay removed. World sizes are
+  kept and placed by measured **normalized** ground-contact anchors.
+- Legacy kit manifest gains `anchorsNormalized` (pixels unchanged).
+- **Official wordmark** replaces the typed menu title; menu recomposed (wordmark → subtitle →
+  ИГРАЙ → НАСТРОЙКИ → forest). **Emblem boot/loading screen** (~1.3 s, skippable once loaded).
+  `src/ui/Brand.ts`; brand assets are screen-space UI only.
+- Debug: art inspector (click), rendered size in the scale audit, render-scale line.
+- Mishkontin: legacy animation atlas kept (no high-res animation exists; key poses conflict
+  with the canonical staff design). Documented in `art/README.md`.
+- Gameplay, physics, collision, camera, checkpoints and saves unchanged: 18/18 checks, bot run
+  identical.
+
 ## High-resolution rendering pass
 
 - **Real device-resolution canvas.** The backbuffer is no longer a fixed 1280x720 stretched by

@@ -1,0 +1,50 @@
+{
+  "brand_wordmark": {
+    "path": "assets/ui/branding/mishkontin-wordmark.png",
+    "role": "brand",
+    "width": 1632,
+    "height": 526,
+    "master": "art/masters/branding/mishkontin-wordmark-master.png",
+    "masterSize": [
+      2130,
+      687
+    ],
+    "masterSha256": "4d62407fb5062131ecb643cbce5fd83f0610f4744a634b3fbcf3b8c8776ca272",
+    "encoding": "png",
+    "alphaCleanup": {
+      "solid": 299542,
+      "specks": 143361
+    },
+    "bytes": 694242,
+    "trimmedFromMaster": {
+      "left": 29,
+      "top": 16,
+      "width": 2130,
+      "height": 687
+    }
+  },
+  "brand_emblem": {
+    "path": "assets/ui/branding/mishkontin-emblem.png",
+    "role": "brand",
+    "width": 672,
+    "height": 674,
+    "master": "art/masters/branding/mishkontin-emblem-master.png",
+    "masterSize": [
+      1158,
+      1162
+    ],
+    "masterSha256": "6a044a2aacf90d2e79795a1ed585dc3c199c3c591e5832823619a0ea9e921a6b",
+    "encoding": "png",
+    "alphaCleanup": {
+      "solid": 529452,
+      "specks": 81202
+    },
+    "bytes": 588910,
+    "trimmedFromMaster": {
+      "left": 48,
+      "top": 39,
+      "width": 1158,
+      "height": 1162
+    }
+  }
+}

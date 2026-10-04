@@ -4,15 +4,19 @@ Ideas collected during v0.1. **None of these are implemented.** Each belongs to 
 version and should be planned before implementation.
 
 ## Art & animation
-- Replace the temporary, low-resolution kit-derived forest art with high-resolution final art
-  under the same keys. Exact sizes and priorities: `art/ASSET_RESOLUTION_REPORT.md` (P1 first:
-  background strips, waterfall, hero trees).
+- Replace the remaining low-resolution legacy kit art (terrain caps, soil, bridge, props, small
+  plants, river band, foreground, slender tree) with high-resolution masters. Sizes:
+  `art/ASSET_RESOLUTION_REPORT.md`.
+- Wider seamless background masters (>= 3300 px, matching left/right edges) to remove visible
+  mirror joins in the sky and forest layers; ~3260x1090 for 4K-native backgrounds.
+- High-resolution Mishkontin animation set matching the canon (wooden staff, gold M medallion),
+  using the key poses in `art/masters/characters/` as reference.
 - Higher-resolution master sprite set for Mishkontin (about 2x current frame size for 1440p, 3x
   for 4K); the current atlas is drawn at 170% on 1440p.
 - Optional: ship two texture sets (1440p and 4K) and pick by render scale; mipmaps for POT
   textures when drawn below native size.
 - Dedicated terrain pieces: cliff faces for tall walls, platform undersides, slope/ramp art.
-- Real waterfall animation frames (current: UV-scrolled overlay on a static image).
+- Waterfall animation (the high-res waterfall is static in v0.1.1).
 - Pack forest pieces into a texture atlas (fewer textures/draw calls) and ship WebP.
 - Final menu button/UI art (still a placeholder).
 - Fix or redraw TURN frame 4 in the source sheet (Mishkontin holds a staff in *both* hands).

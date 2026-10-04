@@ -1,31 +1,53 @@
 # Art sources (not shipped)
 
-Files here are **inputs** for the tools in `tools/`. The game never loads them, and they are
-outside `public/`, so they never reach `dist/`.
+Nothing under `art/` is loaded by the game or copied to `dist/`.
 
-| File | What it is | Used by |
-|------|------------|---------|
-| `reference/forest-art-direction-v1.webp` | Forest Art Direction v1.0, the primary visual target (composition, light, colour). One flat painting, **reference only**. | humans |
-| `source/forest-environment-kit-v1.png` | Forest Environment Kit v1.0 (1125x750, transparent background), lossless PNG of the supplied WebP | `tools/extract-forest-kit.mjs` |
+| Folder | Contents |
+|---|---|
+| `masters/` | **Production master art** (v0.1.1 Ultra Detail pass). Never edited. `masters/MANIFEST.json` lists every file with its original supplied name, role and SHA-256. |
+| `masters/branding/` | Official wordmark and emblem masters + `RUNTIME.json` (runtime copy provenance). |
+| `masters/characters/` | High-resolution Mishkontin **key poses — reference / future animation source only**, not used in gameplay (see below). |
+| `masters/backgrounds/superseded/` | Opaque panorama replaced by the independent layers; kept for provenance, unused. |
+| `reference/` | Reference-only images: canonical Mishkontin design sheet, forest composition reference, forest art direction. Never runtime assets. |
+| `source/` | Forest Environment Kit v1 (input of the legacy `tools/extract-forest-kit.mjs`). |
 
-## Status of the forest pieces
+## Pipelines
 
-Everything under `public/assets/environments/forest/` is **temporary, reference-derived art**,
-cut from the kit sheet at its native low resolution and scaled up 1.3-3x in game.
+- `npm run production-assets` → `tools/build-production-assets.mjs`: verifies master
+  checksums, alpha cleanup on runtime copies only (alpha ≥ 240 → 255, alpha < 4 → 0), sizes
+  each asset to its maximum display size × 2.4, encodes (lossless WebP for alpha art, verified
+  pixel-identical on visible pixels; q95 WebP for the opaque sky; PNG for brand assets),
+  measures **normalized** anchors and writes `public/assets/production-assets.json`.
+- `npm run forest-kit` → legacy kit pieces (`public/assets/environments/forest/`); its manifest
+  now also carries `anchorsNormalized`.
+- `npm run atlas` → Mishkontin legacy gameplay atlas (unchanged).
 
-To replace a piece with final art:
+## Mishkontin canon
 
-1. Export it at roughly 2-3x the current pixel size, same proportions and transparent background.
-2. Overwrite the PNG with the same name (or point `forest-assets.json` at the new file).
-3. Keep the **anchors** in `forest-assets.json` correct (grass walk line, bridge deck, lantern
-   light, waystone glyph, waterfall columns). They are in texture pixels.
-4. Adjust display scales in `src/levels/forest/DecorationPlacer.ts` / `TerrainRenderer.ts`.
+`reference/mishkontin_canonical_design_reference.png` defines the character, with the
+confirmed decisions: **gold "M" medallion/clasp**, **plain carved wooden staff — no glowing
+orb, crystal, vines or leaves**.
 
-Final art should be produced at the target resolution instead of re-running the extractor.
+The supplied key poses (`masters/characters/`) are single images, not animations, and are
+**not** used in gameplay. Canon conflicts:
+
+| Pose | Conflict |
+|---|---|
+| idle_01, run_01, turn_01 | glowing amber orb + leaves on the staff |
+| jump_01, fall_01, land_01, hurt_01 | glowing orb staff **and** baked checkerboard background (no alpha) |
+
+The gameplay keeps the legacy multi-frame atlas until a real high-resolution animation set
+exists.
 
 ## IP note
 
-The kit's wooden sign, waystone and banner carry a **Mickey-Mouse-head symbol**, which is a
-third-party trademark. The extractor clone-stamps it out of the sign and the waystone, and
-the banner is not extracted. Final art must not reintroduce it. The waystone's symbol in
-game is a golden mouse-paw glyph drawn in `src/levels/forest/forestFx.ts`.
+The kit's sign/waystone/banner and the forest composition reference contain a
+Mickey-Mouse-head symbol (third-party trademark). It is removed from the legacy pieces and must
+never be used or reintroduced.
+
+## Replacing art
+
+Production art: drop a new master into `art/masters/...`, update its checksum in
+`MANIFEST.json`, run `npm run production-assets`. World size is set in logical px (tree
+`height`, layer scales), so a different resolution does not move or resize anything.
+See `ASSET_RESOLUTION_REPORT.md` for what still needs higher-resolution art.

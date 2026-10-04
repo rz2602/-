@@ -1,22 +1,33 @@
 import Phaser from 'phaser';
-import { AssetKeys, AssetPaths, GAME_HEIGHT, GAME_WIDTH, SceneKeys, UI_COLORS, UI_FONT_FAMILY } from '../config/constants';
+import { AssetKeys, AssetPaths, BOOT, GAME_HEIGHT, GAME_WIDTH, SceneKeys } from '../config/constants';
 import { getMishkontinManifest, registerMishkontinAnimations } from '../entities/mishkontinAnimations';
-import { assetSource } from '../utils/assetSource';
-import { generatePlaceholderArt } from '../utils/placeholderArt';
 import { getForestManifest } from '../levels/forest/forestAssets';
 import { generateForestFx } from '../levels/forest/forestFx';
+import { getProductionManifest, supersededLegacyKeys } from '../levels/forest/productionAssets';
+import { addEmblem } from '../ui/Brand';
+import { assetSource } from '../utils/assetSource';
+import { generatePlaceholderArt } from '../utils/placeholderArt';
 
-const BAR_WIDTH = 420;
-const BAR_HEIGHT = 14;
-
-/** Loads all game assets with a simple progress bar, then registers animations. */
+/**
+ * Boot / loading presentation: deep forest-green screen, the official emblem
+ * fades in while the real assets load, a thin progress line appears only if
+ * loading takes noticeably long, then a fade to the Main Menu.
+ * Total ~1-2 s; once loading is done any key or click skips the wait.
+ */
 export class PreloadScene extends Phaser.Scene {
+  private loaded = false;
+  private leaving = false;
+  private shownAt = 0;
+
   constructor() {
     super(SceneKeys.Preload);
   }
 
   preload(): void {
-    this.createProgressBar();
+    this.loaded = false;
+    this.leaving = false;
+    this.shownAt = performance.now();
+    this.createLoadingScreen();
 
     // Frame size comes from the preprocessing manifest (see tools/build-mishkontin-atlas.mjs).
     const manifest = getMishkontinManifest(this);
@@ -25,33 +36,54 @@ export class PreloadScene extends Phaser.Scene {
       frameHeight: manifest.frameHeight,
     });
 
-    // Forest environment pieces, listed by tools/extract-forest-kit.mjs.
-    for (const [key, entry] of Object.entries(getForestManifest(this).assets)) {
+    // High-resolution production art (tools/build-production-assets.mjs) ...
+    for (const [key, entry] of Object.entries(getProductionManifest(this).assets)) {
       this.load.image(key, assetSource(entry.path));
     }
+    // ... and the legacy forest-kit pieces it has not replaced yet.
+    const superseded = supersededLegacyKeys(this);
+    for (const [key, entry] of Object.entries(getForestManifest(this).assets)) {
+      if (!superseded.has(key)) this.load.image(key, assetSource(entry.path));
+    }
+
+    this.load.image(AssetKeys.brandWordmark, assetSource(AssetPaths.brandWordmark));
   }
 
   create(): void {
     generatePlaceholderArt(this);
     generateForestFx(this);
     registerMishkontinAnimations(this, getMishkontinManifest(this));
-    this.scene.start(SceneKeys.MainMenu);
+    this.loaded = true;
+
+    const remaining = Math.max(0, BOOT.minimumShowMs - (performance.now() - this.shownAt));
+    this.time.delayedCall(remaining, () => this.toMenu());
+    this.input.keyboard?.once('keydown', () => this.toMenu());
+    this.input.once(Phaser.Input.Events.POINTER_UP, () => this.toMenu());
   }
 
-  private createProgressBar(): void {
-    const x = (GAME_WIDTH - BAR_WIDTH) / 2;
-    const y = GAME_HEIGHT / 2;
-    this.add
-      .text(GAME_WIDTH / 2, y - 40, 'Мишконтин', {
-        fontFamily: UI_FONT_FAMILY,
-        fontSize: '32px',
-        color: UI_COLORS.title,
-      })
-      .setOrigin(0.5);
-    this.add.rectangle(x, y, BAR_WIDTH, BAR_HEIGHT, 0x3b2a16).setOrigin(0, 0.5);
-    const fill = this.add.rectangle(x, y, 1, BAR_HEIGHT, 0xffd36b).setOrigin(0, 0.5);
-    this.load.on(Phaser.Loader.Events.PROGRESS, (value: number) => {
-      fill.width = Math.max(1, BAR_WIDTH * value);
+  private createLoadingScreen(): void {
+    this.cameras.main.setBackgroundColor(BOOT.background);
+    const emblem = addEmblem(this, GAME_WIDTH / 2, GAME_HEIGHT / 2 - 10, BOOT.emblemSize).setAlpha(0);
+    this.tweens.add({ targets: emblem, alpha: 1, duration: BOOT.fadeInMs, ease: 'Sine.easeOut' });
+
+    // Thin progress line, only if loading is slow enough to be worth showing.
+    const lineY = GAME_HEIGHT / 2 + BOOT.emblemSize / 2 + 28;
+    const track = this.add.rectangle(GAME_WIDTH / 2, lineY, BOOT.barWidth, 2, BOOT.barTrack).setAlpha(0);
+    const fill = this.add.rectangle(GAME_WIDTH / 2 - BOOT.barWidth / 2, lineY, 1, 2, BOOT.barFill).setOrigin(0, 0.5).setAlpha(0);
+    this.time.delayedCall(BOOT.showProgressAfterMs, () => {
+      if (this.loaded) return;
+      this.tweens.add({ targets: [track, fill], alpha: 0.8, duration: 250 });
     });
+    this.load.on(Phaser.Loader.Events.PROGRESS, (value: number) => {
+      fill.width = Math.max(1, BOOT.barWidth * value);
+    });
+  }
+
+  private toMenu(): void {
+    if (!this.loaded || this.leaving) return;
+    this.leaving = true;
+    const camera = this.cameras.main;
+    camera.fade(BOOT.fadeOutMs, 0x0b, 0x14, 0x0e, true);
+    camera.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => this.scene.start(SceneKeys.MainMenu));
   }
 }

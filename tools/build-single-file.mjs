@@ -24,17 +24,33 @@ const { version } = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 
 const INLINE_ASSETS = {
   'assets/characters/mishkontin/generated/mishkontin-frames.json': 'json',
   'assets/characters/mishkontin/generated/mishkontin-frames.png': 'image/png',
+  'assets/ui/branding/mishkontin-wordmark.png': 'image/png',
+  'assets/ui/branding/mishkontin-emblem.png': 'image/png',
 };
+const MIME = { '.png': 'image/png', '.webp': 'image/webp' };
+const mimeOf = (p) => MIME[path.extname(p)] ?? 'application/octet-stream';
 
 execSync('npx vite build --mode single', { cwd: ROOT, stdio: 'inherit' });
 
 const dataUri = (file, mime) => `data:${mime};base64,${fs.readFileSync(file).toString('base64')}`;
 
-// Forest environment pieces are listed in their own manifest.
+// High-resolution production art (and the legacy pieces it supersedes, which are skipped).
+const PRODUCTION_MANIFEST = 'assets/production-assets.json';
+INLINE_ASSETS[PRODUCTION_MANIFEST] = 'json';
+const production = JSON.parse(fs.readFileSync(path.join(ROOT, 'public', PRODUCTION_MANIFEST), 'utf8'));
+const superseded = new Set();
+for (const entry of Object.values(production.assets)) {
+  INLINE_ASSETS[entry.path] = mimeOf(entry.path);
+  for (const key of entry.supersedes ?? []) superseded.add(key);
+}
+
+// Legacy forest-kit pieces still in use.
 const FOREST_MANIFEST = 'assets/environments/forest/forest-assets.json';
 INLINE_ASSETS[FOREST_MANIFEST] = 'json';
 const forest = JSON.parse(fs.readFileSync(path.join(ROOT, 'public', FOREST_MANIFEST), 'utf8'));
-for (const entry of Object.values(forest.assets)) INLINE_ASSETS[entry.path] = 'image/png';
+for (const [key, entry] of Object.entries(forest.assets)) {
+  if (!superseded.has(key)) INLINE_ASSETS[entry.path] = mimeOf(entry.path);
+}
 
 const inline = {};
 for (const [assetPath, type] of Object.entries(INLINE_ASSETS)) {

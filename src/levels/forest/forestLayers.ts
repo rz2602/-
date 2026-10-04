@@ -14,14 +14,14 @@ export interface VisualLayer {
 }
 
 export const ForestLayers = {
-  sky: { id: 'sky', label: '0 Sky + clouds', depth: -100, scrollX: 0.04, scrollY: 0.02 },
+  sky: { id: 'sky', label: '0 Sky', depth: -100, scrollX: 0.05, scrollY: 0.02 },
   mountains: { id: 'mountains', label: '1 Mountains + Sirengrad', depth: -90, scrollX: 0.1, scrollY: 0.05 },
   distantForest: { id: 'distantForest', label: '2 Distant forest', depth: -80, scrollX: 0.2, scrollY: 0.1 },
   midForest: { id: 'midForest', label: '3 Mid forest', depth: -70, scrollX: 0.4, scrollY: 0.2 },
-  backDecor: { id: 'backDecor', label: '4 Back decoration', depth: -40, scrollX: 0.85, scrollY: 0.85 },
-  terrain: { id: 'terrain', label: '5 Terrain', depth: 0, scrollX: 1, scrollY: 1 },
-  gameplay: { id: 'gameplay', label: '6 Mishkontin + objects', depth: 5, scrollX: 1, scrollY: 1 },
-  foreground: { id: 'foreground', label: '7 Foreground', depth: 20, scrollX: 1.12, scrollY: 1 },
+  backDecor: { id: 'backDecor', label: '4b Back trees/waterfalls', depth: -40, scrollX: 0.85, scrollY: 0.85 },
+  terrain: { id: 'terrain', label: '4 Gameplay terrain', depth: 0, scrollX: 1, scrollY: 1 },
+  gameplay: { id: 'gameplay', label: '4 Mishkontin + objects', depth: 5, scrollX: 1, scrollY: 1 },
+  foreground: { id: 'foreground', label: '5 Foreground', depth: 20, scrollX: 1.12, scrollY: 1 },
 } as const satisfies Record<string, VisualLayer>;
 
 export const FOREST_LAYER_LIST: readonly VisualLayer[] = Object.values(ForestLayers);

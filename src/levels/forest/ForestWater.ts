@@ -1,10 +1,10 @@
 import Phaser from 'phaser';
 import { GAME_WIDTH } from '../../config/constants';
 import type { LevelDef } from '../LevelTypes';
-import { forestAnchor } from './forestAssets';
-import { ForestDepth, ForestLayers } from './forestLayers';
+import { ForestDepth } from './forestLayers';
 import { FxTextures } from './forestFx';
 import type { DecorationPlacer } from './DecorationPlacer';
+import { ProductionKeys } from './productionAssets';
 
 const RIVER_KEY = 'water_strip';
 const RIVER_SCALE = 1.7;
@@ -15,27 +15,26 @@ const SHIMMER_ALPHA = 0.3;
 /** The water band's visible surface starts this far into its texture (px). */
 const RIVER_SURFACE_OFFSET = 4;
 
-const FALL_BAND = 'water_fall_band';
-const FALL_SPEED = 140;
-const FALL_ALPHA = 0.35;
-
 /**
- * Lightweight animated water: one river running behind the terrain (visible in
- * every gap), animated waterfalls on the back layer, and splashes. Only tile
- * offsets change per frame; a few small particle emitters add foam.
+ * Water: one gently flowing river behind the terrain (visible in every gap,
+ * touching it respawns), static high-resolution waterfall artwork on the back
+ * layer, and a splash when Mishkontin falls in. Only tile offsets change per
+ * frame. (v0.1.1: waterfalls are static artwork by design - no animated
+ * waterfall system.)
  */
 export class ForestWater {
   private readonly surfaces: Array<{ sprite: Phaser.GameObjects.TileSprite; speed: number }> = [];
-  private readonly falls: Phaser.GameObjects.TileSprite[] = [];
   private readonly splashEmitter?: Phaser.GameObjects.Particles.ParticleEmitter;
   private elapsed = 0;
 
   constructor(
-    private readonly scene: Phaser.Scene,
+    scene: Phaser.Scene,
     private readonly level: LevelDef,
     placer: DecorationPlacer,
   ) {
-    for (const wf of level.waterfalls) this.addWaterfall(placer, wf.x, wf.y, wf.scale);
+    for (const wf of level.waterfalls) {
+      placer.place({ key: ProductionKeys.waterfall, layer: 'back', x: wf.x, y: wf.y, height: wf.height });
+    }
 
     const surfaceY = level.waterSurfaceY;
     if (surfaceY === undefined) return;
@@ -84,43 +83,10 @@ export class ForestWater {
     for (const { sprite, speed } of this.surfaces) {
       sprite.tilePositionX = (camera.scrollX + this.elapsed * speed) / sprite.tileScaleX;
     }
-    for (const fall of this.falls) fall.tilePositionY = (-this.elapsed * FALL_SPEED) / fall.tileScaleY;
   }
 
   /** Small splash where Mishkontin touches the water. */
   splash(x: number): void {
     if (this.level.waterSurfaceY !== undefined) this.splashEmitter?.explode(18, x, this.level.waterSurfaceY);
-  }
-
-  private addWaterfall(placer: DecorationPlacer, x: number, y: number, scale: number): void {
-    const image = placer.place({ key: 'waterfall_large', layer: 'back', x, y, scale });
-    const { scrollX, scrollY, depth } = ForestLayers.backDecor;
-    const left = image.x - image.displayWidth / 2;
-    const top = image.y - image.displayHeight;
-    for (const name of ['fallA', 'fallB']) {
-      const [x0, y0, x1, y1] = forestAnchor(this.scene, 'waterfall_large', name, []);
-      if (x1 === undefined) continue;
-      const fall = this.scene.add
-        .tileSprite(left + x0 * scale, top + y0 * scale, (x1 - x0) * scale, (y1 - y0) * scale, FALL_BAND)
-        .setOrigin(0)
-        .setTileScale(scale)
-        .setScrollFactor(scrollX, scrollY)
-        .setAlpha(FALL_ALPHA)
-        .setDepth(depth + 1);
-      this.falls.push(fall);
-      this.scene.add
-        .particles(left + ((x0 + x1) / 2) * scale, top + y1 * scale, FxTextures.droplet, {
-          lifespan: 700,
-          frequency: 90,
-          speedX: { min: -50, max: 50 },
-          speedY: { min: -70, max: -20 },
-          gravityY: 120,
-          scale: { start: 1.4, end: 0.3 },
-          alpha: { start: 0.8, end: 0 },
-          emitZone: { type: 'random', source: new Phaser.Geom.Rectangle(-((x1 - x0) * scale) / 2, -4, (x1 - x0) * scale, 8), quantity: 1 },
-        })
-        .setScrollFactor(scrollX, scrollY)
-        .setDepth(depth + 2);
-    }
   }
 }

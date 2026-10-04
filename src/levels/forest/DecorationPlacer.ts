@@ -4,14 +4,11 @@ import type { DecorationDef, LevelDef } from '../LevelTypes';
 import { forestAnchor } from './forestAssets';
 import { ForestDepth, ForestLayers } from './forestLayers';
 import { FxTextures } from './forestFx';
+import { getProductionAsset } from './productionAssets';
 
-/** Default display scale per texture (kit pieces are small; Mishkontin is ~130 px tall). */
+/** Default display scale per LEGACY kit texture (kit pieces are small; Mishkontin is ~130 px tall). */
 const DEFAULT_SCALE: Record<string, number> = {
-  tree_large_01: 2.3,
-  tree_large_02: 2.2,
   tree_medium: 2.0,
-  pine_tree: 2.1,
-  waterfall_large: 2.4,
   lantern_post: 1.6,
   wooden_sign: 1.15,
   wooden_fence: 1.5,
@@ -27,11 +24,28 @@ const DEFAULT_SCALE: Record<string, number> = {
   fg_trunk_right: 1.6,
 };
 const FALLBACK_SCALE = 1.3;
+
+/**
+ * Production (high-resolution) art is sized by WORLD HEIGHT in logical px,
+ * independent of texture resolution, so swapping in a re-export at another
+ * resolution never changes the world size. Values keep roughly the size of
+ * the legacy art each piece replaces.
+ */
+const DEFAULT_HEIGHT: Record<string, number> = {
+  tree_oak_01: 540,
+  tree_oak_02: 520,
+  tree_oak_03: 520,
+  tree_pine_01: 490,
+  tree_ancient_01: 420,
+  waterfall_01: 270,
+};
 /** Kit pieces stand on a small grass base; sink them this many texture px into the ground. */
 const BASE_SINK = 3;
 /** Back-layer pieces sink further so their bases stay hidden behind the terrain as the camera moves. */
 const BACK_SINK_PX = 46;
 const BACK_TINT = 0xe3ecdc;
+/** Back-layer production art: a lighter touch of atmosphere (the art already carries depth). */
+const BACK_TINT_PRODUCTION = 0xeef3ea;
 const FOREGROUND_BELOW_BOTTOM = 28;
 
 const SCATTER_KEYS = [
@@ -65,7 +79,13 @@ export class DecorationPlacer {
 
   place(d: DecorationDef): Phaser.GameObjects.Image {
     const layer = d.layer ?? 'ground';
-    const scale = d.scale ?? DEFAULT_SCALE[d.key] ?? FALLBACK_SCALE;
+    const production = getProductionAsset(this.scene, d.key);
+    const scale = this.scaleFor(d, production !== undefined);
+    // Production art: measured, normalized ground-contact anchor. Legacy kit
+    // art: bottom-centre with a small sink into the ground (unchanged).
+    const originX = production?.anchor?.x ?? 0.5;
+    const originY = production?.anchor?.y ?? 1;
+    const sink = production ? 0 : BASE_SINK * scale;
     let image: Phaser.GameObjects.Image;
 
     if (layer === 'back') {
@@ -73,9 +93,9 @@ export class DecorationPlacer {
       const [x, y] = this.parallaxPosition(d.x, d.y + BACK_SINK_PX, scrollX, scrollY);
       image = this.scene.add
         .image(x, y, d.key)
-        .setOrigin(0.5, 1)
+        .setOrigin(originX, originY)
         .setScrollFactor(scrollX, scrollY)
-        .setTint(BACK_TINT)
+        .setTint(production ? BACK_TINT_PRODUCTION : BACK_TINT)
         .setDepth(depth);
     } else if (layer === 'foreground') {
       const { scrollX, depth } = ForestLayers.foreground;
@@ -86,15 +106,24 @@ export class DecorationPlacer {
         .setScrollFactor(scrollX, 1)
         .setDepth(depth);
     } else {
-      const isTree = d.key.startsWith('tree') || d.key === 'pine_tree';
+      const isTree = d.key.startsWith('tree');
       image = this.scene.add
-        .image(d.x, d.y + BASE_SINK * scale, d.key)
-        .setOrigin(0.5, 1)
+        .image(d.x, d.y + sink, d.key)
+        .setOrigin(originX, originY)
         .setDepth(isTree ? ForestDepth.groundDecorBack : ForestDepth.groundDecor);
     }
     image.setScale(scale).setFlipX(d.flipX ?? false);
     if (d.key === 'lantern_post') this.addLanternGlow(image, scale, d.flipX ?? false);
     return image;
+  }
+
+  /** Display scale: production art by world height, legacy art by its scale factor. */
+  scaleFor(d: Pick<DecorationDef, 'key' | 'scale' | 'height'>, production: boolean): number {
+    if (production) {
+      const height = d.height ?? DEFAULT_HEIGHT[d.key] ?? 500;
+      return height / this.scene.textures.getFrame(d.key).height;
+    }
+    return d.scale ?? DEFAULT_SCALE[d.key] ?? FALLBACK_SCALE;
   }
 
   /** Where to put an object with the given scroll factors so it appears at (x, y) when the player is there. */

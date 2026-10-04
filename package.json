@@ -11,13 +11,15 @@
     "typecheck": "tsc --noEmit",
     "atlas": "node tools/build-mishkontin-atlas.mjs",
     "build:single": "tsc --noEmit && node tools/build-single-file.mjs",
-    "forest-kit": "node tools/extract-forest-kit.mjs"
+    "forest-kit": "node tools/extract-forest-kit.mjs",
+    "production-assets": "node tools/build-production-assets.mjs"
   },
   "dependencies": {
     "phaser": "^3.90.0"
   },
   "devDependencies": {
     "pngjs": "^7.0.0",
+    "sharp": "^0.35.5",
     "typescript": "~5.9.3",
     "vite": "^6.4.3"
   },
