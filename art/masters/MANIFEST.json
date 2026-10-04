@@ -224,17 +224,6 @@
       "alphaAudit": "A"
     },
     {
-      "master": "environment/blocked/terrain_ground_right_edge_master.png",
-      "suppliedAs": "ground.zip/ground/terrain_ground_right_edge_master.png",
-      "role": "BLOCKED - no alpha channel, checkerboard baked into RGB (audit class C); not integrated",
-      "width": 1536,
-      "height": 1024,
-      "mode": "RGB",
-      "bytes": 2783344,
-      "sha256": "46d6fc62bb2048d3cd595cc5853ce8c960b09b46f1f9a82dda1c0529c8ce612e",
-      "alphaAudit": "C"
-    },
-    {
       "master": "environment/terrain/platforms/terrain_platform_long_master.png",
       "suppliedAs": "platform.zip/platform/Floating Fantasy Grass Platform.png",
       "role": "forest environment kit - platform",
@@ -750,6 +739,39 @@
       "bytes": 2328984,
       "sha256": "e41126b459791b2a3acdee1339cd2aaca80e5bfe573c6fdaa36b82a8e693dadf",
       "alphaAudit": "A (verified: edge-framing foreground, foliage intentionally runs off the canvas edge)"
+    },
+    {
+      "master": "environment/terrain/ground/terrain_ground_right_edge_master.png",
+      "suppliedAs": "New_Folder_With_Items.zip/New Folder With Items/terrain_ground_right_edge_master.png",
+      "role": "forest environment kit - ground right edge (re-export replacing the blocked file)",
+      "width": 1536,
+      "height": 1024,
+      "mode": "RGBA",
+      "bytes": 2477907,
+      "sha256": "51ce124622dafd7c4515dbfba09a2d82f61bfe2e9d0b32c6ca42a0344f99d0e5",
+      "alphaAudit": "A"
+    },
+    {
+      "master": "environment/terrain/ground/terrain_underground_fill_master.png",
+      "suppliedAs": "New_Folder_With_Items.zip/New Folder With Items/terrain_underground_fill_master.png",
+      "role": "forest environment kit - underground fill texture (opaque by design)",
+      "width": 1774,
+      "height": 887,
+      "mode": "RGB",
+      "bytes": 3225659,
+      "sha256": "0bd96b7144b3dfa032ee0956d3567e00922dbe98ba2b1d3c179db681bbd85ac7",
+      "alphaAudit": "B (opaque fill texture, no baked background)"
+    },
+    {
+      "master": "environment/props/prop_waystone_master.png",
+      "suppliedAs": "New_Folder_With_Items.zip/New Folder With Items/prop_waystone_master.png",
+      "role": "forest environment kit - checkpoint waystone",
+      "width": 1374,
+      "height": 1145,
+      "mode": "RGBA",
+      "bytes": 2624912,
+      "sha256": "5cc78066c60252bc590b93afe7b0db117f8e98807ab7d3ef27cfa94af70a2ce7",
+      "alphaAudit": "A"
     }
   ]
 }

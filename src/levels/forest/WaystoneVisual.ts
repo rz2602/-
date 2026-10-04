@@ -1,25 +1,27 @@
 import Phaser from 'phaser';
 import type { CheckpointVisual } from '../../systems/CheckpointSystem';
 import type { PointDef } from '../LevelTypes';
-import { forestAnchor } from './forestAssets';
 import { ForestDepth } from './forestLayers';
 import { FxTextures } from './forestFx';
+import { getProductionAsset } from './productionAssets';
 
-const STONE_KEY = 'waystone';
-const STONE_SCALE = 1.15;
-const BASE_SINK = 4;
-const GLYPH_SCALE = 0.5;
+const STONE_KEY = 'env_waystone';
+const RUNE_KEY = 'env_waystone_rune';
+/** World height (logical px): the same on-screen size as the stone it replaces. */
+const STONE_HEIGHT = 185;
+/** Sink the measured ground contact this far into the grass (logical px). */
+const BASE_SINK = 6;
 
-const IDLE = { glyphAlpha: 0.3, glowAlpha: 0.15, glowScale: 0.9, moteFrequency: 1100 };
+const IDLE = { glyphAlpha: 0.25, glowAlpha: 0.15, glowScale: 0.9, moteFrequency: 1100 };
 const LIT = { glyphAlpha: 1, glowAlpha: 1, glowScale: 2.3, moteFrequency: 220 };
 const PULSE_MS = 1600;
 const BURST_COUNT = 26;
 
 /**
- * Magical forest waystone: a mossy standing stone with a golden mouse-paw
- * glyph. Low glow while inactive; brighter glow, a spark burst and floating
- * motes once activated. (The stone comes from the environment kit with its
- * original symbol removed; the glyph and glow are drawn in code.)
+ * Magical forest waystone (production art, `prop_waystone_master`): a mossy
+ * standing stone with a carved golden rune and a lantern. Faint rune and low
+ * glow while inactive; once activated the rune lights up brightly, with a
+ * glow, a spark burst and floating motes (behaviour unchanged).
  */
 export class WaystoneVisual implements CheckpointVisual {
   private readonly glyph: Phaser.GameObjects.Image;
@@ -32,22 +34,34 @@ export class WaystoneVisual implements CheckpointVisual {
     private readonly scene: Phaser.Scene,
     at: PointDef,
   ) {
+    const asset = getProductionAsset(scene, STONE_KEY);
+    const scale = STONE_HEIGHT / scene.textures.getFrame(STONE_KEY).height;
+    const anchor = asset?.anchor ?? { x: 0.5, y: 1 };
     const stone = scene.add
-      .image(at.x, at.y + BASE_SINK * STONE_SCALE, STONE_KEY)
-      .setOrigin(0.5, 1)
-      .setScale(STONE_SCALE)
+      .image(at.x, at.y + BASE_SINK, STONE_KEY)
+      .setOrigin(anchor.x, anchor.y)
+      .setScale(scale)
       .setDepth(ForestDepth.groundDecor + 1);
-    const [gx, gy] = forestAnchor(scene, STONE_KEY, 'glyph', [81, 44]);
-    const x = stone.x + (gx - stone.width / 2) * STONE_SCALE;
-    const y = stone.y - (stone.height - gy) * STONE_SCALE;
+    // Positions inside the stone, from normalized master coordinates.
+    const toWorld = (nx: number, ny: number): [number, number] => [
+      stone.x + (nx - anchor.x) * stone.displayWidth,
+      stone.y + (ny - anchor.y) * stone.displayHeight,
+    ];
+    const geo = (asset?.geometry ?? {}) as { runeX?: number; runeY?: number };
+    const [x, y] = toWorld(geo.runeX ?? 0.55, geo.runeY ?? 0.37);
+    const runeBox = getProductionAsset(scene, RUNE_KEY)?.extractedFromMaster?.box ?? [0.44, 0.19, 0.66, 0.7];
+    const [rx, ry] = toWorld(runeBox[0], runeBox[1]);
 
     this.glow = scene.add
       .image(x, y, FxTextures.glow)
       .setBlendMode(Phaser.BlendModes.ADD)
       .setDepth(ForestDepth.groundDecor + 1.5);
+    // The stone's own carved rune lights up (golden rune pixels extracted from
+    // the master, drawn additively at exactly the same scale and position).
     this.glyph = scene.add
-      .image(x, y, FxTextures.pawGlyph)
-      .setScale(GLYPH_SCALE)
+      .image(rx, ry, RUNE_KEY)
+      .setOrigin(0)
+      .setScale(scale)
       .setBlendMode(Phaser.BlendModes.ADD)
       .setDepth(ForestDepth.groundDecor + 2);
 

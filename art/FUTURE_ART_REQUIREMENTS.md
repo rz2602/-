@@ -21,9 +21,6 @@ Still wanted:
 
 | Item | Today | Request |
 |---|---|---|
-| **Ground right edge** | `terrain_ground_right_edge_master.png` was supplied with a baked checkerboard (no alpha) and is BLOCKED | Re-export as a real transparent PNG (alpha channel, transparent background), matching `terrain_ground_left_edge_master` |
-| Checkpoint waystone | legacy `waystone` 163×161 at ~230 % | ≥ 375×370, symbol-free face (the glyph is code-drawn) |
-| Inside of the terrain below the ground strip | smooth earth gradient | Optional: a seamless dark earth/root tile ≥ 1024×1024, to add texture deep below the strip |
 | Main Menu ground (locked) | legacy `terrain_cap` / soil | Only if the menu is ever reopened for changes |
 | River band (hidden) | `water_strip` 256×32 | ≥ 1130×142 seamless, only if `RIVER_VISIBLE` returns |
 | Foreground leaves | supplied left/right pieces are full-height strips cut on three sides | For use as framing: pieces with natural (uncut) top edges, ~600–900 px tall |

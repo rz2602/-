@@ -44,9 +44,9 @@ is in **[FOREST_ASSET_INTEGRATION_REPORT.md](FOREST_ASSET_INTEGRATION_REPORT.md)
 | Asset | Native | @1440p | Needed for ≤100 % @1440p |
 |---|---|---|---|
 | Mishkontin atlas frames | 213×195 | **170 %** | ~363×332 per frame (future animation milestone) |
-| `waystone` (checkpoint) | 163×161 | 230 % | ~375×370 |
 
-Nothing else in ForestTestScene exceeds 125 %. The legacy kit pieces still drawn by the
+Nothing else in ForestTestScene exceeds 125 % (the new waystone is 77 %, the ground ends and
+underground fill 90 %). The legacy kit pieces still drawn by the
 **locked Main Menu** (`terrain_cap`, soil, `lantern_post`, `flowers_white`, `mushroom_red`) are
 unchanged. The hidden river band (`water_strip`) is not drawn. Specs for the rest:
 **[FUTURE_ART_REQUIREMENTS.md](FUTURE_ART_REQUIREMENTS.md)**.

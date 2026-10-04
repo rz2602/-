@@ -112,12 +112,12 @@ src/
     forest/
       forestLayers.ts      the 8 visual layers: depth + scroll factors (single source of truth)
       forestAssets.ts      forest manifest access (keys, sizes, anchors)
-      forestFx.ts          procedural FX textures: sky, haze, light, glow, sparks, paw glyph, soil
+      forestFx.ts          procedural FX textures: sky, haze, light, glow, sparks, menu soil
       ForestBackdrop.ts    layers 0-3: sky, mountains + Sirengrad, distant + mid forest, light
       TerrainRenderer.ts   kit ground strip / cliff columns / pillars / ravine walls over plain rectangles; platforms; bridge
       DecorationPlacer.ts  back / ground / foreground decorations (+ parallax placement), scatter
       ForestWater.ts       waterfalls; optional river band + splashes (RIVER_VISIBLE)
-      WaystoneVisual.ts    the checkpoint waystone
+      WaystoneVisual.ts    the checkpoint waystone (production art; its carved rune lights up)
   systems/
     RenderScale.ts         device-resolution backbuffer + camera zoom + crisp text
     AssetScaleAudit.ts     measures on-screen magnification of every texture
@@ -205,7 +205,8 @@ High-resolution masters live in `art/masters/` (never edited, SHA-256 in `MANIFE
 - **Forest Environment Asset Kit:** high-resolution ground strip, cliffs, platforms (by width),
   rope bridge, rocks, vegetation, props and sparse foreground framing. Every piece is positioned
   from the unchanged collision rectangles. All supplied PNGs pass a pixel-level alpha audit;
-  one baked-checkerboard file is blocked. See `art/FOREST_ASSET_INTEGRATION_REPORT.md`.
+  ground ends, a high-resolution underground fill and the checkpoint waystone complete it. See
+  `art/FOREST_ASSET_INTEGRATION_REPORT.md`.
 - **Mishkontin:** the legacy multi-frame atlas is kept. High-res key poses are reference only.
 
 Reports: `art/FOREST_ASSET_INTEGRATION_REPORT.md`, `art/INTEGRATION_REPORT_v0.1.1.md`, `art/ASSET_RESOLUTION_REPORT.md`, `art/README.md`.
@@ -232,7 +233,7 @@ up with physics and effects. Add `--preview out.png` for a contact sheet.
 
 > **IP note.** The kit's wooden sign, waystone and banner carry a Mickey-Mouse-head symbol (a
 > third-party trademark). The tool clone-stamps it out of the sign and waystone, and the banner
-> is not used. The waystone shows a code-drawn golden paw glyph instead.
+> is not used. (The checkpoint now uses the production `prop_waystone_master`.)
 
 **All kit-derived pieces are TEMPORARY.** The sheet is only 1125x750, so pieces are magnified
 on screen far beyond the 125% limit (up to about 640% at 1440p) and look soft. They are

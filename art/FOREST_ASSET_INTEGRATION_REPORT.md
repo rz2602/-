@@ -26,14 +26,13 @@ No background was removed, keyed or "cleaned". `tools/build-production-assets.mj
 every environment master at build time (`verifyRealAlpha`): no alpha channel, almost no
 transparent pixels, or opaque corners on a non-edge piece stops the build.
 
-**Blocked:** `terrain_ground_right_edge_master.png` is stored in
-`art/masters/environment/blocked/` and is not integrated. Integration did not depend on it: the
-ground strip ends on the natural rounded ends of `terrain_ground_long_master` (see below).
+**Blocked (first delivery):** `terrain_ground_right_edge_master.png` was not integrated. **Resolved:** a
+re-export with real alpha was supplied and integrated (see §9).
 
 ## 2. Organisation and integrity
 
 - **Masters** (byte-identical copies, never modified) live under
-  `art/masters/environment/{terrain/{ground,platforms,cliffs},bridges,rocks,vegetation,props,foreground,blocked}`.
+  `art/masters/environment/{terrain/{ground,platforms,cliffs},bridges,rocks,vegetation,props,foreground}`.
   Each has a SHA-256, original ZIP path, size, mode and audit class in `art/masters/MANIFEST.json`.
 - **Renames** (cleanup of supplied names only):
   - trailing spaces removed: `terrain_cliff_right_master .png`, `bridge_rope_long_master .png`, `foreground_fern_right_master .png`
@@ -123,8 +122,7 @@ Physics was never moved to fit the art.
 - **Ravines and pits:** every gap and every enclosed pit has a darker, cooler far
   `terrain_cliff_wall` behind the terrain. Wide hollows get an overlapping row of walls,
   alternately mirrored. This replaces the old flat soil walls and the flat backdrop band.
-- **Earth below the strip:** a smooth warm-to-deep earth gradient. It has no texture, so
-  nothing is magnified.
+- **Earth below the strip:** the high-resolution underground fill texture (see §9).
 - **Platforms:** art is chosen by collision width:
   - long ≥ 190 px
   - medium ≥ 170 px
@@ -169,7 +167,6 @@ Sirengrad.
 
 | Key | Where | Why it remains |
 |---|---|---|
-| `waystone` | checkpoint | No replacement was supplied. The glyph is code-drawn. |
 | `terrain_cap`, `terrain_fill` (→ `fx-soil`), `lantern_post`, `flowers_white`, `mushroom_red` | Main Menu ground and props | The Main Menu is locked (pixel-identical requirement). |
 | `water_strip` | code path behind `RIVER_VISIBLE = false` | Hidden. Kept so the river can return later. |
 | Mishkontin atlas | player | Locked (separate future milestone). |
@@ -207,3 +204,43 @@ timing is unchanged.
 Collision geometry, checkpoints, respawn lines, end trigger and level bounds were not edited:
 `terrain`, `platforms`, `checkpoints`, `finish`, `width/height/cameraBottom/waterSurfaceY` in
 the level data are untouched.
+
+## 9. Final three assets
+
+Supplied in `New_Folder_With_Items.zip`. They went through the same pixel-level audit:
+
+| Master | Size | Mode | Alpha 0 | Corners | Class | Result |
+|---|---|---|---|---|---|---|
+| `terrain_ground_right_edge_master.png` | 1536×1024 | RGBA | 51.6 % | transparent | **A** | integrated; replaces the blocked file |
+| `prop_waystone_master.png` | 1374×1145 | RGBA | 34.4 % | transparent | **A** | integrated |
+| `terrain_underground_fill_master.png` | 1774×887 | RGB | — | opaque | **B** (opaque fill texture by design; no checkerboard, white or green background) | integrated |
+
+- **Ground ends.** Both `terrain_ground_left_edge` and `terrain_ground_right_edge` are now used.
+  - They go on each exposed end of a wide block (≥ 520 px).
+  - The rock face of the art is on the collision edge, and the grass surface is on the collision top.
+  - The runtime copies are cut 520 master px inwards, with a 160 px alpha fade on the cut side.
+    They blend into the ground strip that runs underneath, so there is no hard join. The masters
+    are untouched.
+  - Narrow islands keep their rock pillar and plain strip ends.
+- **Underground fill.** It replaces the smooth earth gradient inside every terrain block, below the ground strip:
+  - Drawn as a world-aligned grid of the tile at 0.45 logical px per master px.
+  - Alternately mirrored in x and y, so every join is pixel-continuous: no stretching, no visible seam.
+  - Slightly darkened.
+  - Deep gaps also get it, darker, behind the far rock wall and starting 240 px below the lower
+    bank. Waterfalls, the water openings, cliff faces and playable surfaces are never covered.
+  - It has no collision.
+- **Waystone.**
+  - Same world position (4560, 1100) and same checkpoint role and behaviour.
+  - Bottom-centre ground-contact anchor, measured on the master.
+  - World height 185 px, the same on-screen size as the stone it replaces (77 % at 1440p).
+  - The carved golden rune of the art is extracted at build time into an additive overlay. It
+    takes the place of the old code-drawn paw glyph: faint while inactive, bright with the glow,
+    spark burst and motes once activated.
+  - The old paw-glyph and earth-gradient FX textures were removed.
+
+Regression after these three assets:
+- mechanics: 18/18 at 1280×720 and 18/18 at 1920×1080
+- bot: 54.7 s, 0 respawns
+- keyboard smoke test: pass
+- QA at 1280×720 / 1920×1080 / 2560×1440: parallax exact, Sirengrad once, bounds unchanged, feet on ground, no errors
+- Main Menu: pixel-identical

@@ -12,7 +12,7 @@ import { AssetKeys } from '../../config/constants';
  */
 export interface ProductionAsset {
   path: string;
-  role: 'layer' | 'tree' | 'water' | 'ground' | 'cliff' | 'platform' | 'bridge' | 'prop' | 'foreground';
+  role: 'layer' | 'tree' | 'water' | 'ground' | 'cliff' | 'platform' | 'bridge' | 'prop' | 'foreground' | 'fill' | 'overlay';
   width: number;
   height: number;
   master: string;
@@ -31,6 +31,10 @@ export interface ProductionAsset {
    * x by width): walkY (grass / deck surface), slab extents, cliff face, light points...
    */
   geometry?: Record<string, number | { left: number; right: number }>;
+  /** Runtime piece cut out of the master: normalized box [x0, y0, x1, y1]. */
+  extractedFromMaster?: { box: [number, number, number, number] };
+  /** Runtime copy cut from the master with an alpha fade on its cut side (master px). */
+  featheredCutFromMaster?: { from: number; to: number; fade: 'left' | 'right'; ramp: number };
   /** Alpha audit result (environment kit). */
   alpha?: string;
   /** Legacy forest-kit keys replaced by this asset (no longer loaded). */

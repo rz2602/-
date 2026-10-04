@@ -78,6 +78,14 @@ const ASSETS = [
     // Columns [tileFrom, tileTo] are the full-height slab, used for mirror-joined repeats; outside them are the natural rounded ends.
     geometry: { walkY: 335, tileFrom: 170, tileTo: 2010 },
   },
+  // Ground ends: walkY = grass surface, faceX = outer rock face (lined up with the collision edge).
+  // Runtime copies are cut 520 master px inwards from the rock face, with a
+  // 160 px alpha fade on the cut side so they blend into the ground strip that
+  // runs underneath (masters untouched). Geometry is in the cut image's px.
+  { key: 'env_ground_left_edge', master: 'environment/terrain/ground/terrain_ground_left_edge_master.png', out: 'assets/environment/terrain/ground_left_edge.webp', role: 'ground', env: true, supersedes: [], featherCut: { from: 0, to: 620, fade: 'right', ramp: 160 }, geometry: { walkY: 320, faceX: 100 } },
+  { key: 'env_ground_right_edge', master: 'environment/terrain/ground/terrain_ground_right_edge_master.png', out: 'assets/environment/terrain/ground_right_edge.webp', role: 'ground', env: true, supersedes: [], featherCut: { from: 900, to: 1536, fade: 'left', ramp: 160 }, geometry: { walkY: 330, faceX: 520 } },
+  // Underground fill: opaque seamless soil texture (alpha audit class B by design).
+  { key: 'env_underground_fill', master: 'environment/terrain/ground/terrain_underground_fill_master.png', out: 'assets/environment/terrain/underground_fill.webp', role: 'fill', format: 'webp-lossy', alphaNote: 'B (opaque fill texture by design, no baked background)' },
   { key: 'env_cliff_left', master: 'environment/terrain/cliffs/terrain_cliff_left_master.png', out: 'assets/environment/terrain/cliff_left.webp', role: 'cliff', env: true, geometry: { walkY: 345, faceX: 22, capEnd: 990 } },
   { key: 'env_cliff_right', master: 'environment/terrain/cliffs/terrain_cliff_right_master.png', out: 'assets/environment/terrain/cliff_right.webp', role: 'cliff', env: true, geometry: { walkY: 345, faceX: 1004, capEnd: 30 } },
   { key: 'env_cliff_wall', master: 'environment/terrain/cliffs/terrain_cliff_wall_master.png', out: 'assets/environment/terrain/cliff_wall.webp', role: 'cliff', env: true, geometry: { fullWidthY: 200 }, supersedes: ['cliff_pillar'] },
@@ -87,7 +95,7 @@ const ASSETS = [
   { key: 'env_platform_tiny', master: 'environment/terrain/platforms/terrain_platform_tiny_master.png', out: 'assets/environment/terrain/platform_tiny.webp', role: 'platform', env: true, maxDisplay: { w: 150 }, geometry: { walkY: 392 } },
 
   // Not built for runtime (masters archived, not placed in this level - see
-  // art/FOREST_ASSET_INTEGRATION_REPORT.md): ground left edge, cliff bottom
+  // art/FOREST_ASSET_INTEGRATION_REPORT.md): cliff bottom
   // left/right, rope bridge long span, bridge entrances, broken bridge,
   // foreground leaves left/right (full-height frame strips cut on three sides).
 
@@ -122,6 +130,11 @@ const ASSETS = [
   { key: 'env_fallen_log', master: 'environment/props/prop_fallen_log_master.png', out: 'assets/environment/props/fallen_log.webp', role: 'prop', env: true, maxDisplay: { h: 100 }, supersedes: ['fallen_log'] },
   { key: 'env_wood_crate', master: 'environment/props/prop_wood_crate_master.png', out: 'assets/environment/props/wood_crate.webp', role: 'prop', env: true, maxDisplay: { h: 80 }, supersedes: ['wooden_crate', 'wooden_crate_small', 'wooden_cart'] },
   { key: 'env_barrel', master: 'environment/props/prop_barrel_master.png', out: 'assets/environment/props/barrel.webp', role: 'prop', env: true, maxDisplay: { h: 80 }, supersedes: ['barrel'] },
+
+  // Checkpoint waystone. Its carved rune (master box [600,220,900,800]) is also
+  // extracted as an additive "lit" overlay: golden rune pixels only, same scale.
+  { key: 'env_waystone', master: 'environment/props/prop_waystone_master.png', out: 'assets/environment/props/waystone.webp', role: 'prop', env: true, maxDisplay: { h: 200 }, supersedes: ['waystone'], geometry: { runeX: 752, runeY: 420 } },
+  { key: 'env_waystone_rune', master: 'environment/props/prop_waystone_master.png', out: 'assets/environment/props/waystone_rune.webp', role: 'overlay', env: true, maxDisplay: { h: 200 }, extractGolden: [600, 220, 900, 800] },
 
   // Foreground: edge-framing pieces; anchor = the corner/edge that sits on the screen edge.
   { key: 'env_fg_fern_left', master: 'environment/foreground/foreground_fern_left_master.png', out: 'assets/environment/foreground/fern_left.webp', role: 'foreground', env: true, maxDisplay: { h: 270 }, supersedes: ['fg_leaves_blur', 'fg_leaves_left'] },
@@ -300,6 +313,24 @@ for (const asset of ASSETS) {
   let img = await rgba(masterPath);
   const cleanup = asset.format === 'webp-lossy' ? { solid: 0, specks: 0 } : cleanupAlpha(img);
 
+  let feathered = null;
+  if (asset.featherCut) {
+    const { from, to, fade, ramp } = asset.featherCut;
+    const crop = await sharp(img.data, { raw: { width: img.width, height: img.height, channels: 4 } })
+      .extract({ left: from, top: 0, width: to - from, height: img.height }).raw().toBuffer();
+    const w = to - from;
+    for (let y = 0; y < img.height; y++) {
+      for (let x = 0; x < w; x++) {
+        const d = fade === 'right' ? w - 1 - x : x; // distance from the cut side
+        if (d >= ramp) continue;
+        const i = (y * w + x) * 4 + 3;
+        crop[i] = Math.round(crop[i] * (d / ramp));
+      }
+    }
+    img = { data: crop, width: w, height: img.height };
+    feathered = { from, to, fade, ramp };
+  }
+
   let trimmed = null;
   if (asset.trim) {
     const box = alphaBox(img, 3);
@@ -317,11 +348,34 @@ for (const asset of ASSETS) {
   // Target runtime size.
   let width = img.width;
   let height = img.height;
+  let k = 1;
   if (asset.maxDisplay) {
     const target = asset.maxDisplay.w
       ? { w: Math.ceil(asset.maxDisplay.w * DISPLAY_FACTOR) }
       : { h: Math.ceil(asset.maxDisplay.h * DISPLAY_FACTOR) };
-    const k = Math.min(1, target.w ? target.w / img.width : target.h / img.height);
+    k = Math.min(1, target.w ? target.w / img.width : target.h / img.height);
+    width = Math.round(img.width * k);
+    height = Math.round(img.height * k);
+  }
+  let extracted = null;
+  if (asset.extractGolden) {
+    // Keep only the glowing golden pixels inside the box, then crop to it. Scaled
+    // with the same factor as the full image so the overlay lines up exactly.
+    const [bx0, by0, bx1, by1] = asset.extractGolden;
+    const masked = Buffer.from(img.data);
+    for (let y = 0; y < img.height; y++) {
+      for (let x = 0; x < img.width; x++) {
+        const i = (y * img.width + x) * 4;
+        const [r, g, b] = [masked[i], masked[i + 1], masked[i + 2]];
+        const inBox = x >= bx0 && x < bx1 && y >= by0 && y < by1;
+        const golden = r > 170 && g > 110 && b < 140 && r - b > 90;
+        masked[i + 3] = inBox && golden ? Math.min(masked[i + 3], Math.round(Math.min(1, (r - b - 90) / 80) * 255)) : 0;
+      }
+    }
+    const crop = await sharp(masked, { raw: { width: img.width, height: img.height, channels: 4 } })
+      .extract({ left: bx0, top: by0, width: bx1 - bx0, height: by1 - by0 }).raw().toBuffer();
+    extracted = { box: [bx0, by0, bx1, by1], masterSize: [img.width, img.height] };
+    img = { data: crop, width: bx1 - bx0, height: by1 - by0 };
     width = Math.round(img.width * k);
     height = Math.round(img.height * k);
   }
@@ -361,6 +415,8 @@ for (const asset of ASSETS) {
     bytes: fs.statSync(outPath).size,
   };
   if (trimmed) entry.trimmedFromMaster = trimmed;
+  if (feathered) entry.featheredCutFromMaster = feathered;
+  if (extracted) entry.extractedFromMaster = { box: extracted.box.map((v, i) => round(v / extracted.masterSize[i % 2])) };
   if (asset.role === 'tree' || asset.role === 'water' || asset.role === 'prop' || (asset.role === 'foreground' && !asset.fixedAnchor)) entry.anchor = groundAnchor(out);
   if (asset.fixedAnchor) entry.anchor = asset.fixedAnchor;
   if (asset.geometry) entry.geometry = normalizeGeometry(asset.geometry, img.width, img.height);
@@ -369,6 +425,7 @@ for (const asset of ASSETS) {
     entry.geometry.slab = slabExtent(out, Math.round((entry.geometry.walkY + 0.03) * height));
   }
   if (asset.env) entry.alpha = 'A (real alpha channel verified)';
+  else if (asset.alphaNote) entry.alpha = asset.alphaNote;
   if (asset.role === 'layer' && asset.format !== 'webp-lossy') {
     entry.contentBand = contentBand(out);
     const cols = solidColumns(out);

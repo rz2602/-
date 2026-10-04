@@ -2,6 +2,18 @@
 
 # v0.1.1 - Forest art pass
 
+## Final environment assets: ground right edge, underground fill, waystone
+
+- All three passed the pixel-level audit. The previously blocked `terrain_ground_right_edge` is
+  replaced by a real-alpha re-export; the fill is an opaque texture by design.
+- Ground end pieces (left and right) on the exposed ends of wide blocks: rock face on the
+  collision edge, grass on the collision top, faded inner side over the ground strip.
+- High-resolution underground fill replaces the earth gradient inside blocks and deep in gaps
+  (mirror-tiled, no stretching; never over cliff faces, waterfalls or water openings).
+- Production waystone at the same position and size, with its carved rune as the lit glyph.
+  Checkpoint behaviour unchanged.
+- Gameplay identical: 18/18 at 720p and 1080p, bot 54.7 s / 0 respawns, menu pixel-identical.
+
 ## Forest Environment Asset Kit (high-resolution terrain, props and foreground)
 
 ForestTestScene's remaining low-resolution kit art is replaced with the supplied production kit.

@@ -297,6 +297,91 @@
         "terrain_cap_right"
       ]
     },
+    "env_ground_left_edge": {
+      "path": "assets/environment/terrain/ground_left_edge.webp",
+      "role": "ground",
+      "width": 620,
+      "height": 1024,
+      "master": "art/masters/environment/terrain/ground/terrain_ground_left_edge_master.png",
+      "masterSize": [
+        620,
+        1024
+      ],
+      "masterSha256": "3bf421620178b275e17a5d0a17843a93c8d828eab01e97144d308ff3e9cc54d1",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 717536,
+        "specks": 38458
+      },
+      "bytes": 831250,
+      "featheredCutFromMaster": {
+        "from": 0,
+        "to": 620,
+        "fade": "right",
+        "ramp": 160
+      },
+      "geometry": {
+        "walkY": 0.3125,
+        "faceX": 0.1613,
+        "slab": {
+          "left": 0.1097,
+          "right": 0.7952
+        }
+      },
+      "alpha": "A (real alpha channel verified)"
+    },
+    "env_ground_right_edge": {
+      "path": "assets/environment/terrain/ground_right_edge.webp",
+      "role": "ground",
+      "width": 636,
+      "height": 1024,
+      "master": "art/masters/environment/terrain/ground/terrain_ground_right_edge_master.png",
+      "masterSize": [
+        636,
+        1024
+      ],
+      "masterSha256": "51ce124622dafd7c4515dbfba09a2d82f61bfe2e9d0b32c6ca42a0344f99d0e5",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 3136,
+        "specks": 398
+      },
+      "bytes": 902220,
+      "featheredCutFromMaster": {
+        "from": 900,
+        "to": 1536,
+        "fade": "left",
+        "ramp": 160
+      },
+      "geometry": {
+        "walkY": 0.3223,
+        "faceX": 0.8176,
+        "slab": {
+          "left": 0.1981,
+          "right": 0.945
+        }
+      },
+      "alpha": "A (real alpha channel verified)"
+    },
+    "env_underground_fill": {
+      "path": "assets/environment/terrain/underground_fill.webp",
+      "role": "fill",
+      "width": 1774,
+      "height": 887,
+      "master": "art/masters/environment/terrain/ground/terrain_underground_fill_master.png",
+      "masterSize": [
+        1774,
+        887
+      ],
+      "masterSha256": "0bd96b7144b3dfa032ee0956d3567e00922dbe98ba2b1d3c179db681bbd85ac7",
+      "encoding": "lossy q95, PSNR 38.1 dB",
+      "alphaCleanup": {
+        "solid": 0,
+        "specks": 0
+      },
+      "bytes": 867602,
+      "alpha": "B (opaque fill texture by design, no baked background)"
+    },
     "env_cliff_left": {
       "path": "assets/environment/terrain/cliff_left.webp",
       "role": "cliff",
@@ -1177,6 +1262,63 @@
       "supersedes": [
         "barrel"
       ]
+    },
+    "env_waystone": {
+      "path": "assets/environment/props/waystone.webp",
+      "role": "prop",
+      "width": 576,
+      "height": 480,
+      "master": "art/masters/environment/props/prop_waystone_master.png",
+      "masterSize": [
+        1374,
+        1145
+      ],
+      "masterSha256": "5cc78066c60252bc590b93afe7b0db117f8e98807ab7d3ef27cfa94af70a2ce7",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 954829,
+        "specks": 32771
+      },
+      "bytes": 415362,
+      "anchor": {
+        "x": 0.4115,
+        "y": 0.9771
+      },
+      "geometry": {
+        "runeX": 0.5473,
+        "runeY": 0.3668
+      },
+      "alpha": "A (real alpha channel verified)",
+      "supersedes": [
+        "waystone"
+      ]
+    },
+    "env_waystone_rune": {
+      "path": "assets/environment/props/waystone_rune.webp",
+      "role": "overlay",
+      "width": 126,
+      "height": 243,
+      "master": "art/masters/environment/props/prop_waystone_master.png",
+      "masterSize": [
+        300,
+        580
+      ],
+      "masterSha256": "5cc78066c60252bc590b93afe7b0db117f8e98807ab7d3ef27cfa94af70a2ce7",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 954829,
+        "specks": 32771
+      },
+      "bytes": 56226,
+      "extractedFromMaster": {
+        "box": [
+          0.4367,
+          0.1921,
+          0.655,
+          0.6987
+        ]
+      },
+      "alpha": "A (real alpha channel verified)"
     },
     "env_fg_fern_left": {
       "path": "assets/environment/foreground/fern_left.webp",

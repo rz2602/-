@@ -1,9 +1,9 @@
 import Phaser from 'phaser';
 
 /**
- * Small procedural EFFECT textures (gradients, glows, sparks, the waystone
- * glyph). These are lighting/FX helpers, not environment artwork, so they are
- * generated rather than shipped as files.
+ * Small procedural EFFECT textures (gradients, glows, sparks). These are
+ * lighting/FX helpers, not environment artwork, so they are generated rather
+ * than shipped as files.
  */
 export const FxTextures = {
   sky: 'fx-sky',
@@ -17,10 +17,8 @@ export const FxTextures = {
   glow: 'fx-glow',
   spark: 'fx-spark',
   droplet: 'fx-droplet',
-  pawGlyph: 'fx-paw-glyph',
   understory: 'fx-understory',
   soil: 'fx-soil',
-  earth: 'fx-earth',
 } as const;
 
 type Painter = (ctx: CanvasRenderingContext2D, w: number, h: number) => void;
@@ -123,16 +121,6 @@ export function generateForestFx(scene: Phaser.Scene): void {
     ctx.fillRect(0, 0, w, h);
   });
 
-  // Inside of the terrain blocks, below the ground strip: warm soil fading into deep earth.
-  make(scene, FxTextures.earth, 4, 256, (ctx, w, h) => {
-    ctx.fillStyle = vertical(ctx, h, [
-      [0, '#5e4129'],
-      [0.3, '#47311f'],
-      [1, '#211710'],
-    ]);
-    ctx.fillRect(0, 0, w, h);
-  });
-
   make(scene, FxTextures.deepWater, 4, 256, (ctx, w, h) => {
     ctx.fillStyle = vertical(ctx, h, [
       [0, '#2f7fb4'],
@@ -181,25 +169,6 @@ export function generateForestFx(scene: Phaser.Scene): void {
 
   generateSoil(scene);
 
-  // Golden mouse-paw glyph for the waystone (one pad + four toes).
-  make(scene, FxTextures.pawGlyph, 64, 64, (ctx) => {
-    ctx.shadowColor = 'rgba(255, 200, 90, 0.9)';
-    ctx.shadowBlur = 8;
-    ctx.fillStyle = '#ffd877';
-    ctx.beginPath();
-    ctx.ellipse(32, 41, 13, 11, 0, 0, Math.PI * 2);
-    ctx.fill();
-    for (const [x, y, rx, ry, rot] of [
-      [15, 26, 5, 6.5, -0.4],
-      [25, 17, 5, 7, -0.15],
-      [39, 17, 5, 7, 0.15],
-      [49, 26, 5, 6.5, 0.4],
-    ] as const) {
-      ctx.beginPath();
-      ctx.ellipse(x, y, rx, ry, rot, 0, Math.PI * 2);
-      ctx.fill();
-    }
-  });
 }
 
 /**

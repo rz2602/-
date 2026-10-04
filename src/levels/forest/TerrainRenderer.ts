@@ -1,7 +1,6 @@
 import Phaser from 'phaser';
 import type { LevelDef, PlatformDef, TerrainDef } from '../LevelTypes';
 import { ForestDepth } from './forestLayers';
-import { FxTextures } from './forestFx';
 import { getProductionAsset, type ProductionAsset } from './productionAssets';
 
 /**
@@ -44,11 +43,18 @@ const TERRAIN_ART = {
   ravineWallTint: 0x4f4842,
   /** Pits: one far wall per this much width (logical px; walls overlap). */
   pitWallSpacing: 220,
-  /** Earth fill starts this far below the walk line (always under the strip). */
+  /** Underground fill starts this far below the walk line (its top edge is always under the strip). */
   fillBelowWalk: 70,
-  /** Earth gradient height (logical px), then the deepest colour continues down. */
-  fillGradientHeight: 380,
-  fillDeepColor: 0x211710,
+  /** Underground fill: logical px per master px (tile 1774x887 master), and a slight darkening. */
+  fillScale: 0.45,
+  fillTint: 0xd6c6b6,
+  /** Deep gaps: the same fill, darker and further back, starting this far below the lower bank. */
+  ravineFillBelowGround: 240,
+  ravineFillTint: 0x6e6158,
+  /** Ground end pieces: the strip runs this far under their faded inner side. */
+  edgeStripUnder: 140,
+  /** Blocks narrower than this keep the plain strip ends (no room for an end piece). */
+  edgeMinBlockWidth: 520,
   /** Platforms: grass edge overhang past the collision ends (logical px). */
   platformOverhang: 8,
   /** Bridge: posts stand this far onto each bank; the sagging deck is balanced around the flat collision. */
@@ -58,6 +64,9 @@ const TERRAIN_ART = {
 
 const KEYS = {
   ground: 'env_ground_long',
+  groundLeftEdge: 'env_ground_left_edge',
+  groundRightEdge: 'env_ground_right_edge',
+  fill: 'env_underground_fill',
   cliffLeft: 'env_cliff_left',
   cliffRight: 'env_cliff_right',
   cliffWall: 'env_cliff_wall',
@@ -124,22 +133,17 @@ export function drawTerrainBlock(scene: Phaser.Scene, t: TerrainDef, level: Leve
   const ex = exposure(t, level);
   const right = t.x + t.width;
 
-  // Earth fill (smooth: no texture to magnify), inset where a cliff column covers the edge.
-  const fillTop = t.top + TERRAIN_ART.fillBelowWalk;
+  // Underground fill, inset where a cliff column covers the edge.
   const inset = 30;
-  const fx0 = t.x + (ex.left ? inset : 0);
-  const fx1 = right - (ex.right ? inset : 0);
-  const fillW = Math.max(1, fx1 - fx0);
-  scene.add
-    .image(fx0, fillTop, FxTextures.earth)
-    .setOrigin(0)
-    .setDisplaySize(fillW, TERRAIN_ART.fillGradientHeight)
-    .setDepth(ForestDepth.terrainFill);
-  const deepTop = fillTop + TERRAIN_ART.fillGradientHeight - 1;
-  scene.add
-    .rectangle(fx0, deepTop, fillW, level.height + 200 - deepTop, TERRAIN_ART.fillDeepColor)
-    .setOrigin(0)
-    .setDepth(ForestDepth.terrainFill);
+  drawFill(
+    scene,
+    t.x + (ex.left ? inset : 0),
+    right - (ex.right ? inset : 0),
+    t.top + TERRAIN_ART.fillBelowWalk,
+    level.height + 200,
+    ForestDepth.terrainFill,
+    TERRAIN_ART.fillTint,
+  );
 
   if (ex.left && ex.right && t.width < TERRAIN_ART.pillarMaxWidth) {
     drawPillar(scene, t);
@@ -148,8 +152,73 @@ export function drawTerrainBlock(scene: Phaser.Scene, t: TerrainDef, level: Leve
     if (ex.right) drawCliffColumn(scene, 'right', right, t.top);
   }
 
+  // Ground end pieces on exposed ends of wide blocks; the strip's own rounded
+  // end then lies underneath the piece.
   const o = TERRAIN_ART.groundEndOverhang;
-  drawGroundStrip(scene, t.x - o, right + o, t.top, ForestDepth.terrainCap);
+  const wide = t.width >= TERRAIN_ART.edgeMinBlockWidth;
+  let x0 = t.x - o;
+  let x1 = right + o;
+  if (wide && ex.left) x0 = drawGroundEnd(scene, 'left', t) - TERRAIN_ART.edgeStripUnder;
+  if (wide && ex.right) x1 = drawGroundEnd(scene, 'right', t) + TERRAIN_ART.edgeStripUnder;
+  drawGroundStrip(scene, Math.max(x0, t.x - o), Math.min(x1, right + o), t.top, ForestDepth.terrainCap);
+}
+
+/**
+ * Ground end piece: the rock face of the artwork on the collision edge, its
+ * grass surface on the collision top. Its inner side fades out (baked into the
+ * runtime copy) over the ground strip beneath. Returns the world x of its inner edge.
+ */
+function drawGroundEnd(scene: Phaser.Scene, side: 'left' | 'right', t: TerrainDef): number {
+  const key = side === 'left' ? KEYS.groundLeftEdge : KEYS.groundRightEdge;
+  const a = art(scene, key);
+  const k = a.scale(TERRAIN_ART.groundScale);
+  const face = a.geo.faceX * a.w * k;
+  const width = a.w * k;
+  const x = side === 'left' ? t.x - face : t.x + t.width - face;
+  scene.add.image(x, t.top, key).setOrigin(0, a.geo.walkY).setScale(k).setDepth(ForestDepth.terrainCap + 0.5);
+  return side === 'left' ? x + width : x;
+}
+
+/**
+ * Underground fill over [x0,x1] x [top,bottom]: a world-aligned grid of the
+ * fill tile, alternately mirrored in x and y so every join is pixel-continuous
+ * (no visible seam, no stretching). Cells are cropped to the region, so
+ * neighbouring regions continue the same pattern.
+ */
+function drawFill(scene: Phaser.Scene, x0: number, x1: number, top: number, bottom: number, depth: number, tint: number): void {
+  if (x1 <= x0 || bottom <= top) return;
+  const a = art(scene, KEYS.fill);
+  const k = a.scale(TERRAIN_ART.fillScale);
+  const tw = a.w * k;
+  const th = a.h * k;
+  for (let cx = Math.floor(x0 / tw); cx * tw < x1; cx++) {
+    for (let cy = Math.floor(top / th); cy * th < bottom; cy++) {
+      const ix0 = Math.max(x0, cx * tw);
+      const ix1 = Math.min(x1, (cx + 1) * tw);
+      const iy0 = Math.max(top, cy * th);
+      const iy1 = Math.min(bottom, (cy + 1) * th);
+      if (ix1 - ix0 < 0.5 || iy1 - iy0 < 0.5) continue;
+      const flipX = Math.abs(cx) % 2 === 1;
+      const flipY = Math.abs(cy) % 2 === 1;
+      let u0 = (ix0 - cx * tw) / k;
+      let u1 = (ix1 - cx * tw) / k;
+      let v0 = (iy0 - cy * th) / k;
+      let v1 = (iy1 - cy * th) / k;
+      if (flipX) [u0, u1] = [a.w - u1, a.w - u0];
+      if (flipY) [v0, v1] = [a.h - v1, a.h - v0];
+      const fx = Math.floor(u0);
+      const fy = Math.floor(v0);
+      const fw = Math.max(1, Math.min(a.w, Math.ceil(u1)) - fx);
+      const fh = Math.max(1, Math.min(a.h, Math.ceil(v1)) - fy);
+      scene.add
+        .image(ix0, iy0, KEYS.fill, frame(scene, KEYS.fill, fx, fy, fw, fh))
+        .setOrigin(0)
+        .setScale((ix1 - ix0) / fw + 0.0001, (iy1 - iy0) / fh + 0.0001)
+        .setFlip(flipX, flipY)
+        .setTint(tint)
+        .setDepth(depth);
+    }
+  }
 }
 
 /**
@@ -269,7 +338,12 @@ export function drawRavines(scene: Phaser.Scene, level: LevelDef): void {
   for (let i = 0; i + 1 < blocks.length; i++) {
     const x0 = blocks[i].x + blocks[i].width;
     const gap = blocks[i + 1].x - x0;
-    if (gap > 0) wall(x0 + gap / 2, Math.max(blocks[i].top, blocks[i + 1].top));
+    if (gap <= 0) continue;
+    const ground = Math.max(blocks[i].top, blocks[i + 1].top);
+    wall(x0 + gap / 2, ground);
+    // Deep inside the gap: dark underground behind the rock wall (never above the
+    // wall top, so waterfalls and the water opening stay visible).
+    drawFill(scene, x0 - 20, x0 + gap + 20, ground + TERRAIN_ART.ravineFillBelowGround, level.height + 200, ForestDepth.ravine - 0.5, TERRAIN_ART.ravineFillTint);
   }
   // Pits (a low floor between two higher blocks) get far walls too: one for a
   // narrow pit, an overlapping row of alternately mirrored walls for a wide hollow.
