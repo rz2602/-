@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH } from '../../config/constants';
+import { GAME_WIDTH, RIVER_VISIBLE } from '../../config/constants';
 import type { LevelDef } from '../LevelTypes';
 import { ForestDepth } from './forestLayers';
 import { FxTextures } from './forestFx';
@@ -16,8 +16,8 @@ const SHIMMER_ALPHA = 0.3;
 const RIVER_SURFACE_OFFSET = 4;
 
 /**
- * Water: one gently flowing river behind the terrain (visible in every gap,
- * touching it respawns), static high-resolution waterfall artwork on the back
+ * Water: an optional flowing river behind the terrain (RIVER_VISIBLE; the
+ * water line below the gaps always respawns), static high-resolution waterfall artwork on the back
  * layer, and a splash when Mishkontin falls in. Only tile offsets change per
  * frame. (v0.1.1: waterfalls are static artwork by design - no animated
  * waterfall system.)
@@ -37,7 +37,9 @@ export class ForestWater {
     }
 
     const surfaceY = level.waterSurfaceY;
-    if (surfaceY === undefined) return;
+    // RIVER_VISIBLE = false: no river band, deep water or splash visuals (the
+    // ravine walls fill the gaps). The kill line and respawn are not affected.
+    if (surfaceY === undefined || !RIVER_VISIBLE) return;
 
     const bandHeight = scene.textures.getFrame(RIVER_KEY).height * RIVER_SCALE;
     const top = surfaceY - RIVER_SURFACE_OFFSET * RIVER_SCALE;

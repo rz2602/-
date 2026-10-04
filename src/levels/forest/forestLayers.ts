@@ -29,8 +29,12 @@ export const FOREST_LAYER_LIST: readonly VisualLayer[] = Object.values(ForestLay
 /** Depths between named layers, for effects that sit in between. */
 export const ForestDepth = {
   haze: -86,
-  /** Ravine back walls: behind the back decoration so waterfalls can fall into gaps. */
-  ravine: -45,
+  /**
+   * Ravine back walls: in front of the back decoration (trees, waterfall
+   * pools) and behind the terrain, so nothing's flat-cut bottom edge shows
+   * inside a gap - the art disappears behind the ravine wall instead.
+   */
+  ravine: -30,
   lightShafts: -75,
   water: -20,
   waterSurface: -19,

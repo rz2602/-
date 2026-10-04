@@ -133,6 +133,38 @@ export const RESPAWN = {
   messageDurationMs: 1600,
 } as const;
 
+/**
+ * River visuals below the level (v0.1.1 polish). The legacy river band was a
+ * screen-wide rectangle that showed hard image edges at the bottom of every
+ * gap, so it is hidden: the ravine walls continue below the screen instead.
+ * VISUAL ONLY - the water kill line (RespawnController), splash event and
+ * respawn are unchanged. Set true to bring the old river band back.
+ */
+export const RIVER_VISIBLE = false;
+
+/**
+ * Background readability: per-layer colour grading (no blur, no resampling).
+ * saturation / contrast: 0 = unchanged, -0.1 = 10 % less; brightness: 1 =
+ * unchanged multiplier. A graded copy of each layer texture is made once at
+ * load (same size, per-pixel colour only). Gameplay layers and Mishkontin are
+ * never graded. Gameplay only - the approved menu keeps its look.
+ */
+export const BACKGROUND_GRADING = {
+  enabled: true,
+  sky: { saturation: 0, contrast: 0, brightness: 1 },
+  mountains: { saturation: -0.1, contrast: -0.08, brightness: 1.02 },
+  distantForest: { saturation: -0.16, contrast: -0.12, brightness: 1.03 },
+  midForest: { saturation: -0.05, contrast: -0.04, brightness: 1 },
+} as const;
+
+/** Additive sun-shaft overlay strength (0-1). */
+export const SUN_SHAFTS = {
+  /** Gameplay: ~40 % of the menu strength so shafts no longer wash over the play area. */
+  gameplayAlpha: 0.22,
+  /** Main Menu (approved look). */
+  menuAlpha: 0.55,
+} as const;
+
 /** Boot / loading presentation with the official emblem. */
 export const BOOT = {
   background: '#0b140e',

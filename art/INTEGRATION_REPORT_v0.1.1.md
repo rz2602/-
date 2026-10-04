@@ -160,9 +160,29 @@ single-file build from disk. No console errors at any resolution.
 
 1. **Mirror joins are visible** in repeating layers: symmetric clouds in the sky (one join,
    placed on the sun-free edge so there is never a second sun) and symmetric pine groups in the
-   distant/mid forest. Wider seamless masters (≥ 3300 px, matching left/right edges) would remove them.
-2. Legacy art next to the new art is clearly softer: slender `tree_medium` (420 %), terrain caps,
-   soil, river band, bridge, small props, foreground leaves.
-3. The river band at the bottom of gaps shows as a small blue rectangle (pre-existing).
-4. Mishkontin is soft at 1440p+ (atlas at 170 %).
-5. Sun shafts are a procedural effect layer (0.3) on top of the art; tune or remove after review.
+   distant/mid forest. Not hidden by blur or distortion; wider wrap-seamless masters are
+   specified in `FUTURE_ART_REQUIREMENTS.md` §2.
+2. Legacy art next to the new art is clearly softer: terrain caps, soil, ravine walls, bridge,
+   fence, sign, small props, foreground leaves (`FUTURE_ART_REQUIREMENTS.md` §1).
+3. ~~The river band at the bottom of gaps shows as a small blue rectangle~~ (fixed in the
+   final polish pass: river hidden, ravine walls run below the screen).
+4. Mishkontin is soft at 1440p+ (atlas at 170 %); future animation set:
+   `FUTURE_ART_REQUIREMENTS.md` §3.
+5. ~~Sun shafts too strong in gameplay~~ (final polish: 0.22 in gameplay, 0.55 in the menu,
+   `SUN_SHAFTS` in `src/config/constants.ts`).
+
+## Final visual polish pass
+
+Visual only. Gameplay, physics, collision, camera, checkpoints and respawn are unchanged
+(18/18 checks at 1280×720 and 1920×1080; bot 54.7 s, 0 respawns, identical; real-keyboard
+smoke test; 1440p QA: parallax factors, single Sirengrad, camera bounds unchanged; Main Menu
+pixel-identical to the approved capture).
+
+| # | Change | Where |
+|---|---|---|
+| 1 | River band, deep-water plane and splash particles hidden (`RIVER_VISIBLE = false`; code kept). Ravine walls now run below the world bottom and sit in front of the back decoration, so waterfall pools end behind the wall top instead of showing a flat-cut image edge. The water kill line (`RespawnController.killYFor`), `WaterSplash` event and respawn are untouched. | `constants.ts`, `ForestWater.ts`, `TerrainRenderer.ts`, `forestLayers.ts` (`ForestDepth.ravine` −45 → −30) |
+| 2 | Both slender legacy `tree_medium` instances replaced: x 2150 → `tree_oak_02` (height 435, flipped), x 5900 → `tree_oak_01` (height 420, flipped). Decorative, no collision. | `forestTestLevel.ts` |
+| 3 | Per-layer grading (no blur): sky unchanged; mountains + Sirengrad saturation −10 %, contrast −8 %, brightness +2 %; distant forest −16 % / −12 % / +3 %; mid forest −5 % / −4 %; gameplay and Mishkontin untouched. A graded copy of each layer texture is made once at load (same size, per-pixel colour only, identical sampling). Gameplay only; the menu passes `grading: false`. | `BACKGROUND_GRADING` in `constants.ts`, `ForestBackdrop.ts` |
+| 4 | Gameplay sun shafts 0.55 → 0.22 (40 %); menu keeps 0.55. | `SUN_SHAFTS` in `constants.ts`, `menuBackdrop.ts` |
+| 5–7 | Documented: legacy terrain/prop replacements, mirror-join source masters (3300–4500 px, wrap-seamless), Mishkontin high-res animation milestone. No art generated. | `art/FUTURE_ART_REQUIREMENTS.md` |
+| 8–9 | End-screen Sirengrad composition and Main Menu left as approved. | — |

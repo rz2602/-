@@ -38,8 +38,7 @@ The four background masters are 2172×724. To stay ≤125 % at 1440p a layer can
 | Asset | Native | @1440p | Needed for ≤100 % @1440p |
 |---|---|---|---|
 | Mishkontin atlas frames | 213×195 | **170 %** | ~363×332 per frame (master sprite set) |
-| `water_strip` (river band) | 256×32 | 442 % | ~1132×142 seamless |
-| `tree_medium` (slender legacy tree) | 101×207 | 420 % | ~425×870 |
+| `water_strip` (river band) — hidden since the polish pass (`RIVER_VISIBLE = false`) | 256×32 | 442 % | ~1132×142 seamless |
 | `lantern_post` | 84×117 | 320 % | ~269×375 |
 | foreground leaves/trunk (3) | ~190×104 | 320 % | ~615×333 |
 | `wooden_fence`, `fence_post` | 72×48, 42×35 | 300 % | ~216×144 |
@@ -50,8 +49,14 @@ The four background masters are 2172×724. To stay ≤125 % at 1440p a layer can
 | `wooden_sign`, `waystone` | 95×110, 163×161 | 230 % | ~219×253, ~375×370 |
 | `fx-soil` (synthesised soil tile) | 256×256 | 270 % | 512×512 / 1024×1024 painted tile |
 
-Total at 2560×1440: **45 of 55 measured textures** are still over 125 %; all are legacy
-kit art or the Mishkontin atlas. None are upscaled or sharpened — they are flagged.
+All are legacy kit art or the Mishkontin atlas. None are upscaled or sharpened — they are
+flagged. The slender `tree_medium` is no longer placed (replaced by production oaks in the
+final polish pass) and the river band is hidden. Exact replacement specs:
+**[FUTURE_ART_REQUIREMENTS.md](FUTURE_ART_REQUIREMENTS.md)**.
+
+The gameplay background layers (mountains, distant and mid forest) are drawn from colour-graded
+copies (`#graded` texture keys, same pixel size, per-pixel colour only); their scale figures
+are identical to the originals.
 
 ## Reproduce
 

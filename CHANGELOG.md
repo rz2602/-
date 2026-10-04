@@ -2,6 +2,20 @@
 
 # v0.1.1 - Forest art pass
 
+## Final visual polish
+
+Visual only; gameplay identical (18/18 checks, bot 54.7 s with 0 respawns).
+- No more water rectangles at the bottom of gaps: the river band is hidden (`RIVER_VISIBLE`)
+  and the ravine walls run below the screen, in front of the back decoration. The water kill
+  line and respawn are unchanged.
+- The two slender low-resolution `tree_medium` trees are replaced with production oaks.
+- Background readability: subtle per-layer colour grading (`BACKGROUND_GRADING`, no blur).
+  Mountains/Sirengrad and the distant forest are slightly less saturated and contrasted, the mid
+  forest very slightly. Sky, gameplay and Mishkontin are unchanged. The menu is unchanged.
+- Gameplay sun shafts reduced to 40 % (`SUN_SHAFTS.gameplayAlpha` 0.22); the menu keeps 0.55.
+- `art/FUTURE_ART_REQUIREMENTS.md`: legacy art to replace, wider seamless background
+  masters, and the Mishkontin high-res animation milestone.
+
 ## Ultra Detail production art + official branding
 
 - Production masters stored byte-identical in `art/masters/` with SHA-256 manifest. Runtime

@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { GAME_HEIGHT, GAME_WIDTH } from '../config/constants';
+import { GAME_HEIGHT, GAME_WIDTH, SUN_SHAFTS } from '../config/constants';
 import { ForestBackdrop } from '../levels/forest/ForestBackdrop';
 import { forestAnchor } from '../levels/forest/forestAssets';
 import { ForestDepth } from '../levels/forest/forestLayers';
@@ -21,6 +21,9 @@ export function addMenuBackdrop(scene: Phaser.Scene): void {
     worldWidth: GAME_WIDTH,
     cameraBottom: GAME_HEIGHT + MENU_BACKDROP_RISE,
     sirengradScreenX: MENU_SIRENGRAD_X,
+    // The approved menu look: ungraded layers, full sunlight.
+    grading: false,
+    sunShaftAlpha: SUN_SHAFTS.menuAlpha,
   }).update(scene.cameras.main);
 
   const capTop = MENU_GROUND_Y - forestAnchor(scene, 'terrain_cap', 'walkY', [0, 14])[1] * CAP_SCALE;

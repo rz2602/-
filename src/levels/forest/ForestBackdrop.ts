@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { GAME_HEIGHT, GAME_WIDTH } from '../../config/constants';
+import { BACKGROUND_GRADING, GAME_HEIGHT, GAME_WIDTH, SUN_SHAFTS } from '../../config/constants';
 import { ForestDepth, ForestLayers, type VisualLayer } from './forestLayers';
 import { FxTextures } from './forestFx';
 import { getProductionAsset, ProductionKeys } from './productionAssets';
@@ -23,7 +23,7 @@ const MOUNTAINS_PEAK_TOP = 0.2;
 /** Mountains: mirror-join column on the left end (normalized) - a local peak at source x 194. */
 const MOUNTAINS_LEFT_JOIN = 0.0893;
 
-const SHAFTS = { scrollX: 0.3, alpha: 0.55 };
+const SHAFTS_SCROLL_X = 0.3;
 const SUN_WASH_ALPHA = 0.3;
 /** The understory starts this far above the mid-forest artwork's bottom edge (hidden behind it). */
 const UNDERSTORY_OVERLAP = 40;
@@ -40,6 +40,55 @@ export interface ForestBackdropOptions {
    * screen, which puts Sirengrad centre-right at the final viewpoint.
    */
   sirengradScreenX?: number;
+  /** Per-layer colour grading (BACKGROUND_GRADING). Default: on. The menu turns it off. */
+  grading?: boolean;
+  /** Sun-shaft strength. Default: SUN_SHAFTS.gameplayAlpha. */
+  sunShaftAlpha?: number;
+}
+
+type LayerGrade = { readonly saturation: number; readonly contrast: number; readonly brightness: number };
+
+const isNeutral = (g: LayerGrade): boolean => g.saturation === 0 && g.contrast === 0 && g.brightness === 1;
+
+/**
+ * Texture key of a colour-graded copy of `key` (created once, on first use).
+ * Grading is a per-pixel colour change only: same size, same pixels, no blur
+ * and no resampling, so the copy is drawn exactly like the original.
+ */
+function gradedTexture(scene: Phaser.Scene, key: string, grade: LayerGrade | undefined): string {
+  if (!grade || isNeutral(grade)) return key;
+  const gradedKey = `${key}#graded`;
+  if (scene.textures.exists(gradedKey)) return gradedKey;
+  const source = scene.textures.get(key).getSourceImage() as HTMLImageElement;
+  const canvas = document.createElement('canvas');
+  canvas.width = source.width;
+  canvas.height = source.height;
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  if (!ctx) return key;
+  ctx.drawImage(source, 0, 0);
+  let image: ImageData;
+  try {
+    image = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  } catch {
+    return key; // pixels not readable (tainted canvas): draw the layer ungraded
+  }
+  const px = image.data;
+  const sat = 1 + grade.saturation;
+  const con = 1 + grade.contrast;
+  const b = grade.brightness;
+  for (let i = 0; i < px.length; i += 4) {
+    if (px[i + 3] === 0) continue;
+    const r = px[i];
+    const g = px[i + 1];
+    const bl = px[i + 2];
+    const luma = 0.299 * r + 0.587 * g + 0.114 * bl;
+    px[i] = ((luma + (r - luma) * sat - 127.5) * con + 127.5) * b;
+    px[i + 1] = ((luma + (g - luma) * sat - 127.5) * con + 127.5) * b;
+    px[i + 2] = ((luma + (bl - luma) * sat - 127.5) * con + 127.5) * b;
+  }
+  ctx.putImageData(image, 0, 0);
+  scene.textures.addCanvas(gradedKey, canvas);
+  return gradedKey;
 }
 
 /**
@@ -65,6 +114,7 @@ class MirrorStrip {
   get height(): number {
     return this.images[0].displayHeight;
   }
+
 
   /** `offsetX` = how far the layer has scrolled (logical px). */
   get stepWidth(): number {
@@ -103,12 +153,14 @@ interface MovingLayer {
 export class ForestBackdrop {
   private readonly moving: MovingLayer[] = [];
   private readonly cameraBottom: number;
+  private readonly grading: typeof BACKGROUND_GRADING | undefined;
 
   constructor(
     private readonly scene: Phaser.Scene,
     private readonly options: ForestBackdropOptions,
   ) {
     this.cameraBottom = options.cameraBottom;
+    this.grading = (options.grading ?? true) && BACKGROUND_GRADING.enabled ? BACKGROUND_GRADING : undefined;
 
     // Gradient behind everything: never an empty canvas, whatever the camera does.
     scene.add
@@ -118,7 +170,7 @@ export class ForestBackdrop {
       .setScrollFactor(0)
       .setDepth(ForestLayers.sky.depth - 1);
 
-    const sky = this.addStrip(ProductionKeys.sky, ForestLayers.sky, LAYER_SCALE.sky, LAYOUT.skyTop);
+    const sky = this.addStrip(ProductionKeys.sky, this.grading?.sky, ForestLayers.sky, LAYER_SCALE.sky, LAYOUT.skyTop);
     // The sky has its sun near the right edge, so a mirror join there would show
     // two suns. Phase the strip so the whole camera range ends inside one
     // unmirrored copy: the only join falls on the sun-free left edge.
@@ -132,13 +184,13 @@ export class ForestBackdrop {
       .setOrigin(0)
       .setScrollFactor(0)
       .setDepth(ForestDepth.lightShafts)
-      .setAlpha(SHAFTS.alpha)
+      .setAlpha(options.sunShaftAlpha ?? SUN_SHAFTS.gameplayAlpha)
       .setBlendMode(Phaser.BlendModes.ADD);
-    this.moving.push({ target: shafts, scrollX: SHAFTS.scrollX, scrollY: 0, screenY: 0 });
+    this.moving.push({ target: shafts, scrollX: SHAFTS_SCROLL_X, scrollY: 0, screenY: 0 });
 
-    this.addStrip(ProductionKeys.forestDistant, ForestLayers.distantForest, LAYER_SCALE.distant, this.bandTopToImageY(ProductionKeys.forestDistant, LAYER_SCALE.distant, LAYOUT.distantBandTop));
+    this.addStrip(ProductionKeys.forestDistant, this.grading?.distantForest, ForestLayers.distantForest, LAYER_SCALE.distant, this.bandTopToImageY(ProductionKeys.forestDistant, LAYER_SCALE.distant, LAYOUT.distantBandTop));
     const midY = this.bandTopToImageY(ProductionKeys.forestMid, LAYER_SCALE.mid, LAYOUT.midBandTop);
-    const mid = this.addStrip(ProductionKeys.forestMid, ForestLayers.midForest, LAYER_SCALE.mid, midY);
+    const mid = this.addStrip(ProductionKeys.forestMid, this.grading?.midForest, ForestLayers.midForest, LAYER_SCALE.mid, midY);
 
     const understoryY = midY + mid.height - UNDERSTORY_OVERLAP;
     const understory = scene.add
@@ -174,8 +226,8 @@ export class ForestBackdrop {
     }
   }
 
-  private addStrip(key: string, layer: VisualLayer, scale: number, screenY: number): MirrorStrip {
-    const strip = new MirrorStrip(this.scene, key, scale, layer.depth);
+  private addStrip(key: string, grade: LayerGrade | undefined, layer: VisualLayer, scale: number, screenY: number): MirrorStrip {
+    const strip = new MirrorStrip(this.scene, gradedTexture(this.scene, key, grade), scale, layer.depth);
     strip.place(0, screenY);
     this.moving.push({ target: strip, scrollX: layer.scrollX, scrollY: layer.scrollY, screenY });
     return strip;
@@ -196,8 +248,8 @@ export class ForestBackdrop {
    * Images use Phaser scroll factors (0.10 / 0.05) so they parallax naturally.
    */
   private buildMountains(): void {
-    const key = ProductionKeys.mountains;
-    const asset = getProductionAsset(this.scene, key);
+    const asset = getProductionAsset(this.scene, ProductionKeys.mountains);
+    const key = gradedTexture(this.scene, ProductionKeys.mountains, this.grading?.mountains);
     const texture = this.scene.textures.get(key);
     const { width: W, height: H } = texture.getSourceImage() as HTMLImageElement;
     const s = LAYER_SCALE.mountains;
@@ -220,18 +272,18 @@ export class ForestBackdrop {
       ? rightAligned
       : maxScroll * scrollX + this.options.sirengradScreenX - castleCentre;
 
-    this.addMountainImage('full', x, y, false, s, scrollX, scrollY, depth);
+    this.addMountainImage(key, 'full', x, y, false, s, scrollX, scrollY, depth);
     // Extension copies leftwards until the layer covers the screen at scroll 0.
     let left = x;
     for (let mirrored = true; left > 0; mirrored = !mirrored) {
       left -= fillerWidth;
-      this.addMountainImage('filler', left, y, mirrored, s, scrollX, scrollY, depth);
+      this.addMountainImage(key, 'filler', left, y, mirrored, s, scrollX, scrollY, depth);
     }
   }
 
-  private addMountainImage(frame: string, x: number, y: number, flipX: boolean, s: number, sx: number, sy: number, depth: number): void {
+  private addMountainImage(key: string, frame: string, x: number, y: number, flipX: boolean, s: number, sx: number, sy: number, depth: number): void {
     this.scene.add
-      .image(x, y, ProductionKeys.mountains, frame)
+      .image(x, y, key, frame)
       .setOrigin(0)
       .setScale(s)
       .setFlipX(flipX)

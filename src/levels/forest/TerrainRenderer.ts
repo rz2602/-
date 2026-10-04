@@ -24,7 +24,10 @@ const FILL_TINT = 0xe0cdb8;
 const BRIDGE_BANK_OVERLAP = 22;
 const RAVINE_TINT = 0x8a7462;
 const RAVINE_START_BELOW_GROUND = 40;
-const RAVINE_BELOW_WATER = 30;
+/** Ravine walls run past the world bottom, so no edge is ever visible in a gap. */
+const RAVINE_BELOW_WORLD = 200;
+/** Height of the top-down shading in a ravine (logical px). */
+const RAVINE_SHADE_MAX = 520;
 const RAVINE_OVERLAP = 20;
 
 const CAP = 'terrain_cap';
@@ -69,12 +72,12 @@ export function drawTerrainBlock(scene: Phaser.Scene, t: TerrainDef, level: Leve
 }
 
 /**
- * Back walls of the ravines between terrain blocks, down to the river. Drawn
- * behind the back-decoration layer so waterfalls can pour down into a gap.
+ * Back walls of the ravines between terrain blocks, down past the world bottom.
+ * Waterfalls pour down into a gap above the wall top and end behind the wall.
  */
 export function drawRavines(scene: Phaser.Scene, level: LevelDef): void {
   const blocks = [...level.terrain].sort((a, b) => a.x - b.x);
-  const bottom = (level.waterSurfaceY ?? level.height) + RAVINE_BELOW_WATER;
+  const bottom = level.height + RAVINE_BELOW_WORLD;
   for (let i = 0; i + 1 < blocks.length; i++) {
     const left = blocks[i];
     const right = blocks[i + 1];
@@ -94,7 +97,7 @@ export function drawRavines(scene: Phaser.Scene, level: LevelDef): void {
     scene.add
       .image(x, top, FxTextures.shadeDown)
       .setOrigin(0)
-      .setDisplaySize(width, bottom - top)
+      .setDisplaySize(width, Math.min(bottom - top, RAVINE_SHADE_MAX))
       .setDepth(ForestDepth.ravine);
   }
 }

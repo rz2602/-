@@ -4,13 +4,15 @@ Ideas collected during v0.1. **None of these are implemented.** Each belongs to 
 version and should be planned before implementation.
 
 ## Art & animation
-- Replace the remaining low-resolution legacy kit art (terrain caps, soil, bridge, props, small
-  plants, river band, foreground, slender tree) with high-resolution masters. Sizes:
-  `art/ASSET_RESOLUTION_REPORT.md`.
-- Wider seamless background masters (>= 3300 px, matching left/right edges) to remove visible
-  mirror joins in the sky and forest layers; ~3260x1090 for 4K-native backgrounds.
-- High-resolution Mishkontin animation set matching the canon (wooden staff, gold M medallion),
-  using the key poses in `art/masters/characters/` as reference.
+- Replace the remaining low-resolution legacy kit art (grass caps, soil, platforms, ravine
+  edges, bridge, fence, sign, props, small plants, foreground) with high-resolution masters.
+  Exact list and sizes: `art/FUTURE_ART_REQUIREMENTS.md` §1.
+- Wider wrap-seamless background masters (3300-4500 px, right edge continuing into the left) to
+  remove the mirror joins in the sky, mountains and forest layers: §2 of the same file.
+- **Milestone:** high-resolution Mishkontin animation set matching the canon (wooden staff, gold
+  M medallion), full multi-frame cycles, ~363x332 per frame: §3 of the same file.
+- Optional: a visible river again (`RIVER_VISIBLE`) once a seamless high-res river band and
+  proper ravine-floor art exist.
 - Higher-resolution master sprite set for Mishkontin (about 2x current frame size for 1440p, 3x
   for 4K); the current atlas is drawn at 170% on 1440p.
 - Optional: ship two texture sets (1440p and 4K) and pick by render scale; mipmaps for POT

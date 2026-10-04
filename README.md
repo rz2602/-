@@ -116,7 +116,7 @@ src/
       ForestBackdrop.ts    layers 0-3: sky, mountains + Sirengrad, distant + mid forest, light
       TerrainRenderer.ts   grass cap / soil / shading over plain rectangles; platforms; bridge; ravines
       DecorationPlacer.ts  back / ground / foreground decorations (+ parallax placement), scatter
-      ForestWater.ts       animated river (respawn zone), waterfalls, splashes
+      ForestWater.ts       waterfalls; optional river band + splashes (RIVER_VISIBLE)
       WaystoneVisual.ts    the checkpoint waystone
   systems/
     RenderScale.ts         device-resolution backbuffer + camera zoom + crisp text
@@ -205,6 +205,12 @@ High-resolution masters live in `art/masters/` (never edited, SHA-256 in `MANIFE
 - **Mishkontin:** the legacy multi-frame atlas is kept. High-res key poses are reference only.
 
 Reports: `art/INTEGRATION_REPORT_v0.1.1.md`, `art/ASSET_RESOLUTION_REPORT.md`, `art/README.md`.
+Future art specs (legacy replacements, seamless background masters, Mishkontin animation
+milestone): `art/FUTURE_ART_REQUIREMENTS.md`.
+
+**Visual tuning** (`src/config/constants.ts`): `BACKGROUND_GRADING` (per-layer saturation /
+contrast / brightness, no blur), `SUN_SHAFTS` (gameplay 0.22, menu 0.55), `RIVER_VISIBLE`
+(river band below the gaps, off).
 
 ### Legacy forest kit art (v0.1.1 first art pass)
 
@@ -238,8 +244,8 @@ lists every texture with its measured magnification and the source size needed f
 | 1 | Mountains | 0.10 / 0.05 | mountains, Sirengrad (in view only at the final viewpoint), haze |
 | 2 | Distant forest | 0.20 / 0.10 | pines in haze, sun shafts |
 | 3 | Mid forest | 0.40 / 0.20 | canopy + dark understory |
-| 4 | Back decoration | 0.85 / 0.85 | big trees, waterfalls (ravine walls just behind) |
-| 5 | Terrain | 1.0 | river, grass caps, soil, platforms, bridge |
+| 4 | Back decoration | 0.85 / 0.85 | big trees, waterfalls (ravine walls just in front) |
+| 5 | Terrain | 1.0 | ravine walls, grass caps, soil, platforms, bridge |
 | 6 | Mishkontin + objects | 1.0 | ground props (behind him), waystone, effects |
 | 7 | Foreground | 1.12 / 1.0 | sparse leaves at the bottom screen edge only |
 
@@ -250,8 +256,8 @@ the level data puts them.
 
 **Readability rules:** the collision is plain rectangles (visual shape is not physics shape),
 the grass cap's walk line sits exactly on the collision top, decorations never collide and
-always draw behind Mishkontin, foreground pieces stay below the ground line, and every gap
-shows the river (touching it respawns, with a splash and the usual "Хайде още веднъж!").
+always draw behind Mishkontin, foreground pieces stay below the ground line, and falling into
+a gap respawns (below the water line, with the usual "Хайде още веднъж!").
 
 ## Debug mode
 

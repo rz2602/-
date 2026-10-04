@@ -107,7 +107,7 @@ export const FOREST_TEST_LEVEL: LevelDef = {
     { key: 'mushroom_orange', x: 2100, y: 1060 },
     { key: 'fern', x: 2330, y: 1060 },
     { key: 'rock_small', x: 2470, y: 1060 },
-    { key: 'tree_medium', layer: 'back', x: 2150, y: 1060, scale: 2.1 },
+    { key: 'tree_oak_02', layer: 'back', x: 2150, y: 1060, height: 435, flipX: true },
     // ---- C vertical platforms ----
     { key: 'bush_wide', x: 2760, y: 1100 },
     { key: 'tree_stump', x: 3330, y: 1100 },
@@ -129,7 +129,7 @@ export const FOREST_TEST_LEVEL: LevelDef = {
     { key: 'fg_trunk_right', layer: 'foreground', x: 4950, y: 1100 },
     // ---- gap series ----
     { key: 'tree_pine_01', layer: 'back', x: 5500, y: 1080, height: 425 },
-    { key: 'tree_medium', layer: 'back', x: 5900, y: 1050, scale: 1.9 },
+    { key: 'tree_oak_01', layer: 'back', x: 5900, y: 1050, height: 420, flipX: true },
     { key: 'mushroom_small', x: 5520, y: 1080 },
     { key: 'grass_patch', x: 5880, y: 1050 },
     // ---- big safe jump ----
