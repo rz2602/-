@@ -62,10 +62,73 @@ const ASSETS = [
 
   { key: 'tree_oak_01', master: 'trees/tree_oak_01_master.png', out: 'assets/trees/tree_oak_01.webp', role: 'tree', maxDisplay: { h: 560 }, supersedes: ['tree_large_01'] },
   { key: 'tree_oak_02', master: 'trees/tree_oak_02_master.png', out: 'assets/trees/tree_oak_02.webp', role: 'tree', maxDisplay: { h: 560 }, supersedes: ['tree_large_02'] },
-  { key: 'tree_oak_03', master: 'trees/tree_oak_03_master.png', out: 'assets/trees/tree_oak_03.webp', role: 'tree', maxDisplay: { h: 560 }, supersedes: [] },
+  { key: 'tree_oak_03', master: 'trees/tree_oak_03_master.png', out: 'assets/trees/tree_oak_03.webp', role: 'tree', maxDisplay: { h: 560 }, supersedes: ['tree_medium'] },
   { key: 'tree_pine_01', master: 'trees/tree_pine_01_master.png', out: 'assets/trees/tree_pine_01.webp', role: 'tree', maxDisplay: { h: 520 }, supersedes: ['pine_tree'] },
   { key: 'tree_ancient_01', master: 'trees/tree_ancient_01_master.png', out: 'assets/trees/tree_ancient_01.webp', role: 'tree', maxDisplay: { w: 640 }, supersedes: [] },
-  { key: 'waterfall_01', master: 'water/waterfall_large_master.png', out: 'assets/water/waterfall_01.webp', role: 'water', maxDisplay: { w: 560 }, supersedes: ['waterfall_large', 'water_fall_band'] },
+  { key: 'waterfall_01', master: 'water/waterfall_large_master.png', out: 'assets/water/waterfall_01.webp', role: 'water', maxDisplay: { w: 560 }, supersedes: ['waterfall_large', 'water_fall_band', 'waterfall_small', 'waterfall_rocks', 'water_pool_rocks'] },
+
+  // ---- Forest Environment Asset Kit (final production integration) ----
+  // Terrain/cliff/platform/bridge geometry values below are MASTER pixels read
+  // off gridded inspections of each master (see art/FOREST_ASSET_INTEGRATION_REPORT.md);
+  // they are stored normalized, so re-exports at another size keep working.
+  // walkY = the grass (or deck) surface Mishkontin's feet stand on.
+  {
+    key: 'env_ground_long', master: 'environment/terrain/ground/terrain_ground_long_master.png', out: 'assets/environment/terrain/ground_long.webp',
+    role: 'ground', env: true, supersedes: ['terrain_long', 'terrain_medium', 'terrain_short', 'terrain_cap_left', 'terrain_cap_right'],
+    // Columns [tileFrom, tileTo] are the full-height slab, used for mirror-joined repeats; outside them are the natural rounded ends.
+    geometry: { walkY: 335, tileFrom: 170, tileTo: 2010 },
+  },
+  { key: 'env_cliff_left', master: 'environment/terrain/cliffs/terrain_cliff_left_master.png', out: 'assets/environment/terrain/cliff_left.webp', role: 'cliff', env: true, geometry: { walkY: 345, faceX: 22, capEnd: 990 } },
+  { key: 'env_cliff_right', master: 'environment/terrain/cliffs/terrain_cliff_right_master.png', out: 'assets/environment/terrain/cliff_right.webp', role: 'cliff', env: true, geometry: { walkY: 345, faceX: 1004, capEnd: 30 } },
+  { key: 'env_cliff_wall', master: 'environment/terrain/cliffs/terrain_cliff_wall_master.png', out: 'assets/environment/terrain/cliff_wall.webp', role: 'cliff', env: true, geometry: { fullWidthY: 200 }, supersedes: ['cliff_pillar'] },
+  { key: 'env_platform_long', master: 'environment/terrain/platforms/terrain_platform_long_master.png', out: 'assets/environment/terrain/platform_long.webp', role: 'platform', env: true, maxDisplay: { w: 250 }, geometry: { walkY: 320 }, supersedes: ['floating_platform_small', 'floating_platform_medium', 'floating_island_round'] },
+  { key: 'env_platform_medium', master: 'environment/terrain/platforms/terrain_platform_medium_master.png', out: 'assets/environment/terrain/platform_medium.webp', role: 'platform', env: true, maxDisplay: { w: 240 }, geometry: { walkY: 378 } },
+  { key: 'env_platform_small', master: 'environment/terrain/platforms/terrain_platform_small_master.png', out: 'assets/environment/terrain/platform_small.webp', role: 'platform', env: true, maxDisplay: { w: 220 }, geometry: { walkY: 380 } },
+  { key: 'env_platform_tiny', master: 'environment/terrain/platforms/terrain_platform_tiny_master.png', out: 'assets/environment/terrain/platform_tiny.webp', role: 'platform', env: true, maxDisplay: { w: 150 }, geometry: { walkY: 392 } },
+
+  // Not built for runtime (masters archived, not placed in this level - see
+  // art/FOREST_ASSET_INTEGRATION_REPORT.md): ground left edge, cliff bottom
+  // left/right, rope bridge long span, bridge entrances, broken bridge,
+  // foreground leaves left/right (full-height frame strips cut on three sides).
+
+  // Bridge span: the deck sags; deckEndY at the posts, deckMidY at the centre; posts at postLeftX / postRightX.
+  { key: 'env_bridge_rope_medium', master: 'environment/bridges/bridge_rope_medium_master.png', out: 'assets/environment/bridges/bridge_rope_medium.webp', role: 'bridge', env: true, maxDisplay: { w: 320 }, supersedes: ['rope_bridge'], geometry: { deckEndY: 285, deckMidY: 462, postLeftX: 162, postRightX: 1775 } },
+  { key: 'env_bridge_post', master: 'environment/bridges/bridge_post_master.png', out: 'assets/environment/bridges/bridge_post.webp', role: 'prop', env: true, maxDisplay: { h: 130 } },
+
+  { key: 'env_rock_large_01', master: 'environment/rocks/rock_large_01_master.png', out: 'assets/environment/rocks/rock_large_01.webp', role: 'prop', env: true, maxDisplay: { h: 150 }, supersedes: ['rock_large'] },
+  { key: 'env_rock_large_02', master: 'environment/rocks/rock_large_02_master.png', out: 'assets/environment/rocks/rock_large_02.webp', role: 'prop', env: true, maxDisplay: { h: 150 } },
+  { key: 'env_rock_medium_01', master: 'environment/rocks/rock_medium_01_master.png', out: 'assets/environment/rocks/rock_medium_01.webp', role: 'prop', env: true, maxDisplay: { h: 100 }, supersedes: ['rock_medium', 'rock_mossy'] },
+  { key: 'env_rock_medium_02', master: 'environment/rocks/rock_medium_02_master.png', out: 'assets/environment/rocks/rock_medium_02.webp', role: 'prop', env: true, maxDisplay: { h: 100 } },
+  { key: 'env_rock_small_01', master: 'environment/rocks/rock_small_01_master.png', out: 'assets/environment/rocks/rock_small_01.webp', role: 'prop', env: true, maxDisplay: { h: 70 }, supersedes: ['rock_small', 'rocks_pair', 'rock_round'] },
+  { key: 'env_rock_small_02', master: 'environment/rocks/rock_small_02_master.png', out: 'assets/environment/rocks/rock_small_02.webp', role: 'prop', env: true, maxDisplay: { h: 70 } },
+  { key: 'env_rock_cluster_01', master: 'environment/rocks/rock_cluster_01_master.png', out: 'assets/environment/rocks/rock_cluster_01.webp', role: 'prop', env: true, maxDisplay: { h: 110 } },
+
+  { key: 'env_bush_01', master: 'environment/vegetation/vegetation_bush_01_master.png', out: 'assets/environment/vegetation/bush_01.webp', role: 'prop', env: true, maxDisplay: { h: 100 }, supersedes: ['bush_01', 'bush_03', 'bush_small'] },
+  { key: 'env_bush_02', master: 'environment/vegetation/vegetation_bush_02_master.png', out: 'assets/environment/vegetation/bush_02.webp', role: 'prop', env: true, maxDisplay: { h: 100 }, supersedes: ['bush_02', 'bush_wide', 'bush_blue'] },
+  { key: 'env_fern_01', master: 'environment/vegetation/vegetation_fern_01_master.png', out: 'assets/environment/vegetation/fern_01.webp', role: 'prop', env: true, maxDisplay: { h: 100 }, supersedes: ['fern'] },
+  { key: 'env_fern_02', master: 'environment/vegetation/vegetation_fern_02_master.png', out: 'assets/environment/vegetation/fern_02.webp', role: 'prop', env: true, maxDisplay: { h: 100 } },
+  { key: 'env_grass_01', master: 'environment/vegetation/vegetation_grass_01_master.png', out: 'assets/environment/vegetation/grass_01.webp', role: 'prop', env: true, maxDisplay: { h: 70 }, supersedes: ['grass_tall', 'grass_tuft', 'grass_tuft_02', 'grass_patch', 'plant_small'] },
+  { key: 'env_grass_02', master: 'environment/vegetation/vegetation_grass_02_master.png', out: 'assets/environment/vegetation/grass_02.webp', role: 'prop', env: true, maxDisplay: { h: 70 } },
+  { key: 'env_flowers_01', master: 'environment/vegetation/vegetation_flowers_01_master.png', out: 'assets/environment/vegetation/flowers_01.webp', role: 'prop', env: true, maxDisplay: { h: 70 }, supersedes: ['flowers_blue', 'flowers_pink', 'flowers_purple'] },
+  { key: 'env_flowers_02', master: 'environment/vegetation/vegetation_flowers_02_master.png', out: 'assets/environment/vegetation/flowers_02.webp', role: 'prop', env: true, maxDisplay: { h: 70 }, supersedes: ['flowers_pink_02'] },
+  { key: 'env_mushrooms_01', master: 'environment/vegetation/vegetation_mushrooms_01_master.png', out: 'assets/environment/vegetation/mushrooms_01.webp', role: 'prop', env: true, maxDisplay: { h: 70 }, supersedes: ['mushroom_orange', 'mushroom_small'] },
+  { key: 'env_vines_01', master: 'environment/vegetation/vegetation_vines_01_master.png', out: 'assets/environment/vegetation/vines_01.webp', role: 'prop', env: true, maxDisplay: { w: 240 } },
+
+  { key: 'env_signpost', master: 'environment/props/prop_signpost_master.png', out: 'assets/environment/props/signpost.webp', role: 'prop', env: true, maxDisplay: { h: 170 }, supersedes: ['wooden_sign'], geometry: { lightX: 293, lightY: 329 } },
+  { key: 'env_lantern_post', master: 'environment/props/prop_lantern_post_master.png', out: 'assets/environment/props/lantern_post.webp', role: 'prop', env: true, maxDisplay: { h: 210 }, geometry: { lightX: 235, lightY: 683 } },
+  { key: 'env_fence_01', master: 'environment/props/prop_wood_fence_01_master.png', out: 'assets/environment/props/fence_01.webp', role: 'prop', env: true, maxDisplay: { h: 90 }, supersedes: ['wooden_fence', 'fence_post'] },
+  { key: 'env_fence_02', master: 'environment/props/prop_wood_fence_02_master.png', out: 'assets/environment/props/fence_02.webp', role: 'prop', env: true, maxDisplay: { h: 90 } },
+  { key: 'env_tree_stump', master: 'environment/props/prop_tree_stump_master.png', out: 'assets/environment/props/tree_stump.webp', role: 'prop', env: true, maxDisplay: { h: 90 }, supersedes: ['tree_stump'] },
+  { key: 'env_fallen_log', master: 'environment/props/prop_fallen_log_master.png', out: 'assets/environment/props/fallen_log.webp', role: 'prop', env: true, maxDisplay: { h: 100 }, supersedes: ['fallen_log'] },
+  { key: 'env_wood_crate', master: 'environment/props/prop_wood_crate_master.png', out: 'assets/environment/props/wood_crate.webp', role: 'prop', env: true, maxDisplay: { h: 80 }, supersedes: ['wooden_crate', 'wooden_crate_small', 'wooden_cart'] },
+  { key: 'env_barrel', master: 'environment/props/prop_barrel_master.png', out: 'assets/environment/props/barrel.webp', role: 'prop', env: true, maxDisplay: { h: 80 }, supersedes: ['barrel'] },
+
+  // Foreground: edge-framing pieces; anchor = the corner/edge that sits on the screen edge.
+  { key: 'env_fg_fern_left', master: 'environment/foreground/foreground_fern_left_master.png', out: 'assets/environment/foreground/fern_left.webp', role: 'foreground', env: true, maxDisplay: { h: 270 }, supersedes: ['fg_leaves_blur', 'fg_leaves_left'] },
+  { key: 'env_fg_fern_right', master: 'environment/foreground/foreground_fern_right_master.png', out: 'assets/environment/foreground/fern_right.webp', role: 'foreground', env: true, maxDisplay: { h: 270 }, supersedes: ['fg_trunk_right'] },
+  { key: 'env_fg_grass_cluster_01', master: 'environment/foreground/foreground_grass_cluster_01_master.png', out: 'assets/environment/foreground/grass_cluster_01.webp', role: 'foreground', env: true, maxDisplay: { h: 200 } },
+  { key: 'env_fg_flower_cluster_01', master: 'environment/foreground/foreground_flower_cluster_01_master.png', out: 'assets/environment/foreground/flower_cluster_01.webp', role: 'foreground', env: true, maxDisplay: { h: 200 } },
+  { key: 'env_fg_branch', master: 'environment/foreground/foreground_branch_master.png', out: 'assets/environment/foreground/branch.webp', role: 'foreground', env: true, maxDisplay: { h: 310 }, edgeFraming: true, fixedAnchor: { x: 0, y: 0 } },
 
   { key: 'brand_wordmark', master: 'branding/mishkontin-wordmark-master.png', out: 'assets/ui/branding/mishkontin-wordmark.png', role: 'brand', maxDisplay: { w: 680 }, trim: true },
   { key: 'brand_emblem', master: 'branding/mishkontin-emblem-master.png', out: 'assets/ui/branding/mishkontin-emblem.png', role: 'brand', maxDisplay: { w: 280 }, trim: true },
@@ -163,6 +226,46 @@ function solidColumns(img) {
   return { left, right };
 }
 
+/**
+ * Mandatory transparency audit for the environment kit: the master must have
+ * a real alpha channel with genuinely transparent pixels, and (unless it is an
+ * edge-framing foreground piece) transparent corners. A baked checkerboard or
+ * white background fails here and the build stops - no automatic cleanup.
+ */
+function verifyRealAlpha(file, meta, img, edgeFraming) {
+  if (!meta.hasAlpha) throw new Error(`${file}: no alpha channel (baked background?) - BLOCKED`);
+  let zero = 0;
+  for (let i = 3; i < img.data.length; i += 4) if (img.data[i] === 0) zero++;
+  if (zero / (img.width * img.height) < 0.05) throw new Error(`${file}: almost no transparent pixels - BLOCKED`);
+  if (edgeFraming) return;
+  const corner = (x0, y0) => {
+    let sum = 0;
+    for (let y = y0; y < y0 + 16; y++) for (let x = x0; x < x0 + 16; x++) sum += img.data[(y * img.width + x) * 4 + 3];
+    return sum / 256;
+  };
+  const corners = [corner(0, 0), corner(img.width - 16, 0), corner(0, img.height - 16), corner(img.width - 16, img.height - 16)];
+  if (Math.max(...corners) > 10) throw new Error(`${file}: opaque corners ${corners} - BLOCKED`);
+}
+
+/** Geometry measured in master px -> normalized: keys ending in Y by height, all others (x positions) by width. */
+function normalizeGeometry(g, w, h) {
+  const out = {};
+  for (const [k, v] of Object.entries(g)) out[k] = round(k.endsWith('Y') ? v / h : v / w);
+  return out;
+}
+
+/** First/last column with alpha > 200 on row y, normalized. */
+function slabExtent(img, y) {
+  let first = -1, last = -1;
+  for (let x = 0; x < img.width; x++) {
+    if (img.data[(y * img.width + x) * 4 + 3] > 200) {
+      if (first < 0) first = x;
+      last = x;
+    }
+  }
+  return { left: round(first / img.width), right: round(last / img.width) };
+}
+
 /** Identical alpha everywhere and identical RGB wherever alpha > 0 (RGB under alpha 0 is invisible). */
 function visiblyIdentical(a, b) {
   for (let i = 0; i < a.length; i += 4) {
@@ -193,6 +296,7 @@ for (const asset of ASSETS) {
   const actual = sha256(masterPath);
   if (!expected || expected !== actual) throw new Error(`${asset.master}: master checksum mismatch - masters must not change`);
 
+  if (asset.env) verifyRealAlpha(masterPath, await sharp(masterPath).metadata(), await rgba(masterPath), asset.edgeFraming);
   let img = await rgba(masterPath);
   const cleanup = asset.format === 'webp-lossy' ? { solid: 0, specks: 0 } : cleanupAlpha(img);
 
@@ -257,7 +361,14 @@ for (const asset of ASSETS) {
     bytes: fs.statSync(outPath).size,
   };
   if (trimmed) entry.trimmedFromMaster = trimmed;
-  if (asset.role === 'tree' || asset.role === 'water') entry.anchor = groundAnchor(out);
+  if (asset.role === 'tree' || asset.role === 'water' || asset.role === 'prop' || (asset.role === 'foreground' && !asset.fixedAnchor)) entry.anchor = groundAnchor(out);
+  if (asset.fixedAnchor) entry.anchor = asset.fixedAnchor;
+  if (asset.geometry) entry.geometry = normalizeGeometry(asset.geometry, img.width, img.height);
+  if (asset.role === 'ground' || asset.role === 'platform') {
+    // Horizontal extent of the solid slab just below the walk line (the visible ground edge).
+    entry.geometry.slab = slabExtent(out, Math.round((entry.geometry.walkY + 0.03) * height));
+  }
+  if (asset.env) entry.alpha = 'A (real alpha channel verified)';
   if (asset.role === 'layer' && asset.format !== 'webp-lossy') {
     entry.contentBand = contentBand(out);
     const cols = solidColumns(out);

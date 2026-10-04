@@ -3,6 +3,7 @@ import { DEPTH, GAME_HEIGHT, GAME_WIDTH, UI_COLORS } from '../config/constants';
 import type { Mishkontin } from '../entities/Mishkontin';
 import type { VisualLayer } from '../levels/forest/forestLayers';
 import type { AreaDef } from '../levels/LevelTypes';
+import { getProductionAsset } from '../levels/forest/productionAssets';
 import { auditAssetScale, MAX_ALLOWED_MAGNIFICATION, type AssetScaleRow } from './AssetScaleAudit';
 import type { CheckpointSystem } from './CheckpointSystem';
 import { RenderScale } from './RenderScale';
@@ -206,6 +207,8 @@ export class DebugOverlay {
         `scroll    ${o.scrollFactorX} / ${o.scrollFactorY}`,
         `physics   ${body ? `${Math.round(body.width)} x ${Math.round(body.height)} @ ${Math.round(body.x)}, ${Math.round(body.y)}` : 'none (decorative)'}`,
       ];
+      const production = getProductionAsset(this.scene, frame.texture.key.replace(/#graded$/, ''));
+      if (production) lines.push(`master    ${production.master} (${production.masterSize.join(' x ')})`, `alpha     ${production.alpha ?? (production.role === 'layer' ? 'layer' : 'A (real alpha)')}`);
       if (o === (this.player as unknown)) lines.push(`state     ${this.player.playerState} / ${this.player.anims.currentAnim?.key ?? '-'}`);
       this.inspectText.setText(lines);
       const b = o.getBounds();

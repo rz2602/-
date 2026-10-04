@@ -5,6 +5,7 @@ Nothing under `art/` is loaded by the game or copied to `dist/`.
 | Folder | Contents |
 |---|---|
 | `masters/` | **Production master art** (v0.1.1 Ultra Detail pass). Never edited. `masters/MANIFEST.json` lists every file with its original supplied name, role and SHA-256. |
+| `masters/environment/` | **Forest Environment Asset Kit** masters (terrain/ground, platforms, cliffs; bridges; rocks; vegetation; props; foreground). `blocked/` holds the one file that failed the alpha audit. See `FOREST_ASSET_INTEGRATION_REPORT.md`. |
 | `masters/branding/` | Official wordmark and emblem masters + `RUNTIME.json` (runtime copy provenance). |
 | `masters/characters/` | High-resolution Mishkontin **key poses — reference / future animation source only**, not used in gameplay (see below). |
 | `masters/backgrounds/superseded/` | Opaque panorama replaced by the independent layers; kept for provenance, unused. |

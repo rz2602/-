@@ -36,15 +36,15 @@ export function buildLevel(scene: Phaser.Scene, level: LevelDef): BuiltLevel {
 
   drawRavines(scene, level);
 
-  for (const p of level.platforms) {
-    drawPlatform(scene, p);
+  level.platforms.forEach((p, index) => {
+    drawPlatform(scene, p, index);
     const zone = scene.add.zone(p.x, p.y, p.width, PLATFORM_BODY_HEIGHT).setOrigin(0);
     platforms.add(zone);
     const body = zone.body as Phaser.Physics.Arcade.StaticBody;
     body.checkCollision.down = false;
     body.checkCollision.left = false;
     body.checkCollision.right = false;
-  }
+  });
 
   const decorations = new DecorationPlacer(scene, level);
   decorations.placeAll();

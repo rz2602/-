@@ -46,6 +46,8 @@ export interface DecorationDef extends PointDef {
   /** Production art: world height in logical px (resolution-independent). */
   height?: number;
   flipX?: boolean;
+  /** Hanging growth (vines): `y` is the top edge, not the ground contact. */
+  hang?: boolean;
 }
 
 /** Named composition area (documentation + debug overlay). */

@@ -2,6 +2,31 @@
 
 # v0.1.1 - Forest art pass
 
+## Forest Environment Asset Kit (high-resolution terrain, props and foreground)
+
+ForestTestScene's remaining low-resolution kit art is replaced with the supplied production kit.
+Visual only: collision, camera, checkpoints, respawn, Mishkontin, Main Menu and end screen are
+unchanged (18/18 checks at 720p and 1080p, bot 54.7 s with 0 respawns, menu pixel-identical).
+
+- Pixel-level transparency audit of all 52 supplied PNGs. One is blocked
+  (`terrain_ground_right_edge_master`, baked checkerboard, no alpha). The build re-verifies
+  real alpha on every environment master. Masters are archived byte-identical with SHA-256.
+- **Ground:** a high-resolution grass/soil/roots strip on every block, walk line exactly on the
+  collision top, mirror-joined inside its slab (no seams, no stretching), natural rounded ends.
+- **Cliffs:** rock columns at every exposed edge (rock face on the collision edge), rock
+  pillars under narrow islands, darker far rock walls in every gap and pit. This replaces the
+  rectangular soil walls.
+- **Platforms:** long / medium / small / tiny art chosen by collision width, surface on the
+  collision top.
+- **Bridge:** production rope span between two posts.
+- **Rocks, vegetation, props:** authored clusters. Production signpost and lanterns (with a
+  glow), fences, stump, logs, a single crate + barrel. The scatter uses the kit plants.
+- **Foreground:** sparse framing (branch, ferns, grass and flower clusters) that never covers
+  Mishkontin, routes or Sirengrad. Edge-cut pieces stay where their cut edge cannot enter the
+  screen.
+- Debug art inspector also shows the source master and its alpha status.
+- `art/FOREST_ASSET_INTEGRATION_REPORT.md`.
+
 ## Final visual polish
 
 Visual only; gameplay identical (18/18 checks, bot 54.7 s with 0 respawns).

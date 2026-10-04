@@ -20,6 +20,7 @@ export const FxTextures = {
   pawGlyph: 'fx-paw-glyph',
   understory: 'fx-understory',
   soil: 'fx-soil',
+  earth: 'fx-earth',
 } as const;
 
 type Painter = (ctx: CanvasRenderingContext2D, w: number, h: number) => void;
@@ -119,6 +120,16 @@ export function generateForestFx(scene: Phaser.Scene): void {
     g.addColorStop(0, 'rgba(20, 12, 6, 0.55)');
     g.addColorStop(1, 'rgba(20, 12, 6, 0)');
     ctx.fillStyle = g;
+    ctx.fillRect(0, 0, w, h);
+  });
+
+  // Inside of the terrain blocks, below the ground strip: warm soil fading into deep earth.
+  make(scene, FxTextures.earth, 4, 256, (ctx, w, h) => {
+    ctx.fillStyle = vertical(ctx, h, [
+      [0, '#5e4129'],
+      [0.3, '#47311f'],
+      [1, '#211710'],
+    ]);
     ctx.fillRect(0, 0, w, h);
   });
 

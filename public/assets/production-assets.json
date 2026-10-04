@@ -181,7 +181,10 @@
       "anchor": {
         "x": 0.5887,
         "y": 0.9926
-      }
+      },
+      "supersedes": [
+        "tree_medium"
+      ]
     },
     "tree_pine_01": {
       "path": "assets/trees/tree_pine_01.webp",
@@ -253,8 +256,1049 @@
       },
       "supersedes": [
         "waterfall_large",
-        "water_fall_band"
+        "water_fall_band",
+        "waterfall_small",
+        "waterfall_rocks",
+        "water_pool_rocks"
       ]
+    },
+    "env_ground_long": {
+      "path": "assets/environment/terrain/ground_long.webp",
+      "role": "ground",
+      "width": 2172,
+      "height": 724,
+      "master": "art/masters/environment/terrain/ground/terrain_ground_long_master.png",
+      "masterSize": [
+        2172,
+        724
+      ],
+      "masterSha256": "b3d715d788aba52625156817749b51b0c9a78c1e03dbfeb74a43c26fa209774d",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 692880,
+        "specks": 45992
+      },
+      "bytes": 1434326,
+      "geometry": {
+        "walkY": 0.4627,
+        "tileFrom": 0.0783,
+        "tileTo": 0.9254,
+        "slab": {
+          "left": 0.0083,
+          "right": 0.9903
+        }
+      },
+      "alpha": "A (real alpha channel verified)",
+      "supersedes": [
+        "terrain_long",
+        "terrain_medium",
+        "terrain_short",
+        "terrain_cap_left",
+        "terrain_cap_right"
+      ]
+    },
+    "env_cliff_left": {
+      "path": "assets/environment/terrain/cliff_left.webp",
+      "role": "cliff",
+      "width": 1024,
+      "height": 1536,
+      "master": "art/masters/environment/terrain/cliffs/terrain_cliff_left_master.png",
+      "masterSize": [
+        1024,
+        1536
+      ],
+      "masterSha256": "71ba2efc6dcc8cc6ed262a3c407906a9a9d318555a28d9d198e3a32ff62a0107",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 704119,
+        "specks": 36955
+      },
+      "bytes": 1329456,
+      "geometry": {
+        "walkY": 0.2246,
+        "faceX": 0.0215,
+        "capEnd": 0.9668
+      },
+      "alpha": "A (real alpha channel verified)"
+    },
+    "env_cliff_right": {
+      "path": "assets/environment/terrain/cliff_right.webp",
+      "role": "cliff",
+      "width": 1024,
+      "height": 1536,
+      "master": "art/masters/environment/terrain/cliffs/terrain_cliff_right_master.png",
+      "masterSize": [
+        1024,
+        1536
+      ],
+      "masterSha256": "47a82a6bb9249e8d677b0ae3c9cf5f97197c64ff30076bb9350a356ab69fe555",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 679456,
+        "specks": 59074
+      },
+      "bytes": 1265944,
+      "geometry": {
+        "walkY": 0.2246,
+        "faceX": 0.9805,
+        "capEnd": 0.0293
+      },
+      "alpha": "A (real alpha channel verified)"
+    },
+    "env_cliff_wall": {
+      "path": "assets/environment/terrain/cliff_wall.webp",
+      "role": "cliff",
+      "width": 1024,
+      "height": 1536,
+      "master": "art/masters/environment/terrain/cliffs/terrain_cliff_wall_master.png",
+      "masterSize": [
+        1024,
+        1536
+      ],
+      "masterSha256": "88990c3e62731e92b36e10c111067607ae1097ade3da440795c7620659fc11e2",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 673921,
+        "specks": 54153
+      },
+      "bytes": 1321136,
+      "geometry": {
+        "fullWidthY": 0.1302
+      },
+      "alpha": "A (real alpha channel verified)",
+      "supersedes": [
+        "cliff_pillar"
+      ]
+    },
+    "env_platform_long": {
+      "path": "assets/environment/terrain/platform_long.webp",
+      "role": "platform",
+      "width": 600,
+      "height": 200,
+      "master": "art/masters/environment/terrain/platforms/terrain_platform_long_master.png",
+      "masterSize": [
+        2172,
+        724
+      ],
+      "masterSha256": "a24a8bb85bb37c43daa15c379a45b5c7fcba522b1549ffc0bb569973b02a628d",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 702572,
+        "specks": 37728
+      },
+      "bytes": 170148,
+      "geometry": {
+        "walkY": 0.442,
+        "slab": {
+          "left": 0.02,
+          "right": 0.975
+        }
+      },
+      "alpha": "A (real alpha channel verified)",
+      "supersedes": [
+        "floating_platform_small",
+        "floating_platform_medium",
+        "floating_island_round"
+      ]
+    },
+    "env_platform_medium": {
+      "path": "assets/environment/terrain/platform_medium.webp",
+      "role": "platform",
+      "width": 576,
+      "height": 288,
+      "master": "art/masters/environment/terrain/platforms/terrain_platform_medium_master.png",
+      "masterSize": [
+        1774,
+        887
+      ],
+      "masterSha256": "d3013a7f640d127ded9235df1928ca9073c43ea3318bfea313b52e065e5ae925",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 735860,
+        "specks": 38537
+      },
+      "bytes": 238376,
+      "geometry": {
+        "walkY": 0.4262,
+        "slab": {
+          "left": 0.0434,
+          "right": 0.9705
+        }
+      },
+      "alpha": "A (real alpha channel verified)"
+    },
+    "env_platform_small": {
+      "path": "assets/environment/terrain/platform_small.webp",
+      "role": "platform",
+      "width": 528,
+      "height": 352,
+      "master": "art/masters/environment/terrain/platforms/terrain_platform_small_master.png",
+      "masterSize": [
+        1536,
+        1024
+      ],
+      "masterSha256": "9f19f3e701c1e7e9ff1b6ba0954261d32817c667fdf8c98e3577351120527c9c",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 804298,
+        "specks": 40053
+      },
+      "bytes": 256076,
+      "geometry": {
+        "walkY": 0.3711,
+        "slab": {
+          "left": 0.0208,
+          "right": 0.9848
+        }
+      },
+      "alpha": "A (real alpha channel verified)"
+    },
+    "env_platform_tiny": {
+      "path": "assets/environment/terrain/platform_tiny.webp",
+      "role": "platform",
+      "width": 360,
+      "height": 240,
+      "master": "art/masters/environment/terrain/platforms/terrain_platform_tiny_master.png",
+      "masterSize": [
+        1536,
+        1024
+      ],
+      "masterSha256": "19ade9215b9cbc9292898085063aff9999fdbc94f5661621786d0e9899181ec3",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 759441,
+        "specks": 41396
+      },
+      "bytes": 133734,
+      "geometry": {
+        "walkY": 0.3828,
+        "slab": {
+          "left": 0.0639,
+          "right": 0.9611
+        }
+      },
+      "alpha": "A (real alpha channel verified)"
+    },
+    "env_bridge_rope_medium": {
+      "path": "assets/environment/bridges/bridge_rope_medium.webp",
+      "role": "bridge",
+      "width": 768,
+      "height": 320,
+      "master": "art/masters/environment/bridges/bridge_rope_medium_master.png",
+      "masterSize": [
+        1942,
+        809
+      ],
+      "masterSha256": "afbc1dbd71707c71a4d1e2e258240fd431bf1300f2da87e9563fd3fc55bf9d0d",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 578881,
+        "specks": 61584
+      },
+      "bytes": 261582,
+      "geometry": {
+        "deckEndY": 0.3523,
+        "deckMidY": 0.5711,
+        "postLeftX": 0.0834,
+        "postRightX": 0.914
+      },
+      "alpha": "A (real alpha channel verified)",
+      "supersedes": [
+        "rope_bridge"
+      ]
+    },
+    "env_bridge_post": {
+      "path": "assets/environment/bridges/bridge_post.webp",
+      "role": "prop",
+      "width": 208,
+      "height": 312,
+      "master": "art/masters/environment/bridges/bridge_post_master.png",
+      "masterSize": [
+        1024,
+        1536
+      ],
+      "masterSha256": "d9d32add289beaafbe255668c46033572d0df99d190ab023d8e84dda15811bb8",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 749258,
+        "specks": 59990
+      },
+      "bytes": 104726,
+      "anchor": {
+        "x": 0.5144,
+        "y": 0.9583
+      },
+      "alpha": "A (real alpha channel verified)"
+    },
+    "env_rock_large_01": {
+      "path": "assets/environment/rocks/rock_large_01.webp",
+      "role": "prop",
+      "width": 397,
+      "height": 360,
+      "master": "art/masters/environment/rocks/rock_large_01_master.png",
+      "masterSize": [
+        1317,
+        1194
+      ],
+      "masterSha256": "baa77f04039a69449b18620b994bffede0022208dbe04318f8bfdc2da37dfc94",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 1031043,
+        "specks": 18791
+      },
+      "bytes": 216488,
+      "anchor": {
+        "x": 0.4446,
+        "y": 0.9556
+      },
+      "alpha": "A (real alpha channel verified)",
+      "supersedes": [
+        "rock_large"
+      ]
+    },
+    "env_rock_large_02": {
+      "path": "assets/environment/rocks/rock_large_02.webp",
+      "role": "prop",
+      "width": 397,
+      "height": 360,
+      "master": "art/masters/environment/rocks/rock_large_02_master.png",
+      "masterSize": [
+        1317,
+        1194
+      ],
+      "masterSha256": "59847f4d383a6b4c57737aceac6416238f7071b28c76e16ba854849fff3d7cd3",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 1069896,
+        "specks": 26972
+      },
+      "bytes": 239196,
+      "anchor": {
+        "x": 0.5365,
+        "y": 0.9667
+      },
+      "alpha": "A (real alpha channel verified)"
+    },
+    "env_rock_medium_01": {
+      "path": "assets/environment/rocks/rock_medium_01.webp",
+      "role": "prop",
+      "width": 265,
+      "height": 240,
+      "master": "art/masters/environment/rocks/rock_medium_01_master.png",
+      "masterSize": [
+        1317,
+        1194
+      ],
+      "masterSha256": "1b49b87f2bc3c68ee471eb77b7711b754e66f901668f2b2e8766b9df49ff74ad",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 899330,
+        "specks": 28803
+      },
+      "bytes": 102302,
+      "anchor": {
+        "x": 0.4981,
+        "y": 0.9042
+      },
+      "alpha": "A (real alpha channel verified)",
+      "supersedes": [
+        "rock_medium",
+        "rock_mossy"
+      ]
+    },
+    "env_rock_medium_02": {
+      "path": "assets/environment/rocks/rock_medium_02.webp",
+      "role": "prop",
+      "width": 265,
+      "height": 240,
+      "master": "art/masters/environment/rocks/rock_medium_02_master.png",
+      "masterSize": [
+        1317,
+        1194
+      ],
+      "masterSha256": "5e9c434b1cd935e3e1b36ecad663cfa95ad77f3aa3710c592e218717f2ba64fb",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 977187,
+        "specks": 25673
+      },
+      "bytes": 105250,
+      "anchor": {
+        "x": 0.6189,
+        "y": 0.95
+      },
+      "alpha": "A (real alpha channel verified)"
+    },
+    "env_rock_small_01": {
+      "path": "assets/environment/rocks/rock_small_01.webp",
+      "role": "prop",
+      "width": 185,
+      "height": 168,
+      "master": "art/masters/environment/rocks/rock_small_01_master.png",
+      "masterSize": [
+        1317,
+        1194
+      ],
+      "masterSha256": "c28de2b831841d36f9e8b7cbef49b91a1f67efca52ff8e3a3ada96cf1c4cf6c6",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 982648,
+        "specks": 29708
+      },
+      "bytes": 56272,
+      "anchor": {
+        "x": 0.6405,
+        "y": 0.9405
+      },
+      "alpha": "A (real alpha channel verified)",
+      "supersedes": [
+        "rock_small",
+        "rocks_pair",
+        "rock_round"
+      ]
+    },
+    "env_rock_small_02": {
+      "path": "assets/environment/rocks/rock_small_02.webp",
+      "role": "prop",
+      "width": 185,
+      "height": 168,
+      "master": "art/masters/environment/rocks/rock_small_02_master.png",
+      "masterSize": [
+        1317,
+        1194
+      ],
+      "masterSha256": "fc1852ea0ebffa7a751f3fa1fb644e59af831bb7101ec0cee9da7ba15b1042e4",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 991880,
+        "specks": 25887
+      },
+      "bytes": 55060,
+      "anchor": {
+        "x": 0.4838,
+        "y": 0.9464
+      },
+      "alpha": "A (real alpha channel verified)"
+    },
+    "env_rock_cluster_01": {
+      "path": "assets/environment/rocks/rock_cluster_01.webp",
+      "role": "prop",
+      "width": 396,
+      "height": 264,
+      "master": "art/masters/environment/rocks/rock_cluster_01_master.png",
+      "masterSize": [
+        1536,
+        1024
+      ],
+      "masterSha256": "522325d85e5d01a1c6d8030455206acec352374dfef2d4db4bab960122831dc1",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 999005,
+        "specks": 26646
+      },
+      "bytes": 163050,
+      "anchor": {
+        "x": 0.5114,
+        "y": 0.9508
+      },
+      "alpha": "A (real alpha channel verified)"
+    },
+    "env_bush_01": {
+      "path": "assets/environment/vegetation/bush_01.webp",
+      "role": "prop",
+      "width": 265,
+      "height": 240,
+      "master": "art/masters/environment/vegetation/vegetation_bush_01_master.png",
+      "masterSize": [
+        1317,
+        1194
+      ],
+      "masterSha256": "391e31e5dcc852883d6cec4b38db1fd3016135caac8bbc09df9f145e00568044",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 953009,
+        "specks": 33350
+      },
+      "bytes": 101628,
+      "anchor": {
+        "x": 0.5566,
+        "y": 0.9042
+      },
+      "alpha": "A (real alpha channel verified)",
+      "supersedes": [
+        "bush_01",
+        "bush_03",
+        "bush_small"
+      ]
+    },
+    "env_bush_02": {
+      "path": "assets/environment/vegetation/bush_02.webp",
+      "role": "prop",
+      "width": 360,
+      "height": 240,
+      "master": "art/masters/environment/vegetation/vegetation_bush_02_master.png",
+      "masterSize": [
+        1536,
+        1024
+      ],
+      "masterSha256": "b3e74fab922962b195af5f1ebdad3b9ff23f2ad755942d591c31d46579870e73",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 891232,
+        "specks": 37919
+      },
+      "bytes": 122934,
+      "anchor": {
+        "x": 0.5403,
+        "y": 0.9292
+      },
+      "alpha": "A (real alpha channel verified)",
+      "supersedes": [
+        "bush_02",
+        "bush_wide",
+        "bush_blue"
+      ]
+    },
+    "env_fern_01": {
+      "path": "assets/environment/vegetation/fern_01.webp",
+      "role": "prop",
+      "width": 265,
+      "height": 240,
+      "master": "art/masters/environment/vegetation/vegetation_fern_01_master.png",
+      "masterSize": [
+        1317,
+        1194
+      ],
+      "masterSha256": "bee2df689751bdfa89e40993f4f14afb22078d0dbb647531b81cd36191176962",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 801855,
+        "specks": 40697
+      },
+      "bytes": 96632,
+      "anchor": {
+        "x": 0.4925,
+        "y": 0.8792
+      },
+      "alpha": "A (real alpha channel verified)",
+      "supersedes": [
+        "fern"
+      ]
+    },
+    "env_fern_02": {
+      "path": "assets/environment/vegetation/fern_02.webp",
+      "role": "prop",
+      "width": 265,
+      "height": 240,
+      "master": "art/masters/environment/vegetation/vegetation_fern_02_master.png",
+      "masterSize": [
+        1317,
+        1194
+      ],
+      "masterSha256": "2c200f85ea5bf32187ef713fc98c1524708e0e18364579fa974d7f68ffc1cc5e",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 758462,
+        "specks": 53040
+      },
+      "bytes": 89768,
+      "anchor": {
+        "x": 0.5509,
+        "y": 0.9042
+      },
+      "alpha": "A (real alpha channel verified)"
+    },
+    "env_grass_01": {
+      "path": "assets/environment/vegetation/grass_01.webp",
+      "role": "prop",
+      "width": 252,
+      "height": 168,
+      "master": "art/masters/environment/vegetation/vegetation_grass_01_master.png",
+      "masterSize": [
+        1536,
+        1024
+      ],
+      "masterSha256": "c0eefd69aa6925011282cc0d67ec7eb504cc70fe70454767773fed236769e09f",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 811660,
+        "specks": 69155
+      },
+      "bytes": 66938,
+      "anchor": {
+        "x": 0.5198,
+        "y": 0.9107
+      },
+      "alpha": "A (real alpha channel verified)",
+      "supersedes": [
+        "grass_tall",
+        "grass_tuft",
+        "grass_tuft_02",
+        "grass_patch",
+        "plant_small"
+      ]
+    },
+    "env_grass_02": {
+      "path": "assets/environment/vegetation/grass_02.webp",
+      "role": "prop",
+      "width": 252,
+      "height": 168,
+      "master": "art/masters/environment/vegetation/vegetation_grass_02_master.png",
+      "masterSize": [
+        1536,
+        1024
+      ],
+      "masterSha256": "b40cb484d7849cfb08e7bcbcef92da87cdbaaf96e4a17a5d9107f15ec64e74ad",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 834154,
+        "specks": 92775
+      },
+      "bytes": 72332,
+      "anchor": {
+        "x": 0.5278,
+        "y": 0.9107
+      },
+      "alpha": "A (real alpha channel verified)"
+    },
+    "env_flowers_01": {
+      "path": "assets/environment/vegetation/flowers_01.webp",
+      "role": "prop",
+      "width": 252,
+      "height": 168,
+      "master": "art/masters/environment/vegetation/vegetation_flowers_01_master.png",
+      "masterSize": [
+        1536,
+        1024
+      ],
+      "masterSha256": "33e890025b89417d077ef70f587b431f063711dc5548eced1e244e7a674c90ce",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 898219,
+        "specks": 62808
+      },
+      "bytes": 79738,
+      "anchor": {
+        "x": 0.5099,
+        "y": 0.9226
+      },
+      "alpha": "A (real alpha channel verified)",
+      "supersedes": [
+        "flowers_blue",
+        "flowers_pink",
+        "flowers_purple"
+      ]
+    },
+    "env_flowers_02": {
+      "path": "assets/environment/vegetation/flowers_02.webp",
+      "role": "prop",
+      "width": 252,
+      "height": 168,
+      "master": "art/masters/environment/vegetation/vegetation_flowers_02_master.png",
+      "masterSize": [
+        1536,
+        1024
+      ],
+      "masterSha256": "0f55e650354a64e8d20fbe3bf658cd0f4f5ba7f65bc9aa1540e7a31c20116c35",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 962839,
+        "specks": 52207
+      },
+      "bytes": 79160,
+      "anchor": {
+        "x": 0.5417,
+        "y": 0.9226
+      },
+      "alpha": "A (real alpha channel verified)",
+      "supersedes": [
+        "flowers_pink_02"
+      ]
+    },
+    "env_mushrooms_01": {
+      "path": "assets/environment/vegetation/mushrooms_01.webp",
+      "role": "prop",
+      "width": 252,
+      "height": 168,
+      "master": "art/masters/environment/vegetation/vegetation_mushrooms_01_master.png",
+      "masterSize": [
+        1536,
+        1024
+      ],
+      "masterSha256": "8d5b3fb3c4718e1879911753c6a3243291425e623f668ec3cd2f69b090b7de12",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 971008,
+        "specks": 54286
+      },
+      "bytes": 75442,
+      "anchor": {
+        "x": 0.5258,
+        "y": 0.9345
+      },
+      "alpha": "A (real alpha channel verified)",
+      "supersedes": [
+        "mushroom_orange",
+        "mushroom_small"
+      ]
+    },
+    "env_vines_01": {
+      "path": "assets/environment/vegetation/vines_01.webp",
+      "role": "prop",
+      "width": 576,
+      "height": 384,
+      "master": "art/masters/environment/vegetation/vegetation_vines_01_master.png",
+      "masterSize": [
+        1536,
+        1024
+      ],
+      "masterSha256": "03b397d8f133b868bf756ba620480102e1726476f36ff7b224e72b07a52f1783",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 660882,
+        "specks": 116905
+      },
+      "bytes": 288504,
+      "anchor": {
+        "x": 0.5043,
+        "y": 0.776
+      },
+      "alpha": "A (real alpha channel verified)"
+    },
+    "env_signpost": {
+      "path": "assets/environment/props/signpost.webp",
+      "role": "prop",
+      "width": 387,
+      "height": 408,
+      "master": "art/masters/environment/props/prop_signpost_master.png",
+      "masterSize": [
+        1222,
+        1287
+      ],
+      "masterSha256": "f9c86ca27c0189cabaee0f91daeb02198ca7e3935bb7805ad26db02bf0d98f25",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 697919,
+        "specks": 44454
+      },
+      "bytes": 165368,
+      "anchor": {
+        "x": 0.4729,
+        "y": 0.973
+      },
+      "geometry": {
+        "lightX": 0.2398,
+        "lightY": 0.2556
+      },
+      "alpha": "A (real alpha channel verified)",
+      "supersedes": [
+        "wooden_sign"
+      ]
+    },
+    "env_lantern_post": {
+      "path": "assets/environment/props/lantern_post.webp",
+      "role": "prop",
+      "width": 336,
+      "height": 504,
+      "master": "art/masters/environment/props/prop_lantern_post_master.png",
+      "masterSize": [
+        1024,
+        1536
+      ],
+      "masterSha256": "c4c8409f4bb56e7fe7a1c28fd7c86be3e1e1e9443bd3042c1816de36300ec1ae",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 644519,
+        "specks": 59159
+      },
+      "bytes": 181270,
+      "anchor": {
+        "x": 0.6741,
+        "y": 0.9821
+      },
+      "geometry": {
+        "lightX": 0.2295,
+        "lightY": 0.4447
+      },
+      "alpha": "A (real alpha channel verified)"
+    },
+    "env_fence_01": {
+      "path": "assets/environment/props/fence_01.webp",
+      "role": "prop",
+      "width": 432,
+      "height": 216,
+      "master": "art/masters/environment/props/prop_wood_fence_01_master.png",
+      "masterSize": [
+        1774,
+        887
+      ],
+      "masterSha256": "d0786764ce56ddc4a0e2a938a86d7445c6b709040746af87ddf139b35d265407",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 876185,
+        "specks": 43915
+      },
+      "bytes": 136196,
+      "anchor": {
+        "x": 0.5069,
+        "y": 0.9259
+      },
+      "alpha": "A (real alpha channel verified)",
+      "supersedes": [
+        "wooden_fence",
+        "fence_post"
+      ]
+    },
+    "env_fence_02": {
+      "path": "assets/environment/props/fence_02.webp",
+      "role": "prop",
+      "width": 432,
+      "height": 216,
+      "master": "art/masters/environment/props/prop_wood_fence_02_master.png",
+      "masterSize": [
+        1774,
+        887
+      ],
+      "masterSha256": "3919f491f28632d48057544cdee02c6613e89008c13c14cb295cc300469d6c89",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 1011422,
+        "specks": 43165
+      },
+      "bytes": 149902,
+      "anchor": {
+        "x": 0.5463,
+        "y": 0.963
+      },
+      "alpha": "A (real alpha channel verified)"
+    },
+    "env_tree_stump": {
+      "path": "assets/environment/props/tree_stump.webp",
+      "role": "prop",
+      "width": 324,
+      "height": 216,
+      "master": "art/masters/environment/props/prop_tree_stump_master.png",
+      "masterSize": [
+        1536,
+        1024
+      ],
+      "masterSha256": "0b8a55a53b709a0ea919d5036897173b86eaea203301c838abeec274aab6c427",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 922483,
+        "specks": 31877
+      },
+      "bytes": 108124,
+      "anchor": {
+        "x": 0.5139,
+        "y": 0.9259
+      },
+      "alpha": "A (real alpha channel verified)",
+      "supersedes": [
+        "tree_stump"
+      ]
+    },
+    "env_fallen_log": {
+      "path": "assets/environment/props/fallen_log.webp",
+      "role": "prop",
+      "width": 480,
+      "height": 240,
+      "master": "art/masters/environment/props/prop_fallen_log_master.png",
+      "masterSize": [
+        1774,
+        887
+      ],
+      "masterSha256": "efcf8b53bf8a4c310d135a124a608d9a1f6d1207fc416455e3d5547b643d47ce",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 969787,
+        "specks": 37867
+      },
+      "bytes": 175578,
+      "anchor": {
+        "x": 0.3573,
+        "y": 0.9292
+      },
+      "alpha": "A (real alpha channel verified)",
+      "supersedes": [
+        "fallen_log"
+      ]
+    },
+    "env_wood_crate": {
+      "path": "assets/environment/props/wood_crate.webp",
+      "role": "prop",
+      "width": 288,
+      "height": 192,
+      "master": "art/masters/environment/props/prop_wood_crate_master.png",
+      "masterSize": [
+        1536,
+        1024
+      ],
+      "masterSha256": "7bc27a48b23ff21cc4505965d5f12d3550e51d834cc83ad174d94f266409f539",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 1011178,
+        "specks": 17471
+      },
+      "bytes": 82148,
+      "anchor": {
+        "x": 0.4583,
+        "y": 0.9167
+      },
+      "alpha": "A (real alpha channel verified)",
+      "supersedes": [
+        "wooden_crate",
+        "wooden_crate_small",
+        "wooden_cart"
+      ]
+    },
+    "env_barrel": {
+      "path": "assets/environment/props/barrel.webp",
+      "role": "prop",
+      "width": 210,
+      "height": 192,
+      "master": "art/masters/environment/props/prop_barrel_master.png",
+      "masterSize": [
+        1312,
+        1199
+      ],
+      "masterSha256": "70e63c4c9ff4cf84e9ab4ff5d6e193db33b7de7bbea24031ad469c39e5acaf9f",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 1114357,
+        "specks": 27033
+      },
+      "bytes": 70010,
+      "anchor": {
+        "x": 0.5119,
+        "y": 0.9583
+      },
+      "alpha": "A (real alpha channel verified)",
+      "supersedes": [
+        "barrel"
+      ]
+    },
+    "env_fg_fern_left": {
+      "path": "assets/environment/foreground/fern_left.webp",
+      "role": "foreground",
+      "width": 972,
+      "height": 648,
+      "master": "art/masters/environment/foreground/foreground_fern_left_master.png",
+      "masterSize": [
+        1536,
+        1024
+      ],
+      "masterSha256": "f14f5afa64f14560b711cf6fd20c06870cd16de00d8ea51e27b2d8a9d3a00178",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 734000,
+        "specks": 55799
+      },
+      "bytes": 675006,
+      "anchor": {
+        "x": 0.5468,
+        "y": 0.9383
+      },
+      "alpha": "A (real alpha channel verified)",
+      "supersedes": [
+        "fg_leaves_blur",
+        "fg_leaves_left"
+      ]
+    },
+    "env_fg_fern_right": {
+      "path": "assets/environment/foreground/fern_right.webp",
+      "role": "foreground",
+      "width": 972,
+      "height": 648,
+      "master": "art/masters/environment/foreground/foreground_fern_right_master.png",
+      "masterSize": [
+        1536,
+        1024
+      ],
+      "masterSha256": "ead1950c19db0604cb14abaede55ba205eb927470c795db9e43a26f54f06f9d6",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 878741,
+        "specks": 57244
+      },
+      "bytes": 765812,
+      "anchor": {
+        "x": 0.5658,
+        "y": 0.963
+      },
+      "alpha": "A (real alpha channel verified)",
+      "supersedes": [
+        "fg_trunk_right"
+      ]
+    },
+    "env_fg_grass_cluster_01": {
+      "path": "assets/environment/foreground/grass_cluster_01.webp",
+      "role": "foreground",
+      "width": 720,
+      "height": 480,
+      "master": "art/masters/environment/foreground/foreground_grass_cluster_01_master.png",
+      "masterSize": [
+        1536,
+        1024
+      ],
+      "masterSha256": "393e612030c95f490562a9843ab623b234d0e3c2f357ed5a3d316e0acd65cd1c",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 837137,
+        "specks": 62935
+      },
+      "bytes": 421472,
+      "anchor": {
+        "x": 0.525,
+        "y": 0.9458
+      },
+      "alpha": "A (real alpha channel verified)"
+    },
+    "env_fg_flower_cluster_01": {
+      "path": "assets/environment/foreground/flower_cluster_01.webp",
+      "role": "foreground",
+      "width": 720,
+      "height": 480,
+      "master": "art/masters/environment/foreground/foreground_flower_cluster_01_master.png",
+      "masterSize": [
+        1536,
+        1024
+      ],
+      "masterSha256": "02c6a81047c3ad495726bd86b2f45d4f1e3dbecccf06ba9458a7aab77f5c28a7",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 889032,
+        "specks": 44863
+      },
+      "bytes": 482290,
+      "anchor": {
+        "x": 0.5083,
+        "y": 0.9375
+      },
+      "alpha": "A (real alpha channel verified)"
+    },
+    "env_fg_branch": {
+      "path": "assets/environment/foreground/branch.webp",
+      "role": "foreground",
+      "width": 1488,
+      "height": 744,
+      "master": "art/masters/environment/foreground/foreground_branch_master.png",
+      "masterSize": [
+        1774,
+        887
+      ],
+      "masterSha256": "41bdae2e5f0f7a5b7bcde8ecda881d347c8da01fa5042b4edb6f21ca2910fb1c",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 652624,
+        "specks": 80019
+      },
+      "bytes": 945718,
+      "anchor": {
+        "x": 0,
+        "y": 0
+      },
+      "alpha": "A (real alpha channel verified)"
     }
   }
 }

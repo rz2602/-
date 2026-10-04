@@ -1,4 +1,4 @@
-# Asset resolution report (v0.1.1 — after the Ultra Detail production integration)
+# Asset resolution report (v0.1.1 — after the Forest Environment Asset Kit integration)
 
 Measured in-game with the asset scale audit (debug mode, `R`; console table). Rule: no
 raster asset above **~125 %** of its native size at **2560×1440** (render scale 2).
@@ -33,25 +33,22 @@ The four background masters are 2172×724. To stay ≤125 % at 1440p a layer can
 ~1357 logical px per copy, so long levels need repeated (mirrored) copies — see
 "Known limitations". For 4K-native backgrounds the masters would need to be ~3260×1090.
 
-## Still above 125 % at 1440p (legacy art, no replacement supplied)
+## Forest Environment Asset Kit (final integration)
+
+All 40 integrated kit textures are **≤ 108 % at 1440p** (ground strip 90 %, cliffs 84 %,
+platforms 66–75 %, bridge 65 %, props/rocks/plants 40–108 %, foreground 64–72 %). The full table
+is in **[FOREST_ASSET_INTEGRATION_REPORT.md](FOREST_ASSET_INTEGRATION_REPORT.md)**.
+
+## Still above 125 % at 1440p in gameplay
 
 | Asset | Native | @1440p | Needed for ≤100 % @1440p |
 |---|---|---|---|
-| Mishkontin atlas frames | 213×195 | **170 %** | ~363×332 per frame (master sprite set) |
-| `water_strip` (river band) — hidden since the polish pass (`RIVER_VISIBLE = false`) | 256×32 | 442 % | ~1132×142 seamless |
-| `lantern_post` | 84×117 | 320 % | ~269×375 |
-| foreground leaves/trunk (3) | ~190×104 | 320 % | ~615×333 |
-| `wooden_fence`, `fence_post` | 72×48, 42×35 | 300 % | ~216×144 |
-| `rock_large`, `fallen_log` | 113×75, 121×55 | 280 % | ~316×210 |
-| terrain caps (`terrain_cap*`) | 256×64 | 270 % | 512×128 seamless (+ end caps) |
-| `rope_bridge` | 198×83 | 268 % | ~531×222 |
-| small plants, flowers, rocks, props (~25) | 25–140 px | 250–270 % | ~2.6× current |
-| `wooden_sign`, `waystone` | 95×110, 163×161 | 230 % | ~219×253, ~375×370 |
-| `fx-soil` (synthesised soil tile) | 256×256 | 270 % | 512×512 / 1024×1024 painted tile |
+| Mishkontin atlas frames | 213×195 | **170 %** | ~363×332 per frame (future animation milestone) |
+| `waystone` (checkpoint) | 163×161 | 230 % | ~375×370 |
 
-All are legacy kit art or the Mishkontin atlas. None are upscaled or sharpened — they are
-flagged. The slender `tree_medium` is no longer placed (replaced by production oaks in the
-final polish pass) and the river band is hidden. Exact replacement specs:
+Nothing else in ForestTestScene exceeds 125 %. The legacy kit pieces still drawn by the
+**locked Main Menu** (`terrain_cap`, soil, `lantern_post`, `flowers_white`, `mushroom_red`) are
+unchanged. The hidden river band (`water_strip`) is not drawn. Specs for the rest:
 **[FUTURE_ART_REQUIREMENTS.md](FUTURE_ART_REQUIREMENTS.md)**.
 
 The gameplay background layers (mountains, distant and mid forest) are drawn from colour-graded

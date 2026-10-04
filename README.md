@@ -114,7 +114,7 @@ src/
       forestAssets.ts      forest manifest access (keys, sizes, anchors)
       forestFx.ts          procedural FX textures: sky, haze, light, glow, sparks, paw glyph, soil
       ForestBackdrop.ts    layers 0-3: sky, mountains + Sirengrad, distant + mid forest, light
-      TerrainRenderer.ts   grass cap / soil / shading over plain rectangles; platforms; bridge; ravines
+      TerrainRenderer.ts   kit ground strip / cliff columns / pillars / ravine walls over plain rectangles; platforms; bridge
       DecorationPlacer.ts  back / ground / foreground decorations (+ parallax placement), scatter
       ForestWater.ts       waterfalls; optional river band + splashes (RIVER_VISIBLE)
       WaystoneVisual.ts    the checkpoint waystone
@@ -202,9 +202,13 @@ High-resolution masters live in `art/masters/` (never edited, SHA-256 in `MANIFE
 - **Branding (screen-space UI, `src/ui/Brand.ts`):** the official wordmark is the Main Menu title.
   The official emblem is shown on the boot/loading screen. Both are image-only, never
   re-typed, with aspect ratio preserved.
+- **Forest Environment Asset Kit:** high-resolution ground strip, cliffs, platforms (by width),
+  rope bridge, rocks, vegetation, props and sparse foreground framing. Every piece is positioned
+  from the unchanged collision rectangles. All supplied PNGs pass a pixel-level alpha audit;
+  one baked-checkerboard file is blocked. See `art/FOREST_ASSET_INTEGRATION_REPORT.md`.
 - **Mishkontin:** the legacy multi-frame atlas is kept. High-res key poses are reference only.
 
-Reports: `art/INTEGRATION_REPORT_v0.1.1.md`, `art/ASSET_RESOLUTION_REPORT.md`, `art/README.md`.
+Reports: `art/FOREST_ASSET_INTEGRATION_REPORT.md`, `art/INTEGRATION_REPORT_v0.1.1.md`, `art/ASSET_RESOLUTION_REPORT.md`, `art/README.md`.
 Future art specs (legacy replacements, seamless background masters, Mishkontin animation
 milestone): `art/FUTURE_ART_REQUIREMENTS.md`.
 
@@ -212,7 +216,7 @@ milestone): `art/FUTURE_ART_REQUIREMENTS.md`.
 contrast / brightness, no blur), `SUN_SHAFTS` (gameplay 0.22, menu 0.55), `RIVER_VISIBLE`
 (river band below the gaps, off).
 
-### Legacy forest kit art (v0.1.1 first art pass)
+### Legacy forest kit art (v0.1.1 first art pass — now largely superseded by the Environment Asset Kit)
 
 The forest follows two references in `art/`: the **Forest Art Direction** painting (composition,
 light and colour target; reference only, since it is one flat image) and the **Forest Environment
@@ -245,9 +249,9 @@ lists every texture with its measured magnification and the source size needed f
 | 2 | Distant forest | 0.20 / 0.10 | pines in haze, sun shafts |
 | 3 | Mid forest | 0.40 / 0.20 | canopy + dark understory |
 | 4 | Back decoration | 0.85 / 0.85 | big trees, waterfalls (ravine walls just in front) |
-| 5 | Terrain | 1.0 | ravine walls, grass caps, soil, platforms, bridge |
+| 5 | Terrain | 1.0 | ravine rock walls, ground strip, cliff columns, platforms, bridge |
 | 6 | Mishkontin + objects | 1.0 | ground props (behind him), waystone, effects |
-| 7 | Foreground | 1.12 / 1.0 | sparse leaves at the bottom screen edge only |
+| 7 | Foreground | 1.12 / 1.0 | sparse framing at the screen edges (never over Mishkontin or routes) |
 
 Tiled layers are screen-sized TileSprites whose texture offset follows the camera, so each
 costs one quad regardless of level length. Back and foreground decorations use Phaser scroll
@@ -255,7 +259,7 @@ factors and are positioned for the camera the player will have near them, so the
 the level data puts them.
 
 **Readability rules:** the collision is plain rectangles (visual shape is not physics shape),
-the grass cap's walk line sits exactly on the collision top, decorations never collide and
+the ground strip's and platforms' grass surface sits exactly on the collision top, decorations never collide and
 always draw behind Mishkontin, foreground pieces stay below the ground line, and falling into
 a gap respawns (below the water line, with the usual "Хайде още веднъж!").
 

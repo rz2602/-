@@ -4,9 +4,10 @@ Ideas collected during v0.1. **None of these are implemented.** Each belongs to 
 version and should be planned before implementation.
 
 ## Art & animation
-- Replace the remaining low-resolution legacy kit art (grass caps, soil, platforms, ravine
-  edges, bridge, fence, sign, props, small plants, foreground) with high-resolution masters.
-  Exact list and sizes: `art/FUTURE_ART_REQUIREMENTS.md` §1.
+- Forest kit leftovers: a real-alpha re-export of `terrain_ground_right_edge_master` (blocked:
+  baked checkerboard), a high-res checkpoint waystone, foreground leaves with uncut tops.
+  `art/FUTURE_ART_REQUIREMENTS.md` §1. Unused kit masters (ground left edge, cliff bottoms,
+  long bridge, bridge entrances, broken bridge) are archived for later levels.
 - Wider wrap-seamless background masters (3300-4500 px, right edge continuing into the left) to
   remove the mirror joins in the sky, mountains and forest layers: §2 of the same file.
 - **Milestone:** high-resolution Mishkontin animation set matching the canon (wooden staff, gold

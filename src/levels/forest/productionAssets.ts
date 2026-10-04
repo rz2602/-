@@ -12,7 +12,7 @@ import { AssetKeys } from '../../config/constants';
  */
 export interface ProductionAsset {
   path: string;
-  role: 'layer' | 'tree' | 'water';
+  role: 'layer' | 'tree' | 'water' | 'ground' | 'cliff' | 'platform' | 'bridge' | 'prop' | 'foreground';
   width: number;
   height: number;
   master: string;
@@ -26,6 +26,13 @@ export interface ProductionAsset {
   solidColumns?: { left: number; right: number };
   /** Mountains: columns [0, castleFreeEnd) contain no castle, normalized. */
   castleFreeEnd?: number;
+  /**
+   * Environment kit geometry measured on the master, normalized (y by height,
+   * x by width): walkY (grass / deck surface), slab extents, cliff face, light points...
+   */
+  geometry?: Record<string, number | { left: number; right: number }>;
+  /** Alpha audit result (environment kit). */
+  alpha?: string;
   /** Legacy forest-kit keys replaced by this asset (no longer loaded). */
   supersedes?: string[];
 }
