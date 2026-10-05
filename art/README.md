@@ -8,6 +8,7 @@ Nothing under `art/` is loaded by the game or copied to `dist/`.
 | `masters/environment/` | **Forest Environment Asset Kit** masters (terrain/ground, platforms, cliffs; bridges; rocks; vegetation; props; foreground). (The once-blocked ground right edge was replaced by a real-alpha re-export.) See `FOREST_ASSET_INTEGRATION_REPORT.md`. |
 | `masters/backgrounds/wide/` | Final separated background set (sky, mountains, Sirengrad, distant, mid). See `WIDE_BACKGROUND_INTEGRATION_REPORT.md`. |
 | `masters/branding/` | Official wordmark and emblem masters + `RUNTIME.json` (runtime copy provenance). |
+| `masters/characters/mishkontin_v2/` | **Mishkontin V2 animation set** (gameplay character) + `CHARACTER_V2_MANIFEST.json`. See `MISHKONTIN_V2_INTEGRATION_REPORT.md`. |
 | `masters/characters/` | High-resolution Mishkontin **key poses — reference / future animation source only**, not used in gameplay (see below). |
 | `masters/backgrounds/superseded/` | Opaque panorama replaced by the independent layers; kept for provenance, unused. |
 | `reference/` | Reference-only images: canonical Mishkontin design sheet, forest composition reference, forest art direction. Never runtime assets. |

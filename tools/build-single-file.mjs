@@ -24,6 +24,9 @@ const { version } = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 
 const INLINE_ASSETS = {
   'assets/characters/mishkontin/generated/mishkontin-frames.json': 'json',
   'assets/characters/mishkontin/generated/mishkontin-frames.png': 'image/png',
+  'assets/characters/mishkontin/v2/mishkontin-v2.webp': 'image/webp',
+  'assets/characters/mishkontin/v2/mishkontin-v2.json': 'json',
+  'assets/characters/mishkontin/v2/mishkontin-v2-manifest.json': 'json',
   'assets/ui/branding/mishkontin-wordmark.png': 'image/png',
   'assets/ui/branding/mishkontin-emblem.png': 'image/png',
 };

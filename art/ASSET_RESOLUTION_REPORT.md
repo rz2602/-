@@ -48,7 +48,7 @@ is in **[FOREST_ASSET_INTEGRATION_REPORT.md](FOREST_ASSET_INTEGRATION_REPORT.md)
 
 | Asset | Native | @1440p | Needed for ≤100 % @1440p |
 |---|---|---|---|
-| Mishkontin atlas frames | 213×195 | **170 %** | ~363×332 per frame (future animation milestone) |
+| ~~Mishkontin atlas frames~~ | 213×195 | 170 % | replaced in gameplay by **Mishkontin V2** (100 % at 1440p); the legacy atlas is used only by the locked Main Menu |
 
 Nothing else in ForestTestScene exceeds 125 % (the new waystone is 77 %, the ground ends and
 underground fill 90 %). The legacy kit pieces still drawn by the

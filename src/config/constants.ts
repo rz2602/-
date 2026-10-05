@@ -14,11 +14,15 @@ export const SceneKeys = {
   Settings: 'SettingsScene',
   ForestTest: 'ForestTestScene',
   Pause: 'PauseScene',
+  /** Developer-only animation gallery (`?animlab`). */
+  AnimationLab: 'AnimationLabScene',
 } as const;
 
 export const AssetKeys = {
   mishkontinManifest: 'mishkontin-frames-manifest',
   mishkontin: 'mishkontin',
+  mishkontinV2: 'mishkontin-v2',
+  mishkontinV2Manifest: 'mishkontin-v2-manifest',
   forestManifest: 'forest-assets-manifest',
   productionManifest: 'production-assets-manifest',
   /** Official brand assets: screen-space UI only. */
@@ -29,6 +33,9 @@ export const AssetKeys = {
 export const AssetPaths = {
   mishkontinManifest: 'assets/characters/mishkontin/generated/mishkontin-frames.json',
   mishkontinFrames: 'assets/characters/mishkontin/generated/mishkontin-frames.png',
+  mishkontinV2Atlas: 'assets/characters/mishkontin/v2/mishkontin-v2.json',
+  mishkontinV2Image: 'assets/characters/mishkontin/v2/mishkontin-v2.webp',
+  mishkontinV2Manifest: 'assets/characters/mishkontin/v2/mishkontin-v2-manifest.json',
   forestManifest: 'assets/environments/forest/forest-assets.json',
   productionManifest: 'assets/production-assets.json',
   brandWordmark: 'assets/ui/branding/mishkontin-wordmark.png',
@@ -68,14 +75,23 @@ export const PLAYER_ASSISTS = {
 } as const;
 
 /**
- * Rendering scale of Mishkontin. The atlas is kept at source resolution so it
- * stays sharp when the canvas is scaled up on large screens.
+ * Gameplay character art: true = high-resolution V2 animation set
+ * (tools/build-mishkontin-v2.mjs), false = legacy atlas. The legacy atlas stays
+ * loaded either way (the locked Main Menu uses it), so switching back is safe.
+ * Physics, body and movement are identical in both.
+ */
+export const USE_MISHKONTIN_V2 = true;
+
+/**
+ * Rendering scale of the LEGACY Mishkontin atlas (V2 uses its manifest's
+ * runtimePxPerLogical). The collision body below is defined against it and
+ * converted for V2, so the body is the same in logical px either way.
  */
 export const PLAYER_SCALE = 0.85;
 
 /**
- * Collision body in UNSCALED atlas-frame pixels (Phaser scales it with the
- * sprite). The body covers torso + legs only: ears, cloak, staff and tail are
+ * Collision body in UNSCALED LEGACY atlas-frame pixels (Phaser scales it with
+ * the sprite; V2 converts it to its own frame pixels). The body covers torso + legs only: ears, cloak, staff and tail are
  * visual only. It is centred on the foot anchor and its bottom edge sits
  * exactly on the feet. Tune these freely.
  */
@@ -104,8 +120,8 @@ export const IDLE_BEHAVIOUR = {
   /** Plain idle loop only, before any alternate idle is allowed. */
   alternateIdleAfterMs: 5000,
   /** Random pause between alternate idles once allowed. */
-  alternateIdleMinGapMs: 2500,
-  alternateIdleMaxGapMs: 5000,
+  alternateIdleMinGapMs: 3000,
+  alternateIdleMaxGapMs: 7000,
 } as const;
 
 export const CAMERA = {

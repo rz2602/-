@@ -1,11 +1,16 @@
 import Phaser from 'phaser';
-import { AssetKeys, AssetPaths, BOOT, GAME_HEIGHT, GAME_WIDTH, SceneKeys } from '../config/constants';
-import { getMishkontinManifest, registerMishkontinAnimations } from '../entities/mishkontinAnimations';
+import { AssetKeys, AssetPaths, BOOT, GAME_HEIGHT, GAME_WIDTH, SceneKeys, USE_MISHKONTIN_V2 } from '../config/constants';
+import {
+  getMishkontinManifest,
+  getMishkontinV2Manifest,
+  registerMishkontinAnimations,
+  registerMishkontinV2Animations,
+} from '../entities/mishkontinAnimations';
 import { getForestManifest } from '../levels/forest/forestAssets';
 import { generateForestFx } from '../levels/forest/forestFx';
 import { getProductionManifest, supersededLegacyKeys } from '../levels/forest/productionAssets';
 import { addEmblem } from '../ui/Brand';
-import { assetSource } from '../utils/assetSource';
+import { assetSource, jsonAssetSource } from '../utils/assetSource';
 import { generatePlaceholderArt } from '../utils/placeholderArt';
 
 /**
@@ -35,6 +40,11 @@ export class PreloadScene extends Phaser.Scene {
       frameWidth: manifest.frameWidth,
       frameHeight: manifest.frameHeight,
     });
+    // High-resolution V2 animation set (gameplay character; the menu keeps the legacy atlas).
+    if (USE_MISHKONTIN_V2) {
+      this.load.atlas(AssetKeys.mishkontinV2, assetSource(AssetPaths.mishkontinV2Image), jsonAssetSource(AssetPaths.mishkontinV2Atlas));
+      this.load.json(AssetKeys.mishkontinV2Manifest, jsonAssetSource(AssetPaths.mishkontinV2Manifest));
+    }
 
     // High-resolution production art (tools/build-production-assets.mjs) ...
     for (const [key, entry] of Object.entries(getProductionManifest(this).assets)) {
@@ -53,6 +63,7 @@ export class PreloadScene extends Phaser.Scene {
     generatePlaceholderArt(this);
     generateForestFx(this);
     registerMishkontinAnimations(this, getMishkontinManifest(this));
+    if (USE_MISHKONTIN_V2) registerMishkontinV2Animations(this, getMishkontinV2Manifest(this));
     this.loaded = true;
 
     const remaining = Math.max(0, BOOT.minimumShowMs - (performance.now() - this.shownAt));
@@ -84,6 +95,8 @@ export class PreloadScene extends Phaser.Scene {
     this.leaving = true;
     const camera = this.cameras.main;
     camera.fade(BOOT.fadeOutMs, 0x0b, 0x14, 0x0e, true);
-    camera.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => this.scene.start(SceneKeys.MainMenu));
+    // Developer-only animation gallery: ?animlab (never reachable from the game's menus).
+    const lab = USE_MISHKONTIN_V2 && new URLSearchParams(window.location.search).has('animlab');
+    camera.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => this.scene.start(lab ? SceneKeys.AnimationLab : SceneKeys.MainMenu));
   }
 }

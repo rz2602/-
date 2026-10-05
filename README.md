@@ -209,7 +209,12 @@ High-resolution masters live in `art/masters/` (never edited, SHA-256 in `MANIFE
   from the unchanged collision rectangles. All supplied PNGs pass a pixel-level alpha audit;
   ground ends, a high-resolution underground fill and the checkpoint waystone complete it. See
   `art/FOREST_ASSET_INTEGRATION_REPORT.md`.
-- **Mishkontin:** the legacy multi-frame atlas is kept. High-res key poses are reference only.
+- **Mishkontin V2:** a high-resolution animation set (`npm run mishkontin-v2`, one atlas, 100 % at
+  1440p) with core animations and personality animations (`player.playPersonality('wave')` etc.;
+  input always interrupts). Collision body and movement are unchanged. `USE_MISHKONTIN_V2` in
+  `src/config/constants.ts` switches back to the legacy atlas, which the locked Main Menu still
+  uses. Developer animation lab: open the game with `?animlab`. See
+  `art/MISHKONTIN_V2_INTEGRATION_REPORT.md`.
 
 Reports: `art/FOREST_ASSET_INTEGRATION_REPORT.md`, `art/INTEGRATION_REPORT_v0.1.1.md`, `art/ASSET_RESOLUTION_REPORT.md`, `art/README.md`.
 Future art specs (legacy replacements, seamless background masters, Mishkontin animation

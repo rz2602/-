@@ -2,6 +2,20 @@
 
 # v0.1.1 - Forest art pass
 
+## Mishkontin V2: high-resolution animation set
+
+- New gameplay character from `art/masters/characters/mishkontin_v2/` (14 sheets, all real
+  alpha). Built by `npm run mishkontin-v2`: seam-based frame slicing, one normalized character
+  scale, foot / body-centre anchors in one shared cell, one 4044×1674 lossless WebP atlas.
+- Drawn at 100 % at 1440p (legacy: 170 %). Idle is 150 logical px tall.
+- Core animations: idle, run, jump, fall, land, crouch, hurt, turn (registered). Personality:
+  blink (idle variant), plus wave, surprised, read map, sit and sleep through
+  `playPersonality()`. Any input interrupts them.
+- Collision body, movement and camera unchanged (bit-identical body). The Main Menu keeps the
+  legacy sprite. `USE_MISHKONTIN_V2` switches back to legacy.
+- Developer animation lab: `?animlab`.
+- `art/MISHKONTIN_V2_INTEGRATION_REPORT.md`.
+
 ## Final wide parallax backgrounds
 
 - New separated layers with real alpha (mountains, distant forest, mid forest) replace the

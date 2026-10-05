@@ -12,7 +12,8 @@
     "atlas": "node tools/build-mishkontin-atlas.mjs",
     "build:single": "tsc --noEmit && node tools/build-single-file.mjs",
     "forest-kit": "node tools/extract-forest-kit.mjs",
-    "production-assets": "node tools/build-production-assets.mjs"
+    "production-assets": "node tools/build-production-assets.mjs",
+    "mishkontin-v2": "node tools/build-mishkontin-v2.mjs"
   },
   "dependencies": {
     "phaser": "^3.90.0"

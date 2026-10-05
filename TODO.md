@@ -9,7 +9,8 @@ version and should be planned before implementation.
   for later levels.
 - (Optional) wider wrap-seamless versions of the integrated wide background layers (3300-4500 px, right edge continuing into the left) to
   remove the mirror joins in the sky, mountains and forest layers: §2 of the same file.
-- **Milestone:** high-resolution Mishkontin animation set matching the canon (wooden staff, gold
+- ~~**Milestone:** high-resolution Mishkontin animation set~~ (done: V2, see `art/MISHKONTIN_V2_INTEGRATION_REPORT.md`). Follow-ups: drive TURN from standing direction changes if it can stay responsive; story triggers for wave / surprised / read map / sit / sleep; optional colour match of the personality sheets.
+- (old note) high-resolution Mishkontin animation set matching the canon (wooden staff, gold
   M medallion), full multi-frame cycles, ~363x332 per frame: §3 of the same file.
 - Optional: a visible river again (`RIVER_VISIBLE`) once a seamless high-res river band and
   proper ravine-floor art exist.

@@ -7,24 +7,41 @@ import {
   PLAYER_BODY,
   PLAYER_MOVEMENT,
   PLAYER_SCALE,
+  USE_MISHKONTIN_V2,
 } from '../config/constants';
 import type { InputSystem } from '../systems/InputSystem';
 import { IdleBehaviour } from './IdleBehaviour';
-import { getMishkontinManifest, MishkontinAnims, type MishkontinAnimKey } from './mishkontinAnimations';
+import {
+  type CharacterAnimSet,
+  getMishkontinManifest,
+  getMishkontinV2Manifest,
+  LegacyAnimSet,
+  MishkontinV2Anims,
+  PERSONALITY_V2,
+  type PersonalityAnimation,
+  V2AnimSet,
+} from './mishkontinAnimations';
 import { PlayerState, PlayerStateMachine, type PlayerStateInput } from './PlayerStateMachine';
 
 const TURN_MIN_SPEED = 10;
 
 /**
  * The protagonist: movement, jump assists and animation selection.
- * Rendering uses the preprocessed frames of the supplied artwork; the sprite's
- * origin is the shared foot anchor, so `y` is always the feet position.
+ * Rendering uses either the high-resolution V2 atlas or the legacy atlas
+ * (USE_MISHKONTIN_V2); in both the sprite's origin is the shared foot anchor,
+ * so `y` is always the feet position, and the collision body is identical in
+ * logical px (torso + legs only - ears, cloak, staff and tail never collide).
  */
 export class Mishkontin extends Phaser.Physics.Arcade.Sprite {
   declare body: Phaser.Physics.Arcade.Body;
 
   private readonly stateMachine = new PlayerStateMachine();
-  private readonly idleBehaviour = new IdleBehaviour();
+  private readonly anim: CharacterAnimSet;
+  private readonly idleBehaviour: IdleBehaviour;
+  /** Legacy-atlas px -> this sprite's frame px (body sizes are defined in legacy px). */
+  private readonly bodyUnit: number;
+  /** Playing personality animation (wave, read map...), until gameplay takes over. */
+  private personality: PersonalityAnimation | null = null;
   private readonly stateInput: PlayerStateInput = {
     now: 0,
     grounded: false,
@@ -59,16 +76,34 @@ export class Mishkontin extends Phaser.Physics.Arcade.Sprite {
     y: number,
     private readonly controls: InputSystem,
   ) {
-    const manifest = getMishkontinManifest(scene);
-    super(scene, x, y, AssetKeys.mishkontin, manifest.animations.idle[0]);
-    this.anchorX = manifest.anchor.x;
-    this.anchorY = manifest.anchor.y;
+    let scale: number;
+    let anchor: { x: number; y: number };
+    let cell: { width: number; height: number };
+    if (USE_MISHKONTIN_V2) {
+      const v2 = getMishkontinV2Manifest(scene);
+      super(scene, x, y, AssetKeys.mishkontinV2, v2.animations.idle[0]);
+      scale = 1 / v2.runtimePxPerLogical;
+      anchor = v2.anchor;
+      cell = v2.cell;
+      this.anim = V2AnimSet;
+    } else {
+      const legacy = getMishkontinManifest(scene);
+      super(scene, x, y, AssetKeys.mishkontin, legacy.animations.idle[0]);
+      scale = PLAYER_SCALE;
+      anchor = legacy.anchor;
+      cell = { width: legacy.frameWidth, height: legacy.frameHeight };
+      this.anim = LegacyAnimSet;
+    }
+    this.anchorX = anchor.x;
+    this.anchorY = anchor.y;
+    this.bodyUnit = PLAYER_SCALE / scale;
+    this.idleBehaviour = new IdleBehaviour(this.anim);
 
     scene.add.existing(this);
     scene.physics.add.existing(this);
 
-    this.setOrigin(manifest.anchor.originX, manifest.anchor.originY);
-    this.setScale(PLAYER_SCALE);
+    this.setOrigin(anchor.x / cell.width, anchor.y / cell.height);
+    this.setScale(scale);
     this.setDepth(DEPTH.player);
 
     this.body.setMaxVelocity(PLAYER_MOVEMENT.maxSpeedX, PLAYER_MOVEMENT.maxFallSpeed);
@@ -78,7 +113,23 @@ export class Mishkontin extends Phaser.Physics.Arcade.Sprite {
 
     this.on(Phaser.Animations.Events.ANIMATION_COMPLETE, this.onAnimationComplete, this);
     this.idleBehaviour.reset();
-    this.play(MishkontinAnims.idle);
+    this.play(this.anim.idle);
+  }
+
+  /**
+   * Plays a personality / story animation (V2 only) while Mishkontin is idle.
+   * Any movement, jump, fall or hurt immediately ends it. Returns false when
+   * it cannot play now.
+   */
+  playPersonality(name: PersonalityAnimation): boolean {
+    if (!USE_MISHKONTIN_V2 || this.stateMachine.state !== PlayerState.Idle) return false;
+    this.personality = name;
+    this.play(PERSONALITY_V2[name].anim);
+    return true;
+  }
+
+  get personalityAnimation(): PersonalityAnimation | null {
+    return this.personality;
   }
 
   /** @param time simulation time in ms (advances by `delta`, like the physics). */
@@ -180,7 +231,8 @@ export class Mishkontin extends Phaser.Physics.Arcade.Sprite {
     this.setFacing(1);
     this.stateMachine.reset(PlayerState.Idle, this.now);
     this.idleBehaviour.reset();
-    this.play(MishkontinAnims.idle);
+    this.personality = null;
+    this.play(this.anim.idle);
   }
 
   get playerState(): PlayerState {
@@ -218,53 +270,69 @@ export class Mishkontin extends Phaser.Physics.Arcade.Sprite {
   private updateAnimation(stateChanged: boolean, delta: number): void {
     const state = this.stateMachine.state;
     if (stateChanged && state === PlayerState.Idle) this.idleBehaviour.reset();
+    // Gameplay always wins over a personality animation.
+    if (this.personality && (state !== PlayerState.Idle || this.controls.state.moveX !== 0)) {
+      this.personality = null;
+      this.idleBehaviour.reset();
+    }
 
     switch (state) {
       case PlayerState.Idle:
+        if (this.personality) break;
         this.playIfNotCurrent(this.idleBehaviour.update(delta));
         break;
       case PlayerState.Run: {
-        this.playIfNotCurrent(MishkontinAnims.run);
+        this.playIfNotCurrent(this.anim.run);
         // Cadence follows speed so feet don't skate while accelerating.
         const speedRatio = Math.abs(this.body.velocity.x) / PLAYER_MOVEMENT.maxSpeedX;
         this.anims.timeScale = Phaser.Math.Clamp(speedRatio, 0.55, 1);
         return;
       }
       case PlayerState.Jump:
-        this.playIfNotCurrent(MishkontinAnims.jump);
+        this.playIfNotCurrent(this.anim.jump);
         break;
       case PlayerState.Fall:
-        this.playIfNotCurrent(MishkontinAnims.fall);
+        this.playIfNotCurrent(this.anim.fall);
         break;
       case PlayerState.Land:
         if (stateChanged) {
           this.landAnimationDone = false;
-          this.play(MishkontinAnims.land);
+          this.play(this.anim.land);
         }
         break;
       case PlayerState.Crouch:
-        if (stateChanged) this.play(MishkontinAnims.crouch);
+        if (stateChanged) this.play(this.anim.crouch);
         break;
       case PlayerState.Hurt:
-        if (stateChanged) this.play(MishkontinAnims.hurt);
+        if (stateChanged) this.play(this.anim.hurt);
         break;
     }
     this.anims.timeScale = 1;
   }
 
-  private playIfNotCurrent(key: MishkontinAnimKey): void {
+  private playIfNotCurrent(key: string): void {
     if (this.anims.currentAnim?.key !== key) this.play(key);
   }
 
   private onAnimationComplete(animation: Phaser.Animations.Animation): void {
     switch (animation.key) {
-      case MishkontinAnims.land:
+      case this.anim.land:
         this.landAnimationDone = true;
         break;
-      case MishkontinAnims.crouch:
-        if (this.stateMachine.state === PlayerState.Crouch) this.play(MishkontinAnims.crouchHold);
+      case this.anim.crouch:
+        if (this.stateMachine.state === PlayerState.Crouch) this.play(this.anim.crouchHold);
+        break;
+      case MishkontinV2Anims.sleep:
+        if (this.personality === 'sleep') this.play(MishkontinV2Anims.sleepLoop);
         break;
       default:
+        // One-shot personality animations return to idle; idle variants report back.
+        if (this.personality && !PERSONALITY_V2[this.personality].loops && animation.key === PERSONALITY_V2[this.personality].anim) {
+          this.personality = null;
+          this.idleBehaviour.reset();
+          this.play(this.anim.idle);
+          break;
+        }
         this.idleBehaviour.onVariantComplete(animation.key);
     }
   }
@@ -284,12 +352,13 @@ export class Mishkontin extends Phaser.Physics.Arcade.Sprite {
 
   /** Resizes the body keeping its bottom edge exactly on the feet. */
   private applyBodySize(height: number): void {
-    this.body.setSize(PLAYER_BODY.width, height, false);
+    this.body.setSize(PLAYER_BODY.width * this.bodyUnit, height * this.bodyUnit, false);
     this.updateBodyOffset();
   }
 
   private updateBodyOffset(): void {
-    const offsetX = this.anchorX - PLAYER_BODY.width / 2 + PLAYER_BODY.offsetXFromAnchor * this.facing;
+    const u = this.bodyUnit;
+    const offsetX = this.anchorX - (PLAYER_BODY.width * u) / 2 + PLAYER_BODY.offsetXFromAnchor * u * this.facing;
     const offsetY = this.anchorY - this.body.sourceHeight;
     this.body.setOffset(offsetX, offsetY);
   }

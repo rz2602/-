@@ -1,0 +1,122 @@
+{
+  "generatedBy": "tools/build-mishkontin-v2.mjs",
+  "runtimePxPerLogical": 2,
+  "targetIdleHeight": 150,
+  "cell": {
+    "width": 375,
+    "height": 368
+  },
+  "anchor": {
+    "x": 213,
+    "y": 351,
+    "originX": 0.568,
+    "originY": 0.9538
+  },
+  "animations": {
+    "idle": [
+      "idle_0",
+      "idle_1",
+      "idle_2",
+      "idle_3",
+      "idle_4",
+      "idle_5"
+    ],
+    "run": [
+      "run_0",
+      "run_1",
+      "run_2",
+      "run_3",
+      "run_4",
+      "run_5",
+      "run_6",
+      "run_7"
+    ],
+    "jump": [
+      "jump_0",
+      "jump_1",
+      "jump_2",
+      "jump_3",
+      "jump_4",
+      "jump_5"
+    ],
+    "fall": [
+      "fall_0",
+      "fall_1",
+      "fall_2",
+      "fall_3",
+      "fall_4",
+      "fall_5"
+    ],
+    "land": [
+      "land_0",
+      "land_1",
+      "land_2",
+      "land_3",
+      "land_4",
+      "land_5"
+    ],
+    "crouch": [
+      "crouch_0",
+      "crouch_1",
+      "crouch_2",
+      "crouch_3"
+    ],
+    "hurt": [
+      "hurt_0",
+      "hurt_1",
+      "hurt_2",
+      "hurt_3",
+      "hurt_4"
+    ],
+    "turn": [
+      "turn_0",
+      "turn_1",
+      "turn_2",
+      "turn_3",
+      "turn_4",
+      "turn_5"
+    ],
+    "blink": [
+      "blink_0",
+      "blink_1",
+      "blink_2",
+      "blink_3"
+    ],
+    "wave": [
+      "wave_0",
+      "wave_1",
+      "wave_2",
+      "wave_3",
+      "wave_4",
+      "wave_5"
+    ],
+    "surprised": [
+      "surprised_0",
+      "surprised_1",
+      "surprised_2",
+      "surprised_3"
+    ],
+    "read_map": [
+      "read_map_0",
+      "read_map_1",
+      "read_map_2",
+      "read_map_3",
+      "read_map_4",
+      "read_map_5"
+    ],
+    "sit": [
+      "sit_0",
+      "sit_1",
+      "sit_2",
+      "sit_3",
+      "sit_4",
+      "sit_5"
+    ],
+    "sleep": [
+      "sleep_0",
+      "sleep_1",
+      "sleep_2",
+      "sleep_3"
+    ]
+  }
+}

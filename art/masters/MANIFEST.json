@@ -860,6 +860,171 @@
       "bytes": 1751741,
       "sha256": "fc6cd9f1903fead25ba37aa2c0ec358894bbffef4a3163e7358569ef8c2631d3",
       "alphaAudit": "A"
+    },
+    {
+      "master": "characters/mishkontin_v2/crouch/mishkontin_crouch_v2_4frames.png",
+      "suppliedAs": "mishkontin_v2.zip/mishkontin_v2/crouch/mishkontin_crouch_v2_6frames.png (file name says 6, sheet has 4 frames)",
+      "role": "Mishkontin V2 animation sheet",
+      "width": 2172,
+      "height": 724,
+      "mode": "RGBA",
+      "bytes": 1377654,
+      "sha256": "29497bceb7ebd6fff280defc6b842b9df24a374478973655d00e62aeb29518e6",
+      "alphaAudit": "A"
+    },
+    {
+      "master": "characters/mishkontin_v2/fall/mishkontin_fall_v2_6frames.png",
+      "suppliedAs": "mishkontin_v2.zip/mishkontin_v2/fall/mishkontin_fall_v2_6frames.png",
+      "role": "Mishkontin V2 animation sheet",
+      "width": 2172,
+      "height": 724,
+      "mode": "RGBA",
+      "bytes": 1140450,
+      "sha256": "d315d71f2359421825fd2480bc314b557c0ce7c27fb1bf6654980871f5135330",
+      "alphaAudit": "A"
+    },
+    {
+      "master": "characters/mishkontin_v2/hurt/mishkontin_hurt_v2_5frames.png",
+      "suppliedAs": "mishkontin_v2.zip/mishkontin_v2/hurt/mishkontin_hurt_v2_5frames.png",
+      "role": "Mishkontin V2 animation sheet",
+      "width": 2172,
+      "height": 724,
+      "mode": "RGBA",
+      "bytes": 1199605,
+      "sha256": "215745f22084ff5155771f05690b7f502a92c8b0d1bf83bc29e60ba61202b398",
+      "alphaAudit": "A"
+    },
+    {
+      "master": "characters/mishkontin_v2/idle/mishkontin_idle_v2_6frames.png",
+      "suppliedAs": "mishkontin_v2.zip/mishkontin_v2/idle/mishkontin_idle_v2_6frames.png",
+      "role": "Mishkontin V2 animation sheet",
+      "width": 2172,
+      "height": 724,
+      "mode": "RGBA",
+      "bytes": 1773664,
+      "sha256": "9c4d54319c00a8f181a17fec306ce624b45acd4527f75b785f402ccbebdba9b3",
+      "alphaAudit": "A"
+    },
+    {
+      "master": "characters/mishkontin_v2/jump/mishkontin_jump_v2_6frames.png",
+      "suppliedAs": "mishkontin_v2.zip/mishkontin_v2/jump/mishkontin_jump_v2_6frames.png",
+      "role": "Mishkontin V2 animation sheet",
+      "width": 2172,
+      "height": 724,
+      "mode": "RGBA",
+      "bytes": 1293599,
+      "sha256": "827d1c370e0438cd06cfadd6ab6e582cc80e7247f37e19341e0eb96b15adca83",
+      "alphaAudit": "A"
+    },
+    {
+      "master": "characters/mishkontin_v2/land/mishkontin_land_v2_6frames.png",
+      "suppliedAs": "mishkontin_v2.zip/mishkontin_v2/land/mishkontin_land_v2_6frames.png",
+      "role": "Mishkontin V2 animation sheet",
+      "width": 2161,
+      "height": 728,
+      "mode": "RGBA",
+      "bytes": 989179,
+      "sha256": "93fa84aaa92ea45ce197091171f009f3576b39838ab7215f5bc4e2b41120c5c6",
+      "alphaAudit": "A"
+    },
+    {
+      "master": "characters/mishkontin_v2/personality/blink/blink_v2_4frames.png",
+      "suppliedAs": "mishkontin_v2.zip/mishkontin_v2/personality/blink/blink_v2_4frames.png",
+      "role": "Mishkontin V2 animation sheet",
+      "width": 2171,
+      "height": 724,
+      "mode": "RGBA",
+      "bytes": 1669760,
+      "sha256": "78dd3bacfa215d0d4050dd2bcdf7e2c7027ac288fbaa6c077b27f0bbf948e810",
+      "alphaAudit": "A"
+    },
+    {
+      "master": "characters/mishkontin_v2/personality/read_map/read_map_v2_6frames.png",
+      "suppliedAs": "mishkontin_v2.zip/mishkontin_v2/personality/read_map/read_map_v2_6frames..png",
+      "role": "Mishkontin V2 animation sheet",
+      "width": 2172,
+      "height": 724,
+      "mode": "RGBA",
+      "bytes": 1681567,
+      "sha256": "99638fc4c763e6eaf2850e8fd4e8ad8e4494364cc87c5986a5a27e9094c23b26",
+      "alphaAudit": "A"
+    },
+    {
+      "master": "characters/mishkontin_v2/personality/sit/sit_v2_6frames.png",
+      "suppliedAs": "mishkontin_v2.zip/mishkontin_v2/personality/sit/sit_v2_6frames..png",
+      "role": "Mishkontin V2 animation sheet",
+      "width": 2172,
+      "height": 724,
+      "mode": "RGBA",
+      "bytes": 1450416,
+      "sha256": "6b8ff2754ce0ac9020f9a5bb948a5817847aa3fd2b9021d8ac9b75f2fa12de50",
+      "alphaAudit": "A"
+    },
+    {
+      "master": "characters/mishkontin_v2/personality/sleep/sleep_v2_4frames.png",
+      "suppliedAs": "mishkontin_v2.zip/mishkontin_v2/personality/sleep/sleep_v2_4frames.png",
+      "role": "Mishkontin V2 animation sheet",
+      "width": 2172,
+      "height": 724,
+      "mode": "RGBA",
+      "bytes": 1173003,
+      "sha256": "83b857d0e3edac94d1a0a70931e4d921a546f7bab97a121b01b282caf0624944",
+      "alphaAudit": "A"
+    },
+    {
+      "master": "characters/mishkontin_v2/personality/surprised/surprised_v2_4frames.png",
+      "suppliedAs": "mishkontin_v2.zip/mishkontin_v2/personality/surprised/surprised_v2_4frames..png",
+      "role": "Mishkontin V2 animation sheet",
+      "width": 2172,
+      "height": 724,
+      "mode": "RGBA",
+      "bytes": 1777038,
+      "sha256": "9729859eb93f13046ee41e6cb25497ce7c33bf0d748a6dee32313fcc71416eab",
+      "alphaAudit": "A"
+    },
+    {
+      "master": "characters/mishkontin_v2/personality/wave/wave_v2_6frames.png",
+      "suppliedAs": "mishkontin_v2.zip/mishkontin_v2/personality/wave/wave_v2_4frames..png (file name says 4, sheet has 6 frames)",
+      "role": "Mishkontin V2 animation sheet",
+      "width": 2172,
+      "height": 724,
+      "mode": "RGBA",
+      "bytes": 1500954,
+      "sha256": "27bc14a76df3395f640f8b96322b4620a217dcc267d090b075e44bacd7be7da6",
+      "alphaAudit": "A"
+    },
+    {
+      "master": "characters/mishkontin_v2/reference/mishkontin_character_master_v2.png",
+      "suppliedAs": "mishkontin_v2.zip/mishkontin_v2/reference/mishkontin_character_master_v2.png",
+      "role": "Mishkontin V2 reference sheet (not runtime)",
+      "width": 1536,
+      "height": 1024,
+      "mode": "RGBA",
+      "bytes": 2991695,
+      "sha256": "dd5b806d8ea04fe6eae343ab6830b108864e597118ae24ac673128f8233e36ed",
+      "alphaAudit": "A"
+    },
+    {
+      "master": "characters/mishkontin_v2/run/mishkontin_run_v2_8frames.png",
+      "suppliedAs": "mishkontin_v2.zip/mishkontin_v2/run/mishkontin_run_v2_6frames.png (file name says 6, sheet has 8 frames)",
+      "role": "Mishkontin V2 animation sheet",
+      "width": 2172,
+      "height": 724,
+      "mode": "RGBA",
+      "bytes": 1251715,
+      "sha256": "139f16bcbcf7744d2d5220114c7f4eaf6e37b460f599d2d2cccf02b120f3ea7c",
+      "alphaAudit": "A"
+    },
+    {
+      "master": "characters/mishkontin_v2/turn/mishkontin_turn_v2_6frames.png",
+      "suppliedAs": "mishkontin_v2.zip/mishkontin_v2/turn/turn_v2_turn_6frames.png",
+      "role": "Mishkontin V2 animation sheet",
+      "width": 2172,
+      "height": 724,
+      "mode": "RGBA",
+      "bytes": 1422488,
+      "sha256": "8bfc83420320740aada94b1a0b5a7bd29ff16314a8ba013e6fedfc0a8dc355c1",
+      "alphaAudit": "A"
     }
   ]
 }

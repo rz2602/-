@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { IDLE_BEHAVIOUR } from '../config/constants';
-import { MishkontinAnims, type MishkontinAnimKey } from './mishkontinAnimations';
+import type { CharacterAnimSet } from './mishkontinAnimations';
 
 /**
  * An optional idle animation that may play once the player has been idle for
@@ -9,23 +9,22 @@ import { MishkontinAnims, type MishkontinAnimKey } from './mishkontinAnimations'
  * once the artwork exists - no other code needs to change.
  */
 export interface IdleVariant {
-  anim: MishkontinAnimKey;
+  anim: string;
   minIdleMs: number;
   weight: number;
 }
-
-const IDLE_VARIANTS: IdleVariant[] = [
-  { anim: MishkontinAnims.idleBlink, minIdleMs: IDLE_BEHAVIOUR.alternateIdleAfterMs, weight: 3 },
-  { anim: MishkontinAnims.idleWink, minIdleMs: IDLE_BEHAVIOUR.alternateIdleAfterMs, weight: 1 },
-  // e.g. { anim: MishkontinAnims.lookAround, minIdleMs: 12000, weight: 2 },
-  // e.g. { anim: MishkontinAnims.sitDown,    minIdleMs: 30000, weight: 1 },
-];
 
 /** Decides which idle animation Mishkontin should be showing. */
 export class IdleBehaviour {
   private idleMs = 0;
   private nextVariantAtMs = 0;
-  private playingVariant: MishkontinAnimKey | null = null;
+  private playingVariant: string | null = null;
+  private readonly variants: IdleVariant[];
+
+  /** Variants come from the active art set (see CharacterAnimSet.idleVariants). */
+  constructor(private readonly anims: CharacterAnimSet) {
+    this.variants = anims.idleVariants.map((v) => ({ ...v, minIdleMs: IDLE_BEHAVIOUR.alternateIdleAfterMs }));
+  }
 
   reset(): void {
     this.idleMs = 0;
@@ -34,7 +33,7 @@ export class IdleBehaviour {
   }
 
   /** Advances idle time; returns the idle animation that should be playing. */
-  update(deltaMs: number): MishkontinAnimKey {
+  update(deltaMs: number): string {
     this.idleMs += deltaMs;
     if (this.playingVariant) return this.playingVariant;
 
@@ -45,7 +44,7 @@ export class IdleBehaviour {
         return variant.anim;
       }
     }
-    return MishkontinAnims.idle;
+    return this.anims.idle;
   }
 
   /** Call when a one-shot idle variant finished playing. */
@@ -63,10 +62,10 @@ export class IdleBehaviour {
 
   private pickVariant(): IdleVariant | null {
     let total = 0;
-    for (const v of IDLE_VARIANTS) if (this.idleMs >= v.minIdleMs) total += v.weight;
+    for (const v of this.variants) if (this.idleMs >= v.minIdleMs) total += v.weight;
     if (total === 0) return null;
     let roll = Math.random() * total;
-    for (const v of IDLE_VARIANTS) {
+    for (const v of this.variants) {
       if (this.idleMs < v.minIdleMs) continue;
       roll -= v.weight;
       if (roll <= 0) return v;

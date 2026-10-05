@@ -7,6 +7,7 @@ import { MainMenuScene } from '../scenes/MainMenuScene';
 import { SettingsScene } from '../scenes/SettingsScene';
 import { ForestTestScene } from '../scenes/ForestTestScene';
 import { PauseScene } from '../scenes/PauseScene';
+import { AnimationLabScene } from '../scenes/AnimationLabScene';
 
 export const gameConfig: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO, // WebGL with automatic Canvas fallback
@@ -34,5 +35,5 @@ export const gameConfig: Phaser.Types.Core.GameConfig = {
       debug: false, // toggled at runtime by DebugOverlay
     },
   },
-  scene: [BootScene, PreloadScene, MainMenuScene, SettingsScene, ForestTestScene, PauseScene],
+  scene: [BootScene, PreloadScene, MainMenuScene, SettingsScene, ForestTestScene, PauseScene, AnimationLabScene],
 };
