@@ -42,7 +42,11 @@ their left edge** (horizontally wrap-seamless), so copies can repeat without mir
 | `bg_forest_distant_master.png` | 2172×724 | 2408 (0.20) | ~2 | **3300–4500 × 1100–1500**, wrap-seamless left/right, transparent above the treeline. |
 | `bg_forest_mid_master.png` | 2172×724 | 4816 (0.40) | ~4 | **3300–4500 × 1100–1500**, wrap-seamless left/right, transparent above the treeline. |
 
-**v2 delivery (`wide.zip`) status:** the sky and Sirengrad are integrated. `bg_mountains`,
+**Final wide set (integrated):** separated mountains / distant / mid with real alpha are in
+gameplay, repeated as overlapping copies without mirroring. They are still 2172 px and not
+wrap-seamless, so the joins are softened but not gone.
+
+**Earlier v2 delivery (`wide.zip`) status:** the sky and Sirengrad are integrated. `bg_mountains`,
 `bg_forest_distant` and `bg_forest_mid` were blocked: they are opaque RGB panoramas with the
 sky (and mountains) painted in, so they cannot be stacked as independent layers. They are
 archived in `art/masters/backgrounds/blocked/`. All five are still 2172 px wide and not

@@ -7,7 +7,7 @@ version and should be planned before implementation.
 - Forest kit leftovers: foreground leaves with uncut tops (`art/FUTURE_ART_REQUIREMENTS.md` §1).
   Unused kit masters (cliff bottoms, long bridge, bridge entrances, broken bridge) are archived
   for later levels.
-- Wider wrap-seamless background masters (3300-4500 px, right edge continuing into the left) to
+- (Optional) wider wrap-seamless versions of the integrated wide background layers (3300-4500 px, right edge continuing into the left) to
   remove the mirror joins in the sky, mountains and forest layers: §2 of the same file.
 - **Milestone:** high-resolution Mishkontin animation set matching the canon (wooden staff, gold
   M medallion), full multi-frame cycles, ~363x332 per frame: §3 of the same file.

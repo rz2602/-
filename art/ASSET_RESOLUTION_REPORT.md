@@ -33,6 +33,11 @@ The four background masters are 2172×724. To stay ≤125 % at 1440p a layer can
 ~1357 logical px per copy, so long levels need repeated (mirrored) copies — see
 "Known limitations". For 4K-native backgrounds the masters would need to be ~3260×1090.
 
+## Wide background set (gameplay)
+
+Sky v2 120 %, mountains v2 120 %, Sirengrad 104 %, distant v2 120 %, mid v2 124 % at 1440p
+(all ≤ 125 %). See [WIDE_BACKGROUND_INTEGRATION_REPORT.md](WIDE_BACKGROUND_INTEGRATION_REPORT.md).
+
 ## Forest Environment Asset Kit (final integration)
 
 All 40 integrated kit textures are **≤ 108 % at 1440p** (ground strip 90 %, cliffs 84 %,

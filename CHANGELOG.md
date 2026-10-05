@@ -2,6 +2,17 @@
 
 # v0.1.1 - Forest art pass
 
+## Final wide parallax backgrounds
+
+- New separated layers with real alpha (mountains, distant forest, mid forest) replace the
+  gameplay backgrounds: sky 0.05 → mountains 0.10 → Sirengrad 0.10 (single object) → distant
+  0.20 → mid 0.40.
+- Layers now repeat as plain overlapping copies (no mirroring): no more symmetric peaks or
+  doubled waterfalls. A darker second row of the mid forest continues the forest under its mist.
+- Main Menu unchanged (approved original layers, pixel-identical). Gameplay identical:
+  18/18 / 18/18, bot 54.7 s / 0 respawns.
+- `art/WIDE_BACKGROUND_INTEGRATION_REPORT.md`.
+
 ## Backgrounds v2: Sirengrad as its own world element, new sky
 
 - Layer order: sky 0.05 → mountains 0.10 → Sirengrad 0.10 (single world element) → distant

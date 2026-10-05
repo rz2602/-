@@ -244,3 +244,8 @@ Regression after these three assets:
 - keyboard smoke test: pass
 - QA at 1280×720 / 1920×1080 / 2560×1440: parallax exact, Sirengrad once, bounds unchanged, feet on ground, no errors
 - Main Menu: pixel-identical
+
+## 10. Backgrounds
+
+The final wide background set (separated layers, single Sirengrad) is documented in
+`WIDE_BACKGROUND_INTEGRATION_REPORT.md`. The gameplay environment above is unchanged by it.

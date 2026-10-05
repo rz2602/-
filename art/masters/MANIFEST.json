@@ -774,7 +774,7 @@
       "alphaAudit": "A"
     },
     {
-      "master": "backgrounds/v2/bg_sky_master.png",
+      "master": "backgrounds/wide/bg_sky_master.png",
       "suppliedAs": "wide.zip/wide/bg_sky_master.png",
       "role": "parallax layer 0 - sky (v2, gameplay; the menu keeps the original sky)",
       "width": 2172,
@@ -785,7 +785,7 @@
       "alphaAudit": "B (opaque sky by design)"
     },
     {
-      "master": "backgrounds/v2/bg_sirengrad_master.png",
+      "master": "backgrounds/wide/bg_sirengrad_master.png",
       "suppliedAs": "wide.zip/wide/bg_sirengrad_master.png",
       "role": "Sirengrad landmark - single world element at scroll 0.10 (gameplay)",
       "width": 2172,
@@ -827,6 +827,39 @@
       "bytes": 3006555,
       "sha256": "c51c32cce403cfb292c0ead94b25771713829312ea972416f7331d5fdf6cf32d",
       "alphaAudit": "C"
+    },
+    {
+      "master": "backgrounds/wide/bg_mountains_master.png",
+      "suppliedAs": "New_Folder_With_Items.zip/New Folder With Items/bg_mountains_master.png",
+      "role": "parallax layer 1 - mountains only (wide set, transparent)",
+      "width": 2172,
+      "height": 724,
+      "mode": "RGBA",
+      "bytes": 1466433,
+      "sha256": "9a2881addd9c79cecdcd88cd5aa1449a8e2f9344f55193699734b46839205a4e",
+      "alphaAudit": "A"
+    },
+    {
+      "master": "backgrounds/wide/bg_forest_distant_master.png",
+      "suppliedAs": "New_Folder_With_Items.zip/New Folder With Items/bg_forest_distant_master.png",
+      "role": "parallax layer 2 - distant forest (wide set, transparent)",
+      "width": 2171,
+      "height": 724,
+      "mode": "RGBA",
+      "bytes": 1625097,
+      "sha256": "1534d792cb261d0c6d39f794ce920f9929ab90f0dab8959715221be7e2f20e66",
+      "alphaAudit": "A"
+    },
+    {
+      "master": "backgrounds/wide/bg_forest_mid_master.png",
+      "suppliedAs": "New_Folder_With_Items.zip/New Folder With Items/bg_forest_mid_master.png.png",
+      "role": "parallax layer 3 - mid forest with waterfalls (wide set, transparent)",
+      "width": 2172,
+      "height": 724,
+      "mode": "RGBA",
+      "bytes": 1751741,
+      "sha256": "fc6cd9f1903fead25ba37aa2c0ec358894bbffef4a3163e7358569ef8c2631d3",
+      "alphaAudit": "A"
     }
   ]
 }

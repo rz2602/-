@@ -49,6 +49,9 @@ export interface ProductionManifest {
 export const ProductionKeys = {
   sky: 'bg_layer_sky',
   skyV2: 'bg_layer_sky_v2',
+  mountainsV2: 'bg_layer_mountains_v2',
+  forestDistantV2: 'bg_layer_forest_distant_v2',
+  forestMidV2: 'bg_layer_forest_mid_v2',
   sirengrad: 'bg_sirengrad',
   mountains: 'bg_layer_mountains',
   forestDistant: 'bg_layer_forest_distant',

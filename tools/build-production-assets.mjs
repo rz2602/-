@@ -59,12 +59,17 @@ const ASSETS = [
   },
   { key: 'bg_layer_forest_distant', master: 'backgrounds/bg_forest_distant_master.png', out: 'assets/backgrounds/bg_forest_distant.webp', role: 'layer', format: 'webp-lossless', supersedes: ['bg_forest_distant'] },
   { key: 'bg_layer_forest_mid', master: 'backgrounds/bg_forest_mid_master.png', out: 'assets/backgrounds/bg_forest_mid.webp', role: 'layer', format: 'webp-lossless', supersedes: ['bg_forest_mid'] },
-  // v2 background delivery (wide.zip): the sky and Sirengrad as its own world
-  // element. The v2 mountains / distant / mid masters have the sky baked in (no
-  // alpha) and are archived in backgrounds/blocked/ - not built.
-  { key: 'bg_layer_sky_v2', master: 'backgrounds/v2/bg_sky_master.png', out: 'assets/backgrounds/bg_sky_v2.webp', role: 'layer', format: 'webp-lossy' },
+  // Wide background set: the sky and Sirengrad as its own world element. (The
+  // first delivery of mountains / distant / mid had the sky painted in and is
+  // archived in backgrounds/blocked/ - not built.)
+  // Wide set, separated layers (real alpha, no sky painted in). Repeated as
+  // plain overlapping copies (no mirroring) - see WIDE_BACKGROUND_INTEGRATION_REPORT.
+  { key: 'bg_layer_mountains_v2', master: 'backgrounds/wide/bg_mountains_master.png', out: 'assets/backgrounds/bg_mountains_v2.webp', role: 'layer', format: 'webp-lossless', env: true, geometry: { peakTopY: 154 } },
+  { key: 'bg_layer_forest_distant_v2', master: 'backgrounds/wide/bg_forest_distant_master.png', out: 'assets/backgrounds/bg_forest_distant_v2.webp', role: 'layer', format: 'webp-lossless', env: true },
+  { key: 'bg_layer_forest_mid_v2', master: 'backgrounds/wide/bg_forest_mid_master.png', out: 'assets/backgrounds/bg_forest_mid_v2.webp', role: 'layer', format: 'webp-lossless', env: true, edgeFraming: true },
+  { key: 'bg_layer_sky_v2', master: 'backgrounds/wide/bg_sky_master.png', out: 'assets/backgrounds/bg_sky_v2.webp', role: 'layer', format: 'webp-lossy' },
   {
-    key: 'bg_sirengrad', master: 'backgrounds/v2/bg_sirengrad_master.png', out: 'assets/backgrounds/bg_sirengrad.webp',
+    key: 'bg_sirengrad', master: 'backgrounds/wide/bg_sirengrad_master.png', out: 'assets/backgrounds/bg_sirengrad.webp',
     role: 'landmark', env: true, edgeFraming: true, maxDisplay: { w: 760 },
     // keepX: centre of the main keep; baseY: cliff line that stays visible (below it is hidden behind the distant forest).
     geometry: { keepX: 1340, baseY: 640 },

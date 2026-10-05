@@ -34,6 +34,27 @@ const SHAFTS_SCROLL_X = 0.3;
  * mountains master stood at the final viewpoint (shifted by keepOffsetX so
  * the whole city fits the frame).
  */
+/**
+ * Wide separated background set (gameplay). Each layer repeats as plain
+ * overlapping copies (no mirroring - mirrored copies made symmetric peaks and
+ * doubled waterfalls). `overlap` is in logical px; `phase` moves the joins so
+ * no join or repeated landmark lands behind Sirengrad at the final viewpoint.
+ */
+const WIDE_LAYERS = {
+  mountains: { overlap: 70, phase: 300 },
+  distant: { overlap: 40, phase: 0 },
+  mid: { overlap: 36, phase: 0 },
+} as const;
+
+/** Wide mid layer: the understory starts this far above the bottom of its solid content band. */
+const WIDE_UNDERSTORY_OVERLAP = 60;
+/**
+ * Wide mid layer, second row: offset down (share of the layer height), its own
+ * phase, darker. Only rows below cropTop are drawn - the rest is hidden behind
+ * the main row anyway (saves fill rate).
+ */
+const WIDE_MID_LOWER_ROW = { offset: 0.26, phase: 720, tint: 0xb4bcb0, cropTop: 0.55 } as const;
+
 const SIRENGRAD = { width: 700, baseScreenY: 318, keepOffsetX: -60 } as const;
 const SUN_WASH_ALPHA = 0.3;
 /** The understory starts this far above the mid-forest artwork's bottom edge (hidden behind it). */
@@ -110,26 +131,50 @@ function gradedTexture(scene: Phaser.Scene, key: string, grade: LayerGrade | und
 
 /**
  * A horizontally repeating strip drawn as a row of plain images (sampled 1:1
- * - no TileSprite power-of-two resampling). Copies alternate between normal
- * and mirrored, so every join matches pixel-for-pixel and no hard seam shows.
+ * - no TileSprite power-of-two resampling). Copies either alternate between
+ * normal and mirrored (every join matches pixel-for-pixel), or - for layers
+ * with faded ends - repeat unmirrored with an overlap.
  */
 class MirrorStrip {
   private readonly images: Phaser.GameObjects.Image[] = [];
   private readonly step: number;
 
-  /** Added to the scroll offset; lets a strip choose where its mirror joins fall. */
+  /** Added to the scroll offset; lets a strip choose where its joins fall. */
   phase = 0;
 
-  constructor(scene: Phaser.Scene, key: string, scale: number, depth: number) {
-    this.step = scene.textures.getFrame(key).width * scale - STRIP_OVERLAP;
+  /**
+   * `repeat.overlap` (logical px): plain, unmirrored copies that overlap by
+   * that much - for transparent layers whose ends fade out, so neighbouring
+   * copies blend instead of meeting at a mirrored (symmetric) join.
+   */
+  constructor(scene: Phaser.Scene, key: string, scale: number, depth: number, private readonly repeat?: { overlap: number; cropTop?: number }) {
+    const base = scene.textures.getFrame(key);
+    this.step = base.width * scale - (repeat ? repeat.overlap : STRIP_OVERLAP);
+    // Optional crop: draw only the rows below cropTop (share of the height).
+    let frame: string | undefined;
+    this.cropOffset = 0;
+    if (repeat?.cropTop) {
+      const top = Math.round(base.height * repeat.cropTop);
+      frame = `crop${top}`;
+      const tex = scene.textures.get(key);
+      if (!tex.has(frame)) tex.add(frame, 0, 0, top, base.width, base.height - top);
+      this.cropOffset = top * scale;
+    }
     const count = Math.ceil(GAME_WIDTH / this.step) + 1;
     for (let i = 0; i < count; i++) {
-      this.images.push(scene.add.image(0, 0, key).setOrigin(0).setScale(scale).setScrollFactor(0).setDepth(depth));
+      this.images.push(scene.add.image(0, 0, key, frame).setOrigin(0).setScale(scale).setScrollFactor(0).setDepth(depth));
     }
   }
 
+  /** Logical px cropped off the top (positions stay those of the full image). */
+  private readonly cropOffset: number;
+
   get height(): number {
-    return this.images[0].displayHeight;
+    return this.images[0].displayHeight + this.cropOffset;
+  }
+
+  tint(color: number): void {
+    for (const image of this.images) image.setTint(color);
   }
 
 
@@ -144,7 +189,7 @@ class MirrorStrip {
     const start = first * this.step - offsetX;
     this.images.forEach((image, i) => {
       // Odd copies are mirrored: their left edge equals the previous copy's right edge.
-      image.setFlipX((first + i) % 2 !== 0).setPosition(start + i * this.step, y);
+      image.setFlipX(!this.repeat && (first + i) % 2 !== 0).setPosition(start + i * this.step, y + this.cropOffset);
     });
   }
 }
@@ -206,11 +251,24 @@ export class ForestBackdrop {
       .setBlendMode(Phaser.BlendModes.ADD);
     this.moving.push({ target: shafts, scrollX: SHAFTS_SCROLL_X, scrollY: 0, screenY: 0 });
 
-    this.addStrip(ProductionKeys.forestDistant, this.grading?.distantForest, ForestLayers.distantForest, LAYER_SCALE.distant, this.bandTopToImageY(ProductionKeys.forestDistant, LAYER_SCALE.distant, LAYOUT.distantBandTop));
-    const midY = this.bandTopToImageY(ProductionKeys.forestMid, LAYER_SCALE.mid, LAYOUT.midBandTop);
-    const mid = this.addStrip(ProductionKeys.forestMid, this.grading?.midForest, ForestLayers.midForest, LAYER_SCALE.mid, midY);
+    const distantKey = v2 ? ProductionKeys.forestDistantV2 : ProductionKeys.forestDistant;
+    this.addStrip(distantKey, this.grading?.distantForest, ForestLayers.distantForest, LAYER_SCALE.distant, this.bandTopToImageY(distantKey, LAYER_SCALE.distant, LAYOUT.distantBandTop), v2 ? WIDE_LAYERS.distant : undefined);
+    const midKey = v2 ? ProductionKeys.forestMidV2 : ProductionKeys.forestMid;
+    const midY = this.bandTopToImageY(midKey, LAYER_SCALE.mid, LAYOUT.midBandTop);
+    const mid = this.addStrip(midKey, this.grading?.midForest, ForestLayers.midForest, LAYER_SCALE.mid, midY, v2 ? WIDE_LAYERS.mid : undefined);
 
-    const understoryY = midY + mid.height - UNDERSTORY_OVERLAP;
+    // The wide mid layer fades into mist at its bottom. A second, lower and
+    // slightly darker row of the same layer (behind it, other phase) continues
+    // the forest downward, and the understory starts behind that row's solid
+    // content - so high camera views never show a flat band or a straight edge.
+    let understoryY = midY + mid.height - UNDERSTORY_OVERLAP;
+    if (v2) {
+      const midBottom = getProductionAsset(scene, midKey)?.contentBand?.bottom ?? 1;
+      const lowerY = midY + mid.height * WIDE_MID_LOWER_ROW.offset;
+      const lower = this.addStrip(midKey, this.grading?.midForest, { ...ForestLayers.midForest, depth: ForestLayers.midForest.depth - 0.25 }, LAYER_SCALE.mid, lowerY, { overlap: WIDE_LAYERS.mid.overlap, phase: WIDE_MID_LOWER_ROW.phase, cropTop: WIDE_MID_LOWER_ROW.cropTop });
+      lower.tint(WIDE_MID_LOWER_ROW.tint);
+      understoryY = lowerY + mid.height * midBottom - WIDE_UNDERSTORY_OVERLAP;
+    }
     const understory = scene.add
       .image(0, understoryY, FxTextures.understory)
       .setOrigin(0)
@@ -244,8 +302,9 @@ export class ForestBackdrop {
     }
   }
 
-  private addStrip(key: string, grade: LayerGrade | undefined, layer: VisualLayer, scale: number, screenY: number): MirrorStrip {
-    const strip = new MirrorStrip(this.scene, gradedTexture(this.scene, key, grade), scale, layer.depth);
+  private addStrip(key: string, grade: LayerGrade | undefined, layer: VisualLayer, scale: number, screenY: number, repeat?: { overlap: number; phase: number; cropTop?: number }): MirrorStrip {
+    const strip = new MirrorStrip(this.scene, gradedTexture(this.scene, key, grade), scale, layer.depth, repeat);
+    if (repeat) strip.phase = repeat.phase;
     strip.place(0, screenY);
     this.moving.push({ target: strip, scrollX: layer.scrollX, scrollY: layer.scrollY, screenY });
     return strip;
@@ -267,7 +326,8 @@ export class ForestBackdrop {
    */
   private buildMountains(separateSirengrad: boolean): void {
     const asset = getProductionAsset(this.scene, ProductionKeys.mountains);
-    const key = gradedTexture(this.scene, ProductionKeys.mountains, this.grading?.mountains);
+    // Gameplay only uses the original master's geometry (to place Sirengrad), not its pixels.
+    const key = separateSirengrad ? ProductionKeys.mountains : gradedTexture(this.scene, ProductionKeys.mountains, this.grading?.mountains);
     const texture = this.scene.textures.get(key);
     const { width: W, height: H } = texture.getSourceImage() as HTMLImageElement;
     const s = LAYER_SCALE.mountains;
@@ -291,11 +351,11 @@ export class ForestBackdrop {
       : maxScroll * scrollX + this.options.sirengradScreenX - castleCentre;
 
     if (separateSirengrad) {
-      // Castle-free range everywhere (alternately mirrored, joined on peaks) ...
-      const end = maxScroll * scrollX + GAME_WIDTH;
-      for (let i = 0, left = -fillerWidth * 0.35; left < end; i++, left += fillerWidth) {
-        this.addMountainImage(key, 'filler', left, y, i % 2 === 1, s, scrollX, scrollY, depth);
-      }
+      // Wide set: the mountains-only layer, repeated as overlapping copies ...
+      const wideKey = ProductionKeys.mountainsV2;
+      const wideH = this.scene.textures.getFrame(wideKey).height;
+      const peakTop = (getProductionAsset(this.scene, wideKey)?.geometry?.peakTopY as number | undefined) ?? 0.21;
+      this.addStrip(wideKey, this.grading?.mountains, ForestLayers.mountains, s, LAYOUT.mountainsPeakTop - peakTop * wideH * s, WIDE_LAYERS.mountains);
       // ... and Sirengrad once, where the original castle stood at the viewpoint.
       this.addSirengrad(x + castleCentre, scrollX, scrollY, depth + 0.5);
       return;

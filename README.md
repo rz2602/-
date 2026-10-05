@@ -197,7 +197,8 @@ High-resolution masters live in `art/masters/` (never edited, SHA-256 in `MANIFE
 - **Parallax:** sky 0.05 → mountains 0.10 → **Sirengrad 0.10 (a single world element)** →
   distant forest 0.20 → mid forest 0.40 → gameplay 1.0 → foreground 1.12. In gameplay the
   mountains are drawn from their castle-free part only and Sirengrad (`bg_sirengrad`) appears
-  exactly once, at the final viewpoint. The locked Main Menu keeps its original sky and castle.
+  exactly once, at the final viewpoint. Layers repeat as plain overlapping copies (no mirroring);
+  see `art/WIDE_BACKGROUND_INTEGRATION_REPORT.md`. The locked Main Menu keeps its original layers.
 - **Trees & waterfall:** three large oaks, a pine, an ancient tree and a static waterfall, all
   decorative (no collision).
 - **Branding (screen-space UI, `src/ui/Brand.ts`):** the official wordmark is the Main Menu title.

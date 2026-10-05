@@ -111,12 +111,96 @@
         "bg_forest_mid"
       ]
     },
+    "bg_layer_mountains_v2": {
+      "path": "assets/backgrounds/bg_mountains_v2.webp",
+      "role": "layer",
+      "width": 2172,
+      "height": 724,
+      "master": "art/masters/backgrounds/wide/bg_mountains_master.png",
+      "masterSize": [
+        2172,
+        724
+      ],
+      "masterSha256": "9a2881addd9c79cecdcd88cd5aa1449a8e2f9344f55193699734b46839205a4e",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 513367,
+        "specks": 37368
+      },
+      "bytes": 983814,
+      "geometry": {
+        "peakTopY": 0.2127
+      },
+      "alpha": "A (real alpha channel verified)",
+      "contentBand": {
+        "top": 0.4751,
+        "bottom": 0.8232
+      },
+      "solidColumns": {
+        "left": 0.1114,
+        "right": 0.8389
+      }
+    },
+    "bg_layer_forest_distant_v2": {
+      "path": "assets/backgrounds/bg_forest_distant_v2.webp",
+      "role": "layer",
+      "width": 2171,
+      "height": 724,
+      "master": "art/masters/backgrounds/wide/bg_forest_distant_master.png",
+      "masterSize": [
+        2171,
+        724
+      ],
+      "masterSha256": "1534d792cb261d0c6d39f794ce920f9929ab90f0dab8959715221be7e2f20e66",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 576382,
+        "specks": 38026
+      },
+      "bytes": 1127938,
+      "alpha": "A (real alpha channel verified)",
+      "contentBand": {
+        "top": 0.4365,
+        "bottom": 0.8494
+      },
+      "solidColumns": {
+        "left": 0.0364,
+        "right": 0.9678
+      }
+    },
+    "bg_layer_forest_mid_v2": {
+      "path": "assets/backgrounds/bg_forest_mid_v2.webp",
+      "role": "layer",
+      "width": 2172,
+      "height": 724,
+      "master": "art/masters/backgrounds/wide/bg_forest_mid_master.png",
+      "masterSize": [
+        2172,
+        724
+      ],
+      "masterSha256": "fc6cd9f1903fead25ba37aa2c0ec358894bbffef4a3163e7358569ef8c2631d3",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 607435,
+        "specks": 35979
+      },
+      "bytes": 1223070,
+      "alpha": "A (real alpha channel verified)",
+      "contentBand": {
+        "top": 0.4696,
+        "bottom": 0.8881
+      },
+      "solidColumns": {
+        "left": 0.0414,
+        "right": 0.9705
+      }
+    },
     "bg_layer_sky_v2": {
       "path": "assets/backgrounds/bg_sky_v2.webp",
       "role": "layer",
       "width": 2172,
       "height": 724,
-      "master": "art/masters/backgrounds/v2/bg_sky_master.png",
+      "master": "art/masters/backgrounds/wide/bg_sky_master.png",
       "masterSize": [
         2172,
         724
@@ -134,7 +218,7 @@
       "role": "landmark",
       "width": 1824,
       "height": 608,
-      "master": "art/masters/backgrounds/v2/bg_sirengrad_master.png",
+      "master": "art/masters/backgrounds/wide/bg_sirengrad_master.png",
       "masterSize": [
         2172,
         724
