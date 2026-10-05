@@ -6,6 +6,7 @@ import {
   PLAYER_ASSISTS,
   PLAYER_BODY,
   PLAYER_MOVEMENT,
+  CHARACTER_MOTION,
   PLAYER_SCALE,
   USE_MISHKONTIN_V2,
 } from '../config/constants';
@@ -42,6 +43,15 @@ export class Mishkontin extends Phaser.Physics.Arcade.Sprite {
   private readonly bodyUnit: number;
   /** Playing personality animation (wave, read map...), until gameplay takes over. */
   private personality: PersonalityAnimation | null = null;
+  private lastState: PlayerState = PlayerState.Idle;
+  private stateStartedAt = 0;
+  private runPhase = 0;
+  private runLeftAt = -Infinity;
+  private readonly runMinRate: number;
+  /** Visual-only offset (render interpolation between physics steps); applied only while rendering. */
+  private renderOffsetX = 0;
+  private renderOffsetY = 0;
+  private renderOffsetApplied = false;
   private readonly stateInput: PlayerStateInput = {
     now: 0,
     grounded: false,
@@ -98,6 +108,8 @@ export class Mishkontin extends Phaser.Physics.Arcade.Sprite {
     this.anchorY = anchor.y;
     this.bodyUnit = PLAYER_SCALE / scale;
     this.idleBehaviour = new IdleBehaviour(this.anim);
+    // Legacy keeps its original cadence clamp; V2 uses the tuned motion values.
+    this.runMinRate = USE_MISHKONTIN_V2 ? CHARACTER_MOTION.runMinRate : 0.55;
 
     scene.add.existing(this);
     scene.physics.add.existing(this);
@@ -112,8 +124,65 @@ export class Mishkontin extends Phaser.Physics.Arcade.Sprite {
     this.applyBodySize(PLAYER_BODY.standingHeight);
 
     this.on(Phaser.Animations.Events.ANIMATION_COMPLETE, this.onAnimationComplete, this);
+    if (CHARACTER_MOTION.renderInterpolation) {
+      const events = scene.events;
+      events.on(Phaser.Scenes.Events.POST_UPDATE, this.computeRenderOffset, this);
+      events.on(Phaser.Scenes.Events.PRE_RENDER, this.applyRenderOffset, this);
+      events.on(Phaser.Scenes.Events.RENDER, this.removeRenderOffset, this);
+      this.once(Phaser.GameObjects.Events.DESTROY, () => {
+        events.off(Phaser.Scenes.Events.POST_UPDATE, this.computeRenderOffset, this);
+        events.off(Phaser.Scenes.Events.PRE_RENDER, this.applyRenderOffset, this);
+        events.off(Phaser.Scenes.Events.RENDER, this.removeRenderOffset, this);
+      });
+    }
     this.idleBehaviour.reset();
     this.play(this.anim.idle);
+  }
+
+  /** Where Mishkontin is DRAWN (physics position + render interpolation); the camera follows this. */
+  get viewX(): number {
+    return this.x + this.renderOffsetX;
+  }
+
+  get viewY(): number {
+    return this.y + this.renderOffsetY;
+  }
+
+  /**
+   * Render interpolation. Physics steps at a fixed 60 Hz; between steps the
+   * sprite is drawn where the body was `elapsed` ms after the previous step,
+   * i.e. between the last two step positions (never ahead of them, so it can
+   * never sink into the ground or a wall). Computed after the physics sync,
+   * applied only for drawing and removed straight after - physics, collision
+   * and all game logic only ever see the real position.
+   */
+  private computeRenderOffset(): void {
+    const world = this.scene.physics.world;
+    // Phaser keeps the fixed-step accumulator private; read it without widening its public type.
+    const internals = world as unknown as { _frameTimeMS: number; _elapsed: number };
+    const stepMs = internals._frameTimeMS;
+    const elapsed = internals._elapsed;
+    if (!world.fixedStep || !this.body.enable || world.isPaused || !(stepMs > 0)) {
+      this.renderOffsetX = this.renderOffsetY = 0;
+      return;
+    }
+    const behind = (1 - Phaser.Math.Clamp(elapsed / stepMs, 0, 1)) * (stepMs / 1000);
+    this.renderOffsetX = -this.body.velocity.x * behind;
+    this.renderOffsetY = -this.body.velocity.y * behind;
+  }
+
+  private applyRenderOffset(): void {
+    if (this.renderOffsetApplied) return;
+    this.x += this.renderOffsetX;
+    this.y += this.renderOffsetY;
+    this.renderOffsetApplied = true;
+  }
+
+  private removeRenderOffset(): void {
+    if (!this.renderOffsetApplied) return;
+    this.x -= this.renderOffsetX;
+    this.y -= this.renderOffsetY;
+    this.renderOffsetApplied = false;
   }
 
   /**
@@ -215,6 +284,8 @@ export class Mishkontin extends Phaser.Physics.Arcade.Sprite {
 
   /** Teleports to a feet position and resets all transient state. */
   respawnAt(x: number, y: number): void {
+    this.removeRenderOffset();
+    this.renderOffsetX = this.renderOffsetY = 0;
     this.body.reset(x, y);
     this.body.setAcceleration(0, 0);
     // A visual tween (e.g. fading out in water) must never outlive the respawn.
@@ -269,31 +340,48 @@ export class Mishkontin extends Phaser.Physics.Arcade.Sprite {
 
   private updateAnimation(stateChanged: boolean, delta: number): void {
     const state = this.stateMachine.state;
+    const previous = this.lastState;
+    this.lastState = state;
+    if (stateChanged) this.stateStartedAt = this.now;
     if (stateChanged && state === PlayerState.Idle) this.idleBehaviour.reset();
-    // Gameplay always wins over a personality animation.
+    // Gameplay always wins over a personality animation (straight into the new
+    // state's animation - no idle frame in between).
     if (this.personality && (state !== PlayerState.Idle || this.controls.state.moveX !== 0)) {
       this.personality = null;
       this.idleBehaviour.reset();
     }
+    if (previous === PlayerState.Run && state !== PlayerState.Run) this.rememberRunPhase();
 
     switch (state) {
       case PlayerState.Idle:
         if (this.personality) break;
+        // Getting up from a crouch plays its short rise before idle (V2).
+        if (stateChanged && previous === PlayerState.Crouch && this.anim.crouchRise) {
+          this.play(this.anim.crouchRise);
+          break;
+        }
+        if (this.anims.currentAnim?.key === this.anim.crouchRise && this.anims.isPlaying) break;
         this.playIfNotCurrent(this.idleBehaviour.update(delta));
         break;
       case PlayerState.Run: {
-        this.playIfNotCurrent(this.anim.run);
-        // Cadence follows speed so feet don't skate while accelerating.
+        if (this.anims.currentAnim?.key !== this.anim.run) this.startRun(previous);
+        // Cadence follows the real horizontal speed (continuous, clamped), so
+        // starting, stopping and short taps read as steps instead of a sprint.
         const speedRatio = Math.abs(this.body.velocity.x) / PLAYER_MOVEMENT.maxSpeedX;
-        this.anims.timeScale = Phaser.Math.Clamp(speedRatio, 0.55, 1);
+        this.anims.timeScale = Phaser.Math.Clamp(speedRatio, this.runMinRate, 1);
         return;
       }
       case PlayerState.Jump:
         this.playIfNotCurrent(this.anim.jump);
         break;
-      case PlayerState.Fall:
-        this.playIfNotCurrent(this.anim.fall);
+      case PlayerState.Fall: {
+        // Apex: keep the rising pose until the body is clearly descending.
+        const fromJump = this.anims.currentAnim?.key === this.anim.jump;
+        if (fromJump && this.anim.fallLong && this.body.velocity.y < CHARACTER_MOTION.apexHoldUntilVelocityY) break;
+        const long = this.anim.fallLong && this.now - this.stateStartedAt > CHARACTER_MOTION.longFallAfterMs;
+        this.playIfNotCurrent(long ? this.anim.fallLong! : this.anim.fall);
         break;
+      }
       case PlayerState.Land:
         if (stateChanged) {
           this.landAnimationDone = false;
@@ -308,6 +396,29 @@ export class Mishkontin extends Phaser.Physics.Arcade.Sprite {
         break;
     }
     this.anims.timeScale = 1;
+  }
+
+  /**
+   * Enters the run loop on the frame that best continues the current pose,
+   * or resumes the previous run phase after a very short interruption.
+   */
+  private startRun(previous: PlayerState): void {
+    if (!this.anim.fallLong) {
+      this.play(this.anim.run); // legacy art set: unchanged behaviour
+      return;
+    }
+    let startFrame: number = CHARACTER_MOTION.runEntryFrame;
+    if (this.now - this.runLeftAt <= CHARACTER_MOTION.runResumeWindowMs) startFrame = this.runPhase;
+    else if (previous === PlayerState.Land) startFrame = CHARACTER_MOTION.runAfterLandFrame;
+    this.play({ key: this.anim.run, startFrame });
+  }
+
+  private rememberRunPhase(): void {
+    const anim = this.anims.currentAnim;
+    const frame = this.anims.currentFrame;
+    if (!frame || !anim || anim.key !== this.anim.run) return;
+    this.runPhase = (anim.frames.indexOf(frame) + 1) % anim.frames.length; // continue with the next frame
+    this.runLeftAt = this.now;
   }
 
   private playIfNotCurrent(key: string): void {

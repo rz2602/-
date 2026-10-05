@@ -2,6 +2,20 @@
 
 # v0.1.1 - Forest art pass
 
+## Mishkontin V2: movement & animation polish
+
+- Render interpolation between the fixed 60 Hz physics steps. Mishkontin no longer moves in steps
+  on 120/144 Hz displays. Physics and logic only ever see the real position, and the camera
+  follows the drawn position.
+- Run at 14 fps (feet in step with 230 px/s), continuous speed-based cadence (min 0.6), better
+  entry frames, phase kept across short interruptions and reversals.
+- Calm idle loop (the idle sheet's closed-eye frame is now the blink, in the same pose); blink
+  every 3–7 s after 5 s idle.
+- Readable apex (peak pose held until clearly descending), calm descent, flail only on long falls.
+  Softer landing timing, land → run after 70 ms. Crouch rise on release.
+- Physics, collision, menu and level unchanged: 18/18 at both resolutions, bot 54.7 s / 0 respawns.
+- `art/MISHKONTIN_V2_MOVEMENT_POLISH_REPORT.md`.
+
 ## Mishkontin V2: high-resolution animation set
 
 - New gameplay character from `art/masters/characters/mishkontin_v2/` (14 sheets, all real

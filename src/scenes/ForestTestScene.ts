@@ -73,6 +73,10 @@ export class ForestTestScene extends Phaser.Scene {
 
     this.cameraController = new CameraController(this.cameras.main, this.player, level.width, level.cameraBottom);
     this.cameraController.snapToTarget();
+    // Camera and camera-driven layers update after the physics sync, so they
+    // follow the same (render-interpolated) position Mishkontin is drawn at.
+    this.events.on(Phaser.Scenes.Events.POST_UPDATE, this.updateView, this);
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.events.off(Phaser.Scenes.Events.POST_UPDATE, this.updateView, this));
 
     this.respawner = new RespawnController(this, this.player, this.checkpoints, this.controls, RespawnController.killYFor(level), {
       onFall: (x) => {
@@ -108,14 +112,17 @@ export class ForestTestScene extends Phaser.Scene {
     this.cameras.main.fadeIn(350, 0, 0, 0);
   }
 
+  private updateView(_time: number, delta: number): void {
+    this.cameraController.update(delta);
+    this.backdrop.update(this.cameras.main);
+    this.water.update(this.cameras.main, delta);
+  }
+
   override update(_time: number, delta: number): void {
     this.simTimeMs += delta;
     this.controls.update(this.simTimeMs);
     this.player.update(this.simTimeMs, delta);
     this.respawner.update();
-    this.cameraController.update(delta);
-    this.backdrop.update(this.cameras.main);
-    this.water.update(this.cameras.main, delta);
     this.debug.update(delta);
   }
 

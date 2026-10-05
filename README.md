@@ -214,7 +214,8 @@ High-resolution masters live in `art/masters/` (never edited, SHA-256 in `MANIFE
   input always interrupts). Collision body and movement are unchanged. `USE_MISHKONTIN_V2` in
   `src/config/constants.ts` switches back to the legacy atlas, which the locked Main Menu still
   uses. Developer animation lab: open the game with `?animlab`. See
-  `art/MISHKONTIN_V2_INTEGRATION_REPORT.md`.
+  `art/MISHKONTIN_V2_INTEGRATION_REPORT.md`. Motion tuning (run cadence, apex, landing, render
+  interpolation) lives in `CHARACTER_MOTION`; see `art/MISHKONTIN_V2_MOVEMENT_POLISH_REPORT.md`.
 
 Reports: `art/FOREST_ASSET_INTEGRATION_REPORT.md`, `art/INTEGRATION_REPORT_v0.1.1.md`, `art/ASSET_RESOLUTION_REPORT.md`, `art/README.md`.
 Future art specs (legacy replacements, seamless background masters, Mishkontin animation

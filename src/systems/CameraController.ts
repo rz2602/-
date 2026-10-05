@@ -3,6 +3,9 @@ import { CAMERA, GAME_HEIGHT, GAME_WIDTH } from '../config/constants';
 
 interface FollowTarget extends Phaser.GameObjects.Components.Transform {
   readonly facingDirection: 1 | -1;
+  /** Drawn position (render interpolation), when it differs from the physics position. */
+  readonly viewX?: number;
+  readonly viewY?: number;
 }
 
 const FRAME_MS = 1000 / 60;
@@ -73,7 +76,7 @@ export class CameraController {
 
   /** Point the view centre is pulled towards (player + look-ahead, slightly above). */
   private focusPoint(): [number, number] {
-    return [this.target.x + this.lookAhead, this.target.y - CAMERA.followOffsetY];
+    return [(this.target.viewX ?? this.target.x) + this.lookAhead, (this.target.viewY ?? this.target.y) - CAMERA.followOffsetY];
   }
 
   private apply(): void {

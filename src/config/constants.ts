@@ -108,11 +108,45 @@ export const PLAYER_ANIMATION = {
   fallVelocityThreshold: 60,
   /** Minimum downward speed at touchdown to play the LAND animation. */
   landMinImpactVelocity: 320,
-  /** LAND can be interrupted by horizontal input after this long. */
-  landInterruptAfterMs: 90,
+  /** LAND can be interrupted by horizontal input after this long (visual only; movement is never locked). */
+  landInterruptAfterMs: 70,
   hurtDurationMs: 900,
   hurtKnockbackX: 160,
   hurtKnockbackY: -260,
+} as const;
+
+/**
+ * Character motion polish (visual only - physics, body and input are untouched).
+ * Tuned for Mishkontin V2; the legacy art set ignores the V2-only entries.
+ */
+export const CHARACTER_MOTION = {
+  /**
+   * Arcade physics steps at a fixed 60 Hz, so on 120/144 Hz displays the
+   * sprite only moved every other frame (visible judder). The sprite is drawn
+   * interpolated between the last two physics steps; logic never sees it.
+   */
+  renderInterpolation: true,
+  /**
+   * Run cadence. 14 fps keeps the planted foot in step with the world at full
+   * speed (230 px/s; the art's contact phase covers ~16 logical px per frame).
+   * Slower movement plays proportionally slower, never below minRate, so
+   * acceleration, deceleration and short taps read as steps, not a sprint.
+   */
+  runFps: 14,
+  runMinRate: 0.6,
+  /** Run frame that best continues the idle silhouette (first step). */
+  runEntryFrame: 2,
+  /** Run frame that best continues the landing recovery pose. */
+  runAfterLandFrame: 7,
+  /** Back to running within this long: continue the previous run phase instead of restarting. */
+  runResumeWindowMs: 250,
+  /**
+   * Apex: the rising pose is held until the body is clearly descending, so
+   * the top of the jump reads without adding any hang time to the physics.
+   */
+  apexHoldUntilVelocityY: 70,
+  /** Falls longer than this (longer than a full jump's descent, ~0.5 s) switch from the calm descent pose to the long-fall loop. */
+  longFallAfterMs: 650,
 } as const;
 
 /** Idle personality timings (ms). */

@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { AssetKeys } from '../config/constants';
+import { AssetKeys, CHARACTER_MOTION } from '../config/constants';
 
 /** Shape of the JSON written by tools/build-mishkontin-atlas.mjs. */
 export interface MishkontinManifest {
@@ -99,6 +99,9 @@ export interface CharacterAnimSet {
   crouchHold: string;
   hurt: string;
   turn: string;
+  /** Optional polish animations (V2): calm descent, long-fall loop, getting up from a crouch. */
+  fallLong?: string;
+  crouchRise?: string;
 }
 
 export const LegacyAnimSet: CharacterAnimSet = {
@@ -126,6 +129,9 @@ export const MishkontinV2Anims = {
   land: 'mishkontin2-land',
   crouch: 'mishkontin2-crouch',
   crouchHold: 'mishkontin2-crouch-hold',
+  crouchRise: 'mishkontin2-crouch-rise',
+  fallLong: 'mishkontin2-fall-long',
+  blinkSheet: 'mishkontin2-blink',
   hurt: 'mishkontin2-hurt',
   turn: 'mishkontin2-turn',
   wave: 'mishkontin2-wave',
@@ -148,13 +154,15 @@ export const V2AnimSet: CharacterAnimSet = {
   crouchHold: MishkontinV2Anims.crouchHold,
   hurt: MishkontinV2Anims.hurt,
   turn: MishkontinV2Anims.turn,
+  fallLong: MishkontinV2Anims.fallLong,
+  crouchRise: MishkontinV2Anims.crouchRise,
 };
 
 /** Personality / story animations (callable; gameplay input always interrupts). */
 export type PersonalityAnimation = 'wave' | 'surprised' | 'readMap' | 'sit' | 'sleep' | 'blink';
 
 export const PERSONALITY_V2: Record<PersonalityAnimation, { anim: string; loops: boolean }> = {
-  blink: { anim: MishkontinV2Anims.idleBlink, loops: false },
+  blink: { anim: MishkontinV2Anims.blinkSheet, loops: false },
   wave: { anim: MishkontinV2Anims.wave, loops: false },
   surprised: { anim: MishkontinV2Anims.surprised, loops: false },
   readMap: { anim: MishkontinV2Anims.readMap, loops: true },
@@ -164,29 +172,41 @@ export const PERSONALITY_V2: Record<PersonalityAnimation, { anim: string; loops:
 };
 
 /**
- * V2 animation choices (frame indices into each sheet; sheet = file in
- * art/masters/characters/mishkontin_v2). Frame rates are tuned against the
- * unchanged movement speeds; the run cadence also follows speed (Mishkontin.ts).
+ * V2 animation choices. Frames are [sheet, index] or [sheet, index, ms] (a
+ * per-frame duration replaces the frame rate for that frame). Sheets = files
+ * in art/masters/characters/mishkontin_v2.
+ *
+ * Notes from the movement polish pass (art/MISHKONTIN_V2_MOVEMENT_POLISH_REPORT.md):
+ * - idle sheet frame 2 has closed eyes and frames 3-4 change expression, so
+ *   looping all six made Mishkontin blink every 1.2 s and pull faces; the
+ *   loop uses the calm open-eyed frames and the blink reuses idle frame 2
+ *   (same pose - the separate blink sheet is drawn in a different pose).
+ * - fall sheet frames 0-2 are a frantic flail; the calm jump frame 4 is the
+ *   descent, the flail only plays on long falls.
  */
-const V2_DEFS: Array<{ key: string; sheet: string; frames: number[]; frameRate: number; repeat: number }> = [
-  { key: MishkontinV2Anims.idle, sheet: 'idle', frames: [0, 1, 2, 3, 4, 5], frameRate: 5, repeat: -1 },
-  { key: MishkontinV2Anims.idleBlink, sheet: 'blink', frames: [0, 1, 2, 1, 3], frameRate: 10, repeat: 0 },
-  { key: MishkontinV2Anims.run, sheet: 'run', frames: [0, 1, 2, 3, 4, 5, 6, 7], frameRate: 12, repeat: -1 },
-  // Sheet frame 0 is the on-ground anticipation; take-off is instant, so the launch starts at 1.
-  { key: MishkontinV2Anims.jump, sheet: 'jump', frames: [1, 2, 3], frameRate: 10, repeat: 0 },
-  { key: MishkontinV2Anims.fall, sheet: 'fall', frames: [0, 1, 2, 1], frameRate: 8, repeat: -1 },
-  // Touch-down squash -> recover (land sheet frames 0-2 are airborne and not needed here).
-  { key: MishkontinV2Anims.land, sheet: 'land', frames: [3, 4, 5], frameRate: 14, repeat: 0 },
-  { key: MishkontinV2Anims.crouch, sheet: 'crouch', frames: [1, 2, 3], frameRate: 16, repeat: 0 },
-  { key: MishkontinV2Anims.crouchHold, sheet: 'crouch', frames: [3], frameRate: 1, repeat: -1 },
-  { key: MishkontinV2Anims.hurt, sheet: 'hurt', frames: [0, 1, 2, 3, 4], frameRate: 8, repeat: 0 },
-  { key: MishkontinV2Anims.turn, sheet: 'turn', frames: [0, 1, 2, 3, 4, 5], frameRate: 12, repeat: 0 },
-  { key: MishkontinV2Anims.wave, sheet: 'wave', frames: [0, 1, 2, 3, 2, 3, 4, 5], frameRate: 8, repeat: 0 },
-  { key: MishkontinV2Anims.surprised, sheet: 'surprised', frames: [0, 1, 2, 2, 3], frameRate: 7, repeat: 0 },
-  { key: MishkontinV2Anims.readMap, sheet: 'read_map', frames: [0, 1, 2, 3, 4, 5], frameRate: 3, repeat: -1 },
-  { key: MishkontinV2Anims.sit, sheet: 'sit', frames: [0, 1, 2, 3, 4, 5], frameRate: 3, repeat: -1 },
-  { key: MishkontinV2Anims.sleep, sheet: 'sleep', frames: [0, 1], frameRate: 2, repeat: 0 },
-  { key: MishkontinV2Anims.sleepLoop, sheet: 'sleep', frames: [2, 3], frameRate: 1.5, repeat: -1 },
+type V2Frame = [sheet: string, index: number, ms?: number];
+const V2_DEFS: Array<{ key: string; frames: V2Frame[]; frameRate: number; repeat: number }> = [
+  { key: MishkontinV2Anims.idle, frames: [['idle', 0, 620], ['idle', 1, 520], ['idle', 5, 600], ['idle', 1, 520]], frameRate: 2, repeat: -1 },
+  { key: MishkontinV2Anims.idleBlink, frames: [['idle', 0, 60], ['idle', 2, 130], ['idle', 0, 90]], frameRate: 10, repeat: 0 },
+  { key: MishkontinV2Anims.blinkSheet, frames: [['blink', 0], ['blink', 1], ['blink', 2], ['blink', 1], ['blink', 3]], frameRate: 10, repeat: 0 },
+  { key: MishkontinV2Anims.run, frames: [0, 1, 2, 3, 4, 5, 6, 7].map((i) => ['run', i] as V2Frame), frameRate: CHARACTER_MOTION.runFps, repeat: -1 },
+  // Launch is brief, the rise reads longer; the peak pose (3) holds until the apex has passed.
+  { key: MishkontinV2Anims.jump, frames: [['jump', 1, 70], ['jump', 2, 150], ['jump', 3]], frameRate: 10, repeat: 0 },
+  { key: MishkontinV2Anims.fall, frames: [['jump', 4]], frameRate: 1, repeat: 0 },
+  { key: MishkontinV2Anims.fallLong, frames: [['fall', 1, 220], ['fall', 2, 220]], frameRate: 5, repeat: -1 },
+  // Impact squash -> low -> recover; landing into a run cuts in after the squash.
+  { key: MishkontinV2Anims.land, frames: [['land', 3, 60], ['land', 4, 80], ['land', 5, 120]], frameRate: 14, repeat: 0 },
+  { key: MishkontinV2Anims.crouch, frames: [['crouch', 1, 50], ['crouch', 2, 50], ['crouch', 3]], frameRate: 16, repeat: 0 },
+  { key: MishkontinV2Anims.crouchHold, frames: [['crouch', 3]], frameRate: 1, repeat: -1 },
+  { key: MishkontinV2Anims.crouchRise, frames: [['crouch', 2, 50], ['crouch', 1, 60]], frameRate: 16, repeat: 0 },
+  { key: MishkontinV2Anims.hurt, frames: [0, 1, 2, 3, 4].map((i) => ['hurt', i] as V2Frame), frameRate: 8, repeat: 0 },
+  { key: MishkontinV2Anims.turn, frames: [0, 1, 2, 3, 4, 5].map((i) => ['turn', i] as V2Frame), frameRate: 12, repeat: 0 },
+  { key: MishkontinV2Anims.wave, frames: [0, 1, 2, 3, 2, 3, 4, 5].map((i) => ['wave', i] as V2Frame), frameRate: 8, repeat: 0 },
+  { key: MishkontinV2Anims.surprised, frames: [['surprised', 0], ['surprised', 1], ['surprised', 2, 280], ['surprised', 3]], frameRate: 7, repeat: 0 },
+  { key: MishkontinV2Anims.readMap, frames: [0, 1, 2, 3, 4, 5].map((i) => ['read_map', i] as V2Frame), frameRate: 3, repeat: -1 },
+  { key: MishkontinV2Anims.sit, frames: [0, 1, 2, 3, 4, 5].map((i) => ['sit', i] as V2Frame), frameRate: 3, repeat: -1 },
+  { key: MishkontinV2Anims.sleep, frames: [['sleep', 0], ['sleep', 1]], frameRate: 2, repeat: 0 },
+  { key: MishkontinV2Anims.sleepLoop, frames: [['sleep', 2], ['sleep', 3]], frameRate: 1.5, repeat: -1 },
 ];
 
 export function getMishkontinV2Manifest(scene: Phaser.Scene): MishkontinV2Manifest {
@@ -196,10 +216,9 @@ export function getMishkontinV2Manifest(scene: Phaser.Scene): MishkontinV2Manife
 export function registerMishkontinV2Animations(scene: Phaser.Scene, manifest: MishkontinV2Manifest): void {
   for (const def of V2_DEFS) {
     if (scene.anims.exists(def.key)) continue;
-    const frames = manifest.animations[def.sheet];
     scene.anims.create({
       key: def.key,
-      frames: def.frames.map((i) => ({ key: AssetKeys.mishkontinV2, frame: frames[i] })),
+      frames: def.frames.map(([sheet, i, ms]) => ({ key: AssetKeys.mishkontinV2, frame: manifest.animations[sheet][i], ...(ms ? { duration: ms } : {}) })),
       frameRate: def.frameRate,
       repeat: def.repeat,
     });
