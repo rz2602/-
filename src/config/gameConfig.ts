@@ -21,12 +21,16 @@ export const gameConfig: Phaser.Types.Core.GameConfig = {
     mode: Phaser.Scale.FIT, // responsive, keeps 16:9
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
-  // Illustrated art: smooth (LINEAR) filtering, no pixel snapping.
+  // Illustrated art: smooth (LINEAR) texture filtering, no pixel snapping.
+  // antialiasGL stays on: turning MSAA off changes edge pixels of the locked
+  // Main Menu. Frame-rate protection is the adaptive render scale instead
+  // (systems/RenderScale.ts). Prefer the discrete GPU on dual-GPU laptops.
   render: {
     antialias: true,
     antialiasGL: true,
     pixelArt: false,
     roundPixels: false,
+    powerPreference: 'high-performance',
   },
   physics: {
     default: 'arcade',

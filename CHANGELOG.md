@@ -2,6 +2,15 @@
 
 # v0.1.1 - Forest art pass
 
+## Smooth motion on slower GPUs
+
+- Adaptive render scale. When frames are dropped, the backbuffer resolution is lowered in 15 % steps,
+  down to the logical 1280x720 at most, until the frame rate holds. It never goes back up by itself.
+  `?fullres` turns it off.
+- The browser is asked for the high-performance GPU on dual-GPU laptops.
+- No gameplay, physics, collision or menu change. The Main Menu stays pixel-identical. MSAA stays on,
+  because turning it off changed menu edge pixels.
+
 ## Mishkontin V2: movement & animation polish
 
 - Render interpolation between the fixed 60 Hz physics steps. Mishkontin no longer moves in steps

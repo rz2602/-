@@ -144,6 +144,12 @@ Design notes:
   so the browser never stretches a small canvas. Text is rasterised at the render scale. Cameras
   use origin (0, 0); `CameraController` does the follow (dead-zone, lerp, look-ahead, bounds).
   Filtering is LINEAR (`antialias: true`, `pixelArt: false`, `roundPixels: false`).
+- **Smooth motion first.** If a device drops frames (more than 8 % of frames take 1.6x the display
+  interval or longer, or it can't reach ~48 fps at all), the render scale is lowered in 15 % steps,
+  down to 1x at most, and never raised again automatically. That gives a softer image but
+  steady movement. Logic, layout and physics are not affected. `?fullres` turns this off;
+  `?adaptive=force` turns it on in automated browsers, where it is off by default. Each step is logged
+  as `[RenderScale] ...` in the console. `F3` shows the FPS.
 - **One resampling step.** Tiled textures are power-of-two sized (otherwise Phaser stretches them
   to POT first), and wide background strips are rows of images sampled 1:1.
 

@@ -99,3 +99,30 @@ At 1280×720, 1920×1080, 2560×1440 and 1440×900 @2×:
 - `src/systems/CameraController.ts`: follows the drawn position
 - `src/scenes/ForestTestScene.ts`: camera and background update after the physics sync
 - This report, `CHANGELOG.md`, `README.md`
+
+## 11. Follow-up: frame-rate protection
+The report "still choppy" was investigated again.
+- Measured on screen at 60, 120 and 144 Hz and with jittery frames, the drawn running speed is a
+  constant 230 px/s. Logic update cost is about 0.07 ms per frame.
+- The remaining cause is GPU fill rate. The backbuffer is up to 3x device pixels, the Forest has
+  about 8x full-screen overdraw (sky, sunbeams, sun wash, forest layers), and MSAA is on. A GPU that
+  can't keep up drops frames, and every dropped frame is a visible jump, whatever the animation does.
+
+Changes:
+- **Adaptive render scale** (`src/systems/RenderScale.ts`, `FrameGovernor`).
+  - It measures 120-frame windows of real frame time and takes the display interval as the 10th
+    percentile.
+  - When more than 8 % of frames are 1.6x that interval or longer, or the fastest frames are
+    slower than 21 ms, the render scale drops to 85 %, with a minimum of 1x.
+  - It never raises the scale again (no oscillation).
+  - It is off in automated browsers and with `?fullres`. `?adaptive=force` turns it on.
+- Simulated frame-time checks:
+  - It keeps full quality at a smooth 60 or 144 Hz, with 3 % hitches, and with tab-switch pauses.
+  - It lowers the scale at 15 % dropped frames, with 60-on-120 alternation, and at a steady 30 or 45 fps.
+  - In the headless browser at 1600x900 it went 1.25 → 1.06 → 1 and the frame rate rose by about 30 %.
+- `powerPreference: 'high-performance'` asks for the discrete GPU.
+- **Rejected:** turning MSAA (`antialiasGL`) off. It changed 0.46 % of the locked Main Menu's pixels
+  (edges), so it stays on.
+
+The art itself is a limit. The run cycle has 8 painted poses (14 fps at full speed), so pose
+changes stay visible. More in-between frames would need new art.
