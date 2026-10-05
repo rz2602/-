@@ -772,6 +772,61 @@
       "bytes": 2624912,
       "sha256": "5cc78066c60252bc590b93afe7b0db117f8e98807ab7d3ef27cfa94af70a2ce7",
       "alphaAudit": "A"
+    },
+    {
+      "master": "backgrounds/v2/bg_sky_master.png",
+      "suppliedAs": "wide.zip/wide/bg_sky_master.png",
+      "role": "parallax layer 0 - sky (v2, gameplay; the menu keeps the original sky)",
+      "width": 2172,
+      "height": 724,
+      "mode": "RGB",
+      "bytes": 2105398,
+      "sha256": "7b1015a52c8e1dfe27b7ccd840ed00381140d0e6c33955a43a062b5ca10716b0",
+      "alphaAudit": "B (opaque sky by design)"
+    },
+    {
+      "master": "backgrounds/v2/bg_sirengrad_master.png",
+      "suppliedAs": "wide.zip/wide/bg_sirengrad_master.png",
+      "role": "Sirengrad landmark - single world element at scroll 0.10 (gameplay)",
+      "width": 2172,
+      "height": 724,
+      "mode": "RGBA",
+      "bytes": 1835333,
+      "sha256": "86322c19b53812531bc4a51c7ff782c984452426ab5734fd01996194bc918a61",
+      "alphaAudit": "A"
+    },
+    {
+      "master": "backgrounds/blocked/bg_mountains_master.png",
+      "suppliedAs": "wide.zip/wide/bg_mountains_master.png",
+      "role": "BLOCKED - layer expected transparent, but sky is baked in (RGB, no alpha); not integrated",
+      "width": 2172,
+      "height": 724,
+      "mode": "RGB",
+      "bytes": 2871168,
+      "sha256": "015a674ba03bf114aa47415bfd8ab523d68ba701fd32d06e6bf1ddc15b1bacb3",
+      "alphaAudit": "C"
+    },
+    {
+      "master": "backgrounds/blocked/bg_forest_distant_master.png",
+      "suppliedAs": "wide.zip/wide/bg_forest_distant_master.png",
+      "role": "BLOCKED - layer expected transparent, but sky and mountains are baked in (RGB, no alpha); not integrated",
+      "width": 2172,
+      "height": 724,
+      "mode": "RGB",
+      "bytes": 2963906,
+      "sha256": "06129d73f7ac0a9f43d7bda59a8478eacdffb7f682151a13b6eed4d62dd1f1af",
+      "alphaAudit": "C"
+    },
+    {
+      "master": "backgrounds/blocked/bg_forest_mid_master.png",
+      "suppliedAs": "wide.zip/wide/bg_forest_mid_master.png",
+      "role": "BLOCKED - layer expected transparent, but sky and mountains are baked in (RGB, no alpha); not integrated",
+      "width": 2171,
+      "height": 724,
+      "mode": "RGB",
+      "bytes": 3006555,
+      "sha256": "c51c32cce403cfb292c0ead94b25771713829312ea972416f7331d5fdf6cf32d",
+      "alphaAudit": "C"
     }
   ]
 }

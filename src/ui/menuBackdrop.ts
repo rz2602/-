@@ -24,6 +24,7 @@ export function addMenuBackdrop(scene: Phaser.Scene): void {
     // The approved menu look: ungraded layers, full sunlight.
     grading: false,
     sunShaftAlpha: SUN_SHAFTS.menuAlpha,
+    backgroundSet: 'approved-menu',
   }).update(scene.cameras.main);
 
   const capTop = MENU_GROUND_Y - forestAnchor(scene, 'terrain_cap', 'walkY', [0, 14])[1] * CAP_SCALE;

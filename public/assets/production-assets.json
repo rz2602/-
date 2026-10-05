@@ -111,6 +111,47 @@
         "bg_forest_mid"
       ]
     },
+    "bg_layer_sky_v2": {
+      "path": "assets/backgrounds/bg_sky_v2.webp",
+      "role": "layer",
+      "width": 2172,
+      "height": 724,
+      "master": "art/masters/backgrounds/v2/bg_sky_master.png",
+      "masterSize": [
+        2172,
+        724
+      ],
+      "masterSha256": "7b1015a52c8e1dfe27b7ccd840ed00381140d0e6c33955a43a062b5ca10716b0",
+      "encoding": "lossy q95, PSNR 38.4 dB",
+      "alphaCleanup": {
+        "solid": 0,
+        "specks": 0
+      },
+      "bytes": 400578
+    },
+    "bg_sirengrad": {
+      "path": "assets/backgrounds/bg_sirengrad.webp",
+      "role": "landmark",
+      "width": 1824,
+      "height": 608,
+      "master": "art/masters/backgrounds/v2/bg_sirengrad_master.png",
+      "masterSize": [
+        2172,
+        724
+      ],
+      "masterSha256": "86322c19b53812531bc4a51c7ff782c984452426ab5734fd01996194bc918a61",
+      "encoding": "lossless",
+      "alphaCleanup": {
+        "solid": 679808,
+        "specks": 23078
+      },
+      "bytes": 1035960,
+      "geometry": {
+        "keepX": 0.6169,
+        "baseY": 0.884
+      },
+      "alpha": "A (real alpha channel verified)"
+    },
     "tree_oak_01": {
       "path": "assets/trees/tree_oak_01.webp",
       "role": "tree",

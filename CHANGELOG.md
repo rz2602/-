@@ -2,6 +2,19 @@
 
 # v0.1.1 - Forest art pass
 
+## Backgrounds v2: Sirengrad as its own world element, new sky
+
+- Layer order: sky 0.05 → mountains 0.10 → Sirengrad 0.10 (single world element) → distant
+  forest 0.20 → mid forest 0.40 → gameplay → foreground.
+- `bg_sirengrad_master` (real alpha) is placed once at the viewpoint, on the mountains layer.
+  Its base is hidden behind the distant forest. The mountains are drawn from their castle-free
+  part only, so no second castle can appear.
+- New v2 sky in gameplay (same sun placement; the single-sun phase is kept).
+- Blocked: the v2 mountains, distant and mid forest masters (opaque, sky painted in, so they
+  can't be stacked as layers). Archived in `art/masters/backgrounds/blocked/`.
+- The Main Menu keeps its approved sky and castle (pixel-identical). Gameplay is identical:
+  18/18 at 720p and 1080p, bot 54.7 s / 0 respawns.
+
 ## Final environment assets: ground right edge, underground fill, waystone
 
 - All three passed the pixel-level audit. The previously blocked `terrain_ground_right_edge` is

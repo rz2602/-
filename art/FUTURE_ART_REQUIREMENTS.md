@@ -38,14 +38,20 @@ their left edge** (horizontally wrap-seamless), so copies can repeat without mir
 | Master (`art/masters/backgrounds/`) | Now | Layer travel over the level (logical px) | Joins in a playthrough | Requested master |
 |---|---|---|---|---|
 | `bg_sky_master.png` (opaque) | 2172×724 | 602 (scroll 0.05) | 1, kept on the sun-free left edge | **3300–3600 × 1100–1200**, wrap-seamless left/right, sun not at an edge. ≥ 3011 px covers the whole level without any join. |
-| `bg_mountains_sirengrad_master.png` | 2172×724 | 1204 (0.10) | 4 (castle-free filler copies joined on peaks) | **≥ 4000 × 1300**, Sirengrad once near the right third, the castle-free range continuing compatibly to both edges (or: one wrap-seamless castle-free range 3300–4500 px + a separate Sirengrad landmark piece). |
+| `bg_mountains_sirengrad_master.png` (castle-free part used in gameplay; Sirengrad is now the separate `v2/bg_sirengrad_master`) | 2172×724 | 1204 (0.10) | ~6 (castle-free copies joined on peaks) | **3300–4500 × 1100–1500, mountains only (no castle), transparent above the peaks**, wrap-seamless left/right. |
 | `bg_forest_distant_master.png` | 2172×724 | 2408 (0.20) | ~2 | **3300–4500 × 1100–1500**, wrap-seamless left/right, transparent above the treeline. |
 | `bg_forest_mid_master.png` | 2172×724 | 4816 (0.40) | ~4 | **3300–4500 × 1100–1500**, wrap-seamless left/right, transparent above the treeline. |
+
+**v2 delivery (`wide.zip`) status:** the sky and Sirengrad are integrated. `bg_mountains`,
+`bg_forest_distant` and `bg_forest_mid` were blocked: they are opaque RGB panoramas with the
+sky (and mountains) painted in, so they cannot be stacked as independent layers. They are
+archived in `art/masters/backgrounds/blocked/`. All five are still 2172 px wide and not
+wrap-seamless, so they do not remove the mirror joins.
 
 Keep the same composition rules: transparent PNG (except the sky), same horizon/content band
 heights relative to the image (the layout reads `contentBand` from
 `production-assets.json`), no baked checkerboard or white background, and no Sirengrad in any
-layer except the mountains. When the masters arrive, `MirrorStrip` only needs its mirroring
+layer: it is its own element (`bg_sirengrad`). When the masters arrive, `MirrorStrip` only needs its mirroring
 switched off for wrap-seamless layers.
 
 The forest ground strip uses the same mirror-join technique (inside its full-height slab

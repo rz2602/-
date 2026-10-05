@@ -12,7 +12,7 @@ import { AssetKeys } from '../../config/constants';
  */
 export interface ProductionAsset {
   path: string;
-  role: 'layer' | 'tree' | 'water' | 'ground' | 'cliff' | 'platform' | 'bridge' | 'prop' | 'foreground' | 'fill' | 'overlay';
+  role: 'layer' | 'tree' | 'water' | 'ground' | 'cliff' | 'platform' | 'bridge' | 'prop' | 'foreground' | 'fill' | 'overlay' | 'landmark';
   width: number;
   height: number;
   master: string;
@@ -48,6 +48,8 @@ export interface ProductionManifest {
 
 export const ProductionKeys = {
   sky: 'bg_layer_sky',
+  skyV2: 'bg_layer_sky_v2',
+  sirengrad: 'bg_sirengrad',
   mountains: 'bg_layer_mountains',
   forestDistant: 'bg_layer_forest_distant',
   forestMid: 'bg_layer_forest_mid',

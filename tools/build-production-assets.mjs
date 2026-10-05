@@ -59,6 +59,16 @@ const ASSETS = [
   },
   { key: 'bg_layer_forest_distant', master: 'backgrounds/bg_forest_distant_master.png', out: 'assets/backgrounds/bg_forest_distant.webp', role: 'layer', format: 'webp-lossless', supersedes: ['bg_forest_distant'] },
   { key: 'bg_layer_forest_mid', master: 'backgrounds/bg_forest_mid_master.png', out: 'assets/backgrounds/bg_forest_mid.webp', role: 'layer', format: 'webp-lossless', supersedes: ['bg_forest_mid'] },
+  // v2 background delivery (wide.zip): the sky and Sirengrad as its own world
+  // element. The v2 mountains / distant / mid masters have the sky baked in (no
+  // alpha) and are archived in backgrounds/blocked/ - not built.
+  { key: 'bg_layer_sky_v2', master: 'backgrounds/v2/bg_sky_master.png', out: 'assets/backgrounds/bg_sky_v2.webp', role: 'layer', format: 'webp-lossy' },
+  {
+    key: 'bg_sirengrad', master: 'backgrounds/v2/bg_sirengrad_master.png', out: 'assets/backgrounds/bg_sirengrad.webp',
+    role: 'landmark', env: true, edgeFraming: true, maxDisplay: { w: 760 },
+    // keepX: centre of the main keep; baseY: cliff line that stays visible (below it is hidden behind the distant forest).
+    geometry: { keepX: 1340, baseY: 640 },
+  },
 
   { key: 'tree_oak_01', master: 'trees/tree_oak_01_master.png', out: 'assets/trees/tree_oak_01.webp', role: 'tree', maxDisplay: { h: 560 }, supersedes: ['tree_large_01'] },
   { key: 'tree_oak_02', master: 'trees/tree_oak_02_master.png', out: 'assets/trees/tree_oak_02.webp', role: 'tree', maxDisplay: { h: 560 }, supersedes: ['tree_large_02'] },

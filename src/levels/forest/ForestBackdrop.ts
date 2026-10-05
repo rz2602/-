@@ -24,6 +24,17 @@ const MOUNTAINS_PEAK_TOP = 0.2;
 const MOUNTAINS_LEFT_JOIN = 0.0893;
 
 const SHAFTS_SCROLL_X = 0.3;
+
+/**
+ * Sirengrad as its own world element (v2 backgrounds, gameplay): the whole
+ * landmark image is drawn `width` logical px wide on the mountains layer
+ * (scroll 0.10 / 0.05); its cliff line (geometry.baseY) sits at `baseScreenY`
+ * when the camera is at its lowest point, so everything below it is hidden
+ * behind the distant forest. Its keep stands where the castle of the original
+ * mountains master stood at the final viewpoint (shifted by keepOffsetX so
+ * the whole city fits the frame).
+ */
+const SIRENGRAD = { width: 700, baseScreenY: 318, keepOffsetX: -60 } as const;
 const SUN_WASH_ALPHA = 0.3;
 /** The understory starts this far above the mid-forest artwork's bottom edge (hidden behind it). */
 const UNDERSTORY_OVERLAP = 40;
@@ -44,6 +55,12 @@ export interface ForestBackdropOptions {
   grading?: boolean;
   /** Sun-shaft strength. Default: SUN_SHAFTS.gameplayAlpha. */
   sunShaftAlpha?: number;
+  /**
+   * 'v2' (default, gameplay): v2 sky + Sirengrad as a separate world element
+   * over castle-free mountains. 'approved-menu': the original sky and the
+   * original mountains master with its built-in castle (the locked Main Menu).
+   */
+  backgroundSet?: 'v2' | 'approved-menu';
 }
 
 type LayerGrade = { readonly saturation: number; readonly contrast: number; readonly brightness: number };
@@ -170,14 +187,15 @@ export class ForestBackdrop {
       .setScrollFactor(0)
       .setDepth(ForestLayers.sky.depth - 1);
 
-    const sky = this.addStrip(ProductionKeys.sky, this.grading?.sky, ForestLayers.sky, LAYER_SCALE.sky, LAYOUT.skyTop);
+    const v2 = (options.backgroundSet ?? 'v2') === 'v2';
+    const sky = this.addStrip(v2 ? ProductionKeys.skyV2 : ProductionKeys.sky, this.grading?.sky, ForestLayers.sky, LAYER_SCALE.sky, LAYOUT.skyTop);
     // The sky has its sun near the right edge, so a mirror join there would show
     // two suns. Phase the strip so the whole camera range ends inside one
     // unmirrored copy: the only join falls on the sun-free left edge.
     const skyTravel = Math.max(0, options.worldWidth - GAME_WIDTH) * ForestLayers.sky.scrollX;
     sky.phase = sky.stepWidth - (GAME_WIDTH + skyTravel);
     sky.place(0, LAYOUT.skyTop);
-    this.buildMountains();
+    this.buildMountains(v2);
 
     const shafts = scene.add
       .tileSprite(0, 0, GAME_WIDTH, GAME_HEIGHT, FxTextures.sunbeams)
@@ -247,7 +265,7 @@ export class ForestBackdrop {
    * copies of its castle-free left part only - no duplicate castle can appear.
    * Images use Phaser scroll factors (0.10 / 0.05) so they parallax naturally.
    */
-  private buildMountains(): void {
+  private buildMountains(separateSirengrad: boolean): void {
     const asset = getProductionAsset(this.scene, ProductionKeys.mountains);
     const key = gradedTexture(this.scene, ProductionKeys.mountains, this.grading?.mountains);
     const texture = this.scene.textures.get(key);
@@ -272,6 +290,17 @@ export class ForestBackdrop {
       ? rightAligned
       : maxScroll * scrollX + this.options.sirengradScreenX - castleCentre;
 
+    if (separateSirengrad) {
+      // Castle-free range everywhere (alternately mirrored, joined on peaks) ...
+      const end = maxScroll * scrollX + GAME_WIDTH;
+      for (let i = 0, left = -fillerWidth * 0.35; left < end; i++, left += fillerWidth) {
+        this.addMountainImage(key, 'filler', left, y, i % 2 === 1, s, scrollX, scrollY, depth);
+      }
+      // ... and Sirengrad once, where the original castle stood at the viewpoint.
+      this.addSirengrad(x + castleCentre, scrollX, scrollY, depth + 0.5);
+      return;
+    }
+
     this.addMountainImage(key, 'full', x, y, false, s, scrollX, scrollY, depth);
     // Extension copies leftwards until the layer covers the screen at scroll 0.
     let left = x;
@@ -279,6 +308,20 @@ export class ForestBackdrop {
       left -= fillerWidth;
       this.addMountainImage(key, 'filler', left, y, mirrored, s, scrollX, scrollY, depth);
     }
+  }
+
+  /** Sirengrad landmark, keep centred on world x `keepX` (mountains layer coordinates). */
+  private addSirengrad(keepX: number, scrollX: number, scrollY: number, depth: number): void {
+    const asset = getProductionAsset(this.scene, ProductionKeys.sirengrad);
+    const geo = (asset?.geometry ?? {}) as { keepX?: number; baseY?: number };
+    const key = gradedTexture(this.scene, ProductionKeys.sirengrad, this.grading?.mountains);
+    const frame = this.scene.textures.getFrame(key);
+    this.scene.add
+      .image(keepX + SIRENGRAD.keepOffsetX, SIRENGRAD.baseScreenY + (this.cameraBottom - GAME_HEIGHT) * scrollY, key)
+      .setOrigin(geo.keepX ?? 0.6, geo.baseY ?? 0.88)
+      .setScale(SIRENGRAD.width / frame.width)
+      .setScrollFactor(scrollX, scrollY)
+      .setDepth(depth);
   }
 
   private addMountainImage(key: string, frame: string, x: number, y: number, flipX: boolean, s: number, sx: number, sy: number, depth: number): void {

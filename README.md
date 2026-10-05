@@ -194,9 +194,10 @@ High-resolution masters live in `art/masters/` (never edited, SHA-256 in `MANIFE
 `npm run production-assets` creates the runtime copies listed in
 `public/assets/production-assets.json` (normalized anchors, world size in logical px).
 
-- **Parallax:** four independent transparent layers: sky 0.05, mountains + Sirengrad 0.10,
-  distant forest 0.20, mid forest 0.40. Then gameplay 1.0 and foreground 1.12. Sirengrad appears
-  exactly once, at the final viewpoint.
+- **Parallax:** sky 0.05 → mountains 0.10 → **Sirengrad 0.10 (a single world element)** →
+  distant forest 0.20 → mid forest 0.40 → gameplay 1.0 → foreground 1.12. In gameplay the
+  mountains are drawn from their castle-free part only and Sirengrad (`bg_sirengrad`) appears
+  exactly once, at the final viewpoint. The locked Main Menu keeps its original sky and castle.
 - **Trees & waterfall:** three large oaks, a pine, an ancient tree and a static waterfall, all
   decorative (no collision).
 - **Branding (screen-space UI, `src/ui/Brand.ts`):** the official wordmark is the Main Menu title.
