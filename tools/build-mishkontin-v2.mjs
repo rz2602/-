@@ -12,7 +12,7 @@
  *      by equal cells - the sheets are not uniform and some poses overlap.
  *      Detached parts (Z symbols, reaction marks, the map, the staff) stay
  *      with the frame whose region they are in.
- *   3. Measurement per frame: body centre = centroid of fur pixels, feet =
+ *   3. Measurement per frame: fur centroid, feet =
  *      lowest row with real coverage, character scale = size of the pink ears
  *      (upper half of the frame) - the sheets were drawn at different sizes.
  *   4. Normalization: ONE character scale. Each sheet gets a single factor
@@ -20,9 +20,11 @@
  *      where the ear proxy misreads a pose) so Mishkontin is the same size in
  *      every animation; frames are never scaled individually or stretched.
  *   5. Anchors: grounded frames sit on their feet (bottom-centre contact);
- *      airborne frames keep the body centre at the same height above the
- *      physics feet as in idle. All frames share one cell, so Phaser's origin
- *      is constant and nothing pops between frames.
+ *      horizontally they use the fur centroid, or for BODY_ANCHOR sheets (the
+ *      run) the upper-body centre (head + torso landmarks). Airborne frames keep
+ *      the body centre at the same height above the physics feet as in idle.
+ *      All frames share one cell and carry a pivot at the anchor, so Phaser's
+ *      origin is constant and flipX mirrors around the anchor.
  *   6. Runtime: frames downscaled (Lanczos) to RUNTIME_PX_PER_LOGICAL, runtime
  *      alpha cleanup (>=240 -> 255, <4 -> 0), packed into ONE trimmed atlas,
  *      lossless WebP (verified identical on visible pixels).
@@ -76,6 +78,34 @@ const SHEETS = [
   { name: 'sit', file: 'personality/sit/sit_v2_6frames.png', frames: 6, kind: 'personality', scaleAdjust: 0.92 },
   { name: 'sleep', file: 'personality/sleep/sleep_v2_4frames.png', frames: 4, kind: 'personality', scaleAdjust: 0.75 },
 ];
+
+/**
+ * Horizontal anchor of grounded frames, per sheet.
+ *   'fur' (default): centroid of fur-coloured pixels. Swinging legs and arms
+ *     are fur too, so on the run this shifted the whole body against every leg
+ *     swing (torso jitter up to 9.5 logical px between frames).
+ *   'body': upper-body centre = midpoint of the head (pupil) and the torso
+ *     (gold medallion), both found automatically by template matching against
+ *     ONE character reference (idle frame 0); then a single per-sheet constant
+ *     keeps the sheet's average placement on the physics anchor unchanged.
+ *     No per-frame manual offsets. The head and torso of the run art do not
+ *     move together (the head nods ~8 px), so locking either one alone leaves
+ *     the other at full jitter; the midpoint halves both.
+ * Vertical anchoring is unchanged (feet / airborne body centre).
+ * Only the run uses 'body' for now; jump, fall and land are deliberately untouched.
+ */
+const BODY_ANCHOR = {
+  sheets: ['run'],
+  /** Reference landmarks in idle frame 0, master px relative to the frame's crop box. */
+  reference: { sheet: 'idle', frame: 0, eye: [227.8, 87.5], medallion: [236.0, 199.8] },
+  /** Share of the head in the upper-body centre (0 = torso only). */
+  headWeight: 0.5,
+  /** Template half-sizes and minimum match scores (runtime px; normalized cross-correlation). */
+  eyeHalf: 16,
+  medallionHalf: 9,
+  minEyeScore: 0.6,
+  minMedallionScore: 0.45,
+};
 
 const sha256 = (file) => crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 const median = (a) => [...a].sort((x, y) => x - y)[a.length >> 1];
@@ -156,6 +186,91 @@ function extractFrame(img, left, right) {
   return { data: px, width: w, height: h, box: [x0, y0, x1, y1], furX: furX / furN, furY: furY / furN, ear: Math.sqrt(pink), feet: feet + 1 };
 }
 
+// ------------------------------------------------- body landmarks (runtime) ---
+/** Luminance composited on mid grey (transparent = 128), so silhouettes match too. */
+function greyOf(f) {
+  const g = new Float32Array(f.w * f.h);
+  for (let i = 0; i < g.length; i++) {
+    const a = f.data[i * 4 + 3] / 255;
+    g[i] = ((f.data[i * 4] + f.data[i * 4 + 1] + f.data[i * 4 + 2]) / 3) * a + 128 * (1 - a);
+  }
+  return g;
+}
+
+function patchOf(g, w, cx, cy, half) {
+  const n = half * 2;
+  const t = new Float32Array(n * n);
+  const x0 = Math.round(cx) - half, y0 = Math.round(cy) - half;
+  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) t[y * n + x] = g[(y0 + y) * w + x0 + x];
+  return { t, n };
+}
+
+/** Best normalized cross-correlation of template `p` in region [x0,x1)x[y0,y1) (template centres). */
+function matchTemplate(g, w, h, p, x0, y0, x1, y1) {
+  const { t, n } = p;
+  const half = n / 2;
+  let tm = 0;
+  for (const v of t) tm += v;
+  tm /= t.length;
+  let tv = 0;
+  for (const v of t) tv += (v - tm) ** 2;
+  let best = { score: -2, x: 0, y: 0 };
+  for (let cy = Math.max(half, y0); cy < Math.min(h - half, y1); cy++) {
+    for (let cx = Math.max(half, x0); cx < Math.min(w - half, x1); cx++) {
+      let s = 0, s2 = 0, st = 0;
+      for (let y = 0; y < n; y++) {
+        const row = (cy - half + y) * w + cx - half;
+        for (let x = 0; x < n; x++) {
+          const v = g[row + x];
+          s += v; s2 += v * v; st += v * (t[y * n + x] - tm);
+        }
+      }
+      const variance = s2 - (s * s) / t.length;
+      if (variance / t.length < 25) continue; // flat area (background): no texture to match
+      const score = st / Math.sqrt(variance * tv);
+      if (score > best.score) best = { score, x: cx, y: cy };
+    }
+  }
+  return best;
+}
+
+/** Centroid of pixels passing `test` within `rad` of p (sub-pixel landmark), else p. */
+function refineLandmark(f, p, rad, test) {
+  let n = 0, sx = 0, sy = 0;
+  for (let y = Math.max(0, p.y - rad); y < Math.min(f.h, p.y + rad); y++) {
+    for (let x = Math.max(0, p.x - rad); x < Math.min(f.w, p.x + rad); x++) {
+      const i = (y * f.w + x) * 4;
+      if (test(f.data[i], f.data[i + 1], f.data[i + 2], f.data[i + 3])) { n++; sx += x; sy += y; }
+    }
+  }
+  return n >= 5 ? { x: sx / n, y: sy / n } : { x: p.x, y: p.y };
+}
+const isPupil = (r, g, b, a) => a > 200 && r + g + b < 110;
+const isGold = (r, g, b, a) => a > 200 && r > 170 && g > 120 && b < 100 && g / Math.max(r, 1) > 0.62;
+
+/**
+ * Head (pupil) and torso (medallion) of every frame of `frames`. Pass 1 uses the
+ * idle reference; the medallion is small, so pass 2 re-searches it with the
+ * sheet's own best-matching medallion as template. The torso search is limited
+ * to the chest area below the head found first (belt and satchel buckles are gold too).
+ */
+function findBodyLandmarks(frames, refEye, refMedallion) {
+  const cfg = BODY_ANCHOR;
+  const find = (f, g, medallionTemplate) => {
+    const eyeHit = matchTemplate(g, f.w, f.h, refEye, 0, 0, f.w, Math.round(f.h * 0.75));
+    const eye = refineLandmark(f, eyeHit, 10, isPupil);
+    const ex = Math.round(eye.x), ey = Math.round(eye.y);
+    const mHit = matchTemplate(g, f.w, f.h, medallionTemplate, ex - 75, ey + 20, ex + 30, ey + 120);
+    const medallion = refineLandmark(f, mHit, cfg.medallionHalf, isGold);
+    return { eye, eyeScore: eyeHit.score, medallion, medallionScore: mHit.score };
+  };
+  const greys = frames.map(greyOf);
+  const pass1 = frames.map((f, i) => find(f, greys[i], refMedallion));
+  const best = pass1.reduce((b, r, i) => (r.eyeScore + r.medallionScore > pass1[b].eyeScore + pass1[b].medallionScore ? i : b), 0);
+  const own = patchOf(greys[best], frames[best].w, pass1[best].medallion.x, pass1[best].medallion.y, cfg.medallionHalf);
+  return frames.map((f, i) => find(f, greys[i], own));
+}
+
 function cleanupAlpha(buf) {
   for (let i = 3; i < buf.length; i += 4) {
     const a = buf[i];
@@ -223,6 +338,40 @@ for (const sheet of sheets) {
   }
 }
 
+// Body anchor (see BODY_ANCHOR): upper-body centre, one constant per sheet keeps its mean placement.
+{
+  const refSheet = sheets.find((s) => s.name === BODY_ANCHOR.reference.sheet);
+  const refSrc = refSheet.frames[BODY_ANCHOR.reference.frame];
+  const ref = runtime.find((f) => f.name === `${refSheet.name}_${BODY_ANCHOR.reference.frame}`);
+  const k = ref.w / refSrc.width;
+  const refGrey = greyOf(ref);
+  const [eX, eY] = BODY_ANCHOR.reference.eye;
+  const [mX, mY] = BODY_ANCHOR.reference.medallion;
+  const refEye = patchOf(refGrey, ref.w, eX * k, eY * k, BODY_ANCHOR.eyeHalf);
+  const refMedallion = patchOf(refGrey, ref.w, mX * k, mY * k, BODY_ANCHOR.medallionHalf);
+  for (const sheet of sheets) {
+    if (!BODY_ANCHOR.sheets.includes(sheet.name)) continue;
+    const frames = runtime.filter((f) => f.sheet === sheet.name && !f.air);
+    const marks = findBodyLandmarks(frames, refEye, refMedallion);
+    const ok = marks.map((m) => m.eyeScore >= BODY_ANCHOR.minEyeScore && m.medallionScore >= BODY_ANCHOR.minMedallionScore);
+    const bodyX = marks.map((m) => m.medallion.x * (1 - BODY_ANCHOR.headWeight) + m.eye.x * BODY_ANCHOR.headWeight);
+    const used = frames.filter((_, i) => ok[i]);
+    const shift = used.reduce((s, f) => s + f.anchorX - bodyX[frames.indexOf(f)], 0) / Math.max(1, used.length);
+    frames.forEach((f, i) => {
+      f.landmarks = { eye: [round(marks[i].eye.x, 1), round(marks[i].eye.y, 1)], eyeScore: round(marks[i].eyeScore, 2), medallion: [round(marks[i].medallion.x, 1), round(marks[i].medallion.y, 1)], medallionScore: round(marks[i].medallionScore, 2) };
+      if (!ok[i]) {
+        f.anchorMethod = 'fur (body landmarks not found)';
+        console.warn(`  WARNING ${f.name}: head/torso not found (scores ${f.landmarks.eyeScore}/${f.landmarks.medallionScore}); fur centroid kept`);
+        return;
+      }
+      f.anchorX = bodyX[i] + shift;
+      f.anchorMethod = 'body';
+    });
+    sheet.bodyAnchorShift = round(shift, 2);
+    console.log(`  ${sheet.name.padEnd(10)} body anchor: ${used.length}/${frames.length} frames, sheet constant ${shift.toFixed(2)} runtime px`);
+  }
+}
+
 // Shared cell: every frame placed so its anchor lands on (AX, AY).
 const AX = Math.ceil(Math.max(...runtime.map((f) => f.anchorX)));
 const AY = Math.ceil(Math.max(...runtime.map((f) => f.anchorY)));
@@ -264,6 +413,10 @@ const atlasJson = {
     trimmed: true,
     spriteSourceSize: { x: Math.round(AX - f.anchorX), y: Math.round(AY - f.anchorY), w: f.w, h: f.h },
     sourceSize: { w: CW, h: CH },
+    // Custom pivot = the shared anchor. Phaser mirrors a flipped frame around its pivot;
+    // without one it mirrors around the frame centre, which drew Mishkontin facing left
+    // 25.5 logical px away from his anchor and body.
+    pivot: { x: AX / CW, y: AY / CH },
   }])),
   meta: { app: 'tools/build-mishkontin-v2.mjs', image: 'mishkontin-v2.webp', size: { w: atlasW, h: atlasH }, scale: '1' },
 };
@@ -275,13 +428,14 @@ const runtimeManifest = {
   targetIdleHeight: TARGET_IDLE_HEIGHT,
   cell: { width: CW, height: CH },
   anchor: { x: AX, y: AY, originX: round(AX / CW), originY: round(AY / CH) },
+  flip: 'frames carry a pivot at the anchor, so flipX mirrors around the anchor',
   animations: Object.fromEntries(sheets.map((s) => [s.name, s.frames.map((_, i) => `${s.name}_${i}`)])),
 };
 fs.writeFileSync(path.join(OUT_DIR, 'mishkontin-v2-manifest.json'), JSON.stringify(runtimeManifest, null, 2) + '\n');
 
 const sourceManifest = {
   note: 'Mishkontin V2 source audit + slicing record. Generated by tools/build-mishkontin-v2.mjs; masters are never modified.',
-  normalization: { targetIdleHeightLogical: TARGET_IDLE_HEIGHT, runtimePxPerLogical: RUNTIME_PX_PER_LOGICAL, scaleReference: 'pink ear size (upper half of frame), idle median', anchorPolicy: 'grounded: feet (lowest covered row) + fur centroid x; airborne: fur centroid, body centre held at idle height above the feet' },
+  normalization: { targetIdleHeightLogical: TARGET_IDLE_HEIGHT, runtimePxPerLogical: RUNTIME_PX_PER_LOGICAL, scaleReference: 'pink ear size (upper half of frame), idle median', anchorPolicy: 'grounded: feet (lowest covered row) + x per sheet (body = midpoint of head pupil and torso medallion, matched against idle frame 0, plus one per-sheet constant keeping the mean placement; fur = fur centroid); airborne: fur centroid, body centre held at idle height above the feet', bodyAnchor: { sheets: BODY_ANCHOR.sheets, reference: BODY_ANCHOR.reference, headWeight: BODY_ANCHOR.headWeight } },
   facing: 'right (left = Phaser flipX)',
   animations: sheets.map((s) => ({
     name: s.name,
@@ -294,6 +448,8 @@ const sourceManifest = {
     sheetScale: round(s.scale),
     manualScaleAdjust: s.scaleAdjust ?? 1,
     airborneFrames: s.air ?? [],
+    horizontalAnchor: BODY_ANCHOR.sheets.includes(s.name) ? 'body' : 'fur',
+    ...(s.bodyAnchorShift !== undefined ? { bodyAnchorSheetConstant: s.bodyAnchorShift, bodyLandmarks: runtime.filter((f) => f.sheet === s.name && f.landmarks).map((f) => ({ frame: f.name, method: f.anchorMethod, ...f.landmarks })) } : {}),
     frameBoxes: s.frames.map((f) => f.box),
     status: 'INTEGRATED',
   })),

@@ -185,11 +185,13 @@ export const PERSONALITY_V2: Record<PersonalityAnimation, { anim: string; loops:
  *   descent, the flail only plays on long falls.
  */
 type V2Frame = [sheet: string, index: number, ms?: number];
-const V2_DEFS: Array<{ key: string; frames: V2Frame[]; frameRate: number; repeat: number }> = [
+/** Frames are explicit, or `{ allOf: sheet }` = every frame of that sheet in order (the run: 8 now, 12 later). */
+type V2Def = { key: string; frames: V2Frame[] | { allOf: string }; frameRate: number | { cycleMs: number }; repeat: number };
+const V2_DEFS: V2Def[] = [
   { key: MishkontinV2Anims.idle, frames: [['idle', 0, 620], ['idle', 1, 520], ['idle', 5, 600], ['idle', 1, 520]], frameRate: 2, repeat: -1 },
   { key: MishkontinV2Anims.idleBlink, frames: [['idle', 0, 60], ['idle', 2, 130], ['idle', 0, 90]], frameRate: 10, repeat: 0 },
   { key: MishkontinV2Anims.blinkSheet, frames: [['blink', 0], ['blink', 1], ['blink', 2], ['blink', 1], ['blink', 3]], frameRate: 10, repeat: 0 },
-  { key: MishkontinV2Anims.run, frames: [0, 1, 2, 3, 4, 5, 6, 7].map((i) => ['run', i] as V2Frame), frameRate: CHARACTER_MOTION.runFps, repeat: -1 },
+  { key: MishkontinV2Anims.run, frames: { allOf: 'run' }, frameRate: { cycleMs: CHARACTER_MOTION.runCycleMs }, repeat: -1 },
   // Launch is brief, the rise reads longer; the peak pose (3) holds until the apex has passed.
   { key: MishkontinV2Anims.jump, frames: [['jump', 1, 70], ['jump', 2, 150], ['jump', 3]], frameRate: 10, repeat: 0 },
   { key: MishkontinV2Anims.fall, frames: [['jump', 4]], frameRate: 1, repeat: 0 },
@@ -216,10 +218,11 @@ export function getMishkontinV2Manifest(scene: Phaser.Scene): MishkontinV2Manife
 export function registerMishkontinV2Animations(scene: Phaser.Scene, manifest: MishkontinV2Manifest): void {
   for (const def of V2_DEFS) {
     if (scene.anims.exists(def.key)) continue;
+    const frames: V2Frame[] = Array.isArray(def.frames) ? def.frames : manifest.animations[def.frames.allOf].map((_, i) => [(def.frames as { allOf: string }).allOf, i]);
     scene.anims.create({
       key: def.key,
-      frames: def.frames.map(([sheet, i, ms]) => ({ key: AssetKeys.mishkontinV2, frame: manifest.animations[sheet][i], ...(ms ? { duration: ms } : {}) })),
-      frameRate: def.frameRate,
+      frames: frames.map(([sheet, i, ms]) => ({ key: AssetKeys.mishkontinV2, frame: manifest.animations[sheet][i], ...(ms ? { duration: ms } : {}) })),
+      frameRate: typeof def.frameRate === 'number' ? def.frameRate : (frames.length * 1000) / def.frameRate.cycleMs,
       repeat: def.repeat,
     });
   }

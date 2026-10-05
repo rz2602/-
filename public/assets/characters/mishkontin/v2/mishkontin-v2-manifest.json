@@ -12,6 +12,7 @@
     "originX": 0.568,
     "originY": 0.9538
   },
+  "flip": "frames carry a pivot at the anchor, so flipX mirrors around the anchor",
   "animations": {
     "idle": [
       "idle_0",

@@ -222,6 +222,10 @@ High-resolution masters live in `art/masters/` (never edited, SHA-256 in `MANIFE
   uses. Developer animation lab: open the game with `?animlab`. See
   `art/MISHKONTIN_V2_INTEGRATION_REPORT.md`. Motion tuning (run cadence, apex, landing, render
   interpolation) lives in `CHARACTER_MOTION`; see `art/MISHKONTIN_V2_MOVEMENT_POLISH_REPORT.md`.
+  Run frames are anchored on the upper-body centre (head + torso, `BODY_ANCHOR` in the build
+  script). Atlas frames carry a pivot, so facing left mirrors around the anchor. The run uses every
+  run frame in the atlas at `runCycleMs` per cycle, so a new 12-frame run only needs its sheet entry in
+  `SHEETS` and a rebuild. See `art/MISHKONTIN_V2_ALIGNMENT_FLIP_REPORT.md`.
 
 Reports: `art/FOREST_ASSET_INTEGRATION_REPORT.md`, `art/INTEGRATION_REPORT_v0.1.1.md`, `art/ASSET_RESOLUTION_REPORT.md`, `art/README.md`.
 Future art specs (legacy replacements, seamless background masters, Mishkontin animation

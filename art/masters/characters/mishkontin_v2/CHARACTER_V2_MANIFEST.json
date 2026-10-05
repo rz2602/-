@@ -4,7 +4,25 @@
     "targetIdleHeightLogical": 150,
     "runtimePxPerLogical": 2,
     "scaleReference": "pink ear size (upper half of frame), idle median",
-    "anchorPolicy": "grounded: feet (lowest covered row) + fur centroid x; airborne: fur centroid, body centre held at idle height above the feet"
+    "anchorPolicy": "grounded: feet (lowest covered row) + x per sheet (body = midpoint of head pupil and torso medallion, matched against idle frame 0, plus one per-sheet constant keeping the mean placement; fur = fur centroid); airborne: fur centroid, body centre held at idle height above the feet",
+    "bodyAnchor": {
+      "sheets": [
+        "run"
+      ],
+      "reference": {
+        "sheet": "idle",
+        "frame": 0,
+        "eye": [
+          227.8,
+          87.5
+        ],
+        "medallion": [
+          236,
+          199.8
+        ]
+      },
+      "headWeight": 0.5
+    }
   },
   "facing": "right (left = Phaser flipX)",
   "animations": [
@@ -28,6 +46,7 @@
       "sheetScale": 0.6186,
       "manualScaleAdjust": 1,
       "airborneFrames": [],
+      "horizontalAnchor": "fur",
       "frameBoxes": [
         [
           14,
@@ -90,6 +109,122 @@
       "sheetScale": 0.8432,
       "manualScaleAdjust": 1,
       "airborneFrames": [],
+      "horizontalAnchor": "body",
+      "bodyAnchorSheetConstant": -56.62,
+      "bodyLandmarks": [
+        {
+          "frame": "run_0",
+          "method": "body",
+          "eye": [
+            220.4,
+            76.3
+          ],
+          "eyeScore": 0.85,
+          "medallion": [
+            195.4,
+            138.1
+          ],
+          "medallionScore": 0.82
+        },
+        {
+          "frame": "run_1",
+          "method": "body",
+          "eye": [
+            215.9,
+            68.3
+          ],
+          "eyeScore": 0.85,
+          "medallion": [
+            194,
+            131.3
+          ],
+          "medallionScore": 1
+        },
+        {
+          "frame": "run_2",
+          "method": "body",
+          "eye": [
+            229,
+            67.5
+          ],
+          "eyeScore": 0.74,
+          "medallion": [
+            214.9,
+            137.9
+          ],
+          "medallionScore": 0.55
+        },
+        {
+          "frame": "run_3",
+          "method": "body",
+          "eye": [
+            204.2,
+            68.8
+          ],
+          "eyeScore": 0.86,
+          "medallion": [
+            195.3,
+            131.3
+          ],
+          "medallionScore": 0.79
+        },
+        {
+          "frame": "run_4",
+          "method": "body",
+          "eye": [
+            197.2,
+            72.9
+          ],
+          "eyeScore": 0.82,
+          "medallion": [
+            175.3,
+            134.1
+          ],
+          "medallionScore": 0.91
+        },
+        {
+          "frame": "run_5",
+          "method": "body",
+          "eye": [
+            214.2,
+            73.4
+          ],
+          "eyeScore": 0.83,
+          "medallion": [
+            199.2,
+            137.2
+          ],
+          "medallionScore": 0.57
+        },
+        {
+          "frame": "run_6",
+          "method": "body",
+          "eye": [
+            219.6,
+            80.3
+          ],
+          "eyeScore": 0.79,
+          "medallion": [
+            195.8,
+            141
+          ],
+          "medallionScore": 0.82
+        },
+        {
+          "frame": "run_7",
+          "method": "body",
+          "eye": [
+            212.3,
+            66.2
+          ],
+          "eyeScore": 0.84,
+          "medallion": [
+            198.5,
+            129.8
+          ],
+          "medallionScore": 0.58
+        }
+      ],
       "frameBoxes": [
         [
           0,
@@ -167,6 +302,7 @@
         3,
         4
       ],
+      "horizontalAnchor": "fur",
       "frameBoxes": [
         [
           29,
@@ -231,6 +367,7 @@
         1,
         2
       ],
+      "horizontalAnchor": "fur",
       "frameBoxes": [
         [
           9,
@@ -295,6 +432,7 @@
         1,
         2
       ],
+      "horizontalAnchor": "fur",
       "frameBoxes": [
         [
           16,
@@ -353,6 +491,7 @@
       "sheetScale": 0.5457,
       "manualScaleAdjust": 1,
       "airborneFrames": [],
+      "horizontalAnchor": "fur",
       "frameBoxes": [
         [
           9,
@@ -400,6 +539,7 @@
       "sheetScale": 0.6336,
       "manualScaleAdjust": 0.86,
       "airborneFrames": [],
+      "horizontalAnchor": "fur",
       "frameBoxes": [
         [
           9,
@@ -454,6 +594,7 @@
       "sheetScale": 0.7206,
       "manualScaleAdjust": 1,
       "airborneFrames": [],
+      "horizontalAnchor": "fur",
       "frameBoxes": [
         [
           14,
@@ -512,6 +653,7 @@
       "sheetScale": 0.4886,
       "manualScaleAdjust": 1,
       "airborneFrames": [],
+      "horizontalAnchor": "fur",
       "frameBoxes": [
         [
           30,
@@ -560,6 +702,7 @@
       "sheetScale": 0.6451,
       "manualScaleAdjust": 1,
       "airborneFrames": [],
+      "horizontalAnchor": "fur",
       "frameBoxes": [
         [
           23,
@@ -618,6 +761,7 @@
       "sheetScale": 0.5032,
       "manualScaleAdjust": 1,
       "airborneFrames": [],
+      "horizontalAnchor": "fur",
       "frameBoxes": [
         [
           27,
@@ -666,6 +810,7 @@
       "sheetScale": 0.6303,
       "manualScaleAdjust": 1,
       "airborneFrames": [],
+      "horizontalAnchor": "fur",
       "frameBoxes": [
         [
           10,
@@ -726,6 +871,7 @@
       "sheetScale": 0.6239,
       "manualScaleAdjust": 0.92,
       "airborneFrames": [],
+      "horizontalAnchor": "fur",
       "frameBoxes": [
         [
           0,
@@ -784,6 +930,7 @@
       "sheetScale": 0.4836,
       "manualScaleAdjust": 0.75,
       "airborneFrames": [],
+      "horizontalAnchor": "fur",
       "frameBoxes": [
         [
           15,

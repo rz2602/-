@@ -127,17 +127,24 @@ export const CHARACTER_MOTION = {
    */
   renderInterpolation: true,
   /**
-   * Run cadence. 14 fps keeps the planted foot in step with the world at full
-   * speed (230 px/s; the art's contact phase covers ~16 logical px per frame).
-   * Slower movement plays proportionally slower, never below minRate, so
-   * acceleration, deceleration and short taps read as steps, not a sprint.
+   * Run cadence, as the duration of one full run cycle (two steps) at full
+   * speed. The frame rate follows from the number of run frames in the atlas:
+   * 8 frames -> 14 fps (feet in step with 230 px/s; the current art's contact
+   * phase covers ~16 logical px per frame); a 12-frame cycle plays at 21 fps
+   * with the same stride timing. Slower movement plays proportionally slower,
+   * never below minRate, so acceleration, deceleration and short taps read as
+   * steps, not a sprint.
    */
-  runFps: 14,
+  runCycleMs: 8000 / 14,
   runMinRate: 0.6,
-  /** Run frame that best continues the idle silhouette (first step). */
-  runEntryFrame: 2,
-  /** Run frame that best continues the landing recovery pose. */
-  runAfterLandFrame: 7,
+  /**
+   * Run entry points as a fraction of the cycle (0 = first frame), so they
+   * survive a change of frame count. With 8 frames: 0.25 = frame 2 (best
+   * continues the idle silhouette), 0.875 = frame 7 (best continues the
+   * landing recovery pose). Re-check both when the run art is replaced.
+   */
+  runEntryPhase: 0.25,
+  runAfterLandPhase: 0.875,
   /** Back to running within this long: continue the previous run phase instead of restarting. */
   runResumeWindowMs: 250,
   /**

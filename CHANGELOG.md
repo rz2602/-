@@ -2,6 +2,18 @@
 
 # v0.1.1 - Forest art pass
 
+## Mishkontin V2: run alignment and facing-left fix
+
+- Run frames are placed horizontally on the upper-body centre (head + torso, found automatically
+  against idle frame 0) instead of the fur centroid. Head jitter between run poses fell from 8.6
+  to 3.1 logical px and torso jitter from 9.0 to 4.1; vertical grounding is unchanged.
+- Atlas frames carry a pivot at the anchor, so facing left mirrors around the anchor. The 25.5 px
+  facing-left offset from the collision body is gone.
+- The run animation uses every run frame in the atlas, and the cadence is a cycle duration
+  (`runCycleMs`), so a 12-frame run cycle can be dropped in. Timing is identical with 8 frames.
+- No change to art, physics, collision, camera, gameplay, idle or jump/fall/land placement.
+- `art/MISHKONTIN_V2_ALIGNMENT_FLIP_REPORT.md`.
+
 ## Smooth motion on slower GPUs
 
 - Adaptive render scale. When frames are dropped, the backbuffer resolution is lowered in 15 % steps,

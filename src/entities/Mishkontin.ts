@@ -407,9 +407,11 @@ export class Mishkontin extends Phaser.Physics.Arcade.Sprite {
       this.play(this.anim.run); // legacy art set: unchanged behaviour
       return;
     }
-    let startFrame: number = CHARACTER_MOTION.runEntryFrame;
-    if (this.now - this.runLeftAt <= CHARACTER_MOTION.runResumeWindowMs) startFrame = this.runPhase;
-    else if (previous === PlayerState.Land) startFrame = CHARACTER_MOTION.runAfterLandFrame;
+    const runFrames = this.scene.anims.get(this.anim.run).frames.length;
+    const frameAt = (phase: number) => Math.round(phase * runFrames) % runFrames;
+    let startFrame = frameAt(CHARACTER_MOTION.runEntryPhase);
+    if (this.now - this.runLeftAt <= CHARACTER_MOTION.runResumeWindowMs) startFrame = this.runPhase % runFrames;
+    else if (previous === PlayerState.Land) startFrame = frameAt(CHARACTER_MOTION.runAfterLandPhase);
     this.play({ key: this.anim.run, startFrame });
   }
 
