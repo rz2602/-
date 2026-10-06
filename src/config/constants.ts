@@ -127,24 +127,21 @@ export const CHARACTER_MOTION = {
    */
   renderInterpolation: true,
   /**
-   * Run cadence, as the duration of one full run cycle (two steps) at full
-   * speed. The frame rate follows from the number of run frames in the atlas:
-   * 8 frames -> 14 fps (feet in step with 230 px/s; the current art's contact
-   * phase covers ~16 logical px per frame); a 12-frame cycle plays at 21 fps
-   * with the same stride timing. Slower movement plays proportionally slower,
-   * never below minRate, so acceleration, deceleration and short taps read as
-   * steps, not a sprint.
+   * Run cadence, as the duration of one full run cycle at full speed; the frame
+   * rate follows from the number of run frames in the atlas. 12-frame run at
+   * 15 fps = 800 ms (12 / 15 / 18 fps compared in art/MISHKONTIN_V2_RUN12_REPORT.md).
+   * Slower movement plays proportionally slower, never below minRate, so
+   * acceleration, deceleration and short taps read as steps, not a sprint.
    */
-  runCycleMs: 8000 / 14,
+  runCycleMs: 12000 / 15,
   runMinRate: 0.6,
   /**
    * Run entry points as a fraction of the cycle (0 = first frame), so they
-   * survive a change of frame count. With 8 frames: 0.25 = frame 2 (best
-   * continues the idle silhouette), 0.875 = frame 7 (best continues the
-   * landing recovery pose). Re-check both when the run art is replaced.
+   * survive a change of frame count. 12-frame run: 4/12 = frame 05 (closest
+   * silhouette to idle), 3/12 = frame 04 (closest to the landing recovery pose).
    */
-  runEntryPhase: 0.25,
-  runAfterLandPhase: 0.875,
+  runEntryPhase: 4 / 12,
+  runAfterLandPhase: 3 / 12,
   /** Back to running within this long: continue the previous run phase instead of restarting. */
   runResumeWindowMs: 250,
   /**

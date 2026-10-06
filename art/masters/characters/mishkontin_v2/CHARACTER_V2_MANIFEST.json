@@ -4,7 +4,7 @@
     "targetIdleHeightLogical": 150,
     "runtimePxPerLogical": 2,
     "scaleReference": "pink ear size (upper half of frame), idle median",
-    "anchorPolicy": "grounded: feet (lowest covered row) + x per sheet (body = midpoint of head pupil and torso medallion, matched against idle frame 0, plus one per-sheet constant keeping the mean placement; fur = fur centroid); airborne: fur centroid, body centre held at idle height above the feet",
+    "anchorPolicy": "grounded: feet (lowest covered row) + x per sheet (body = midpoint of head pupil and torso medallion, matched against idle frame 0, the upper-body centre is the anchor (mirror axis, centred on the collision body); fur = fur centroid); airborne: fur centroid, body centre held at idle height above the feet",
     "bodyAnchor": {
       "sheets": [
         "run"
@@ -90,53 +90,55 @@
     {
       "name": "run",
       "kind": "core",
-      "source": "art/masters/characters/mishkontin_v2/run/mishkontin_run_v2_8frames.png",
+      "source": "art/masters/characters/mishkontin_v2/run/mishkontin_run_v2_12frames_master.webp",
       "sourceSize": [
-        2172,
-        724
+        2000,
+        667
       ],
-      "sha256": "139f16bcbcf7744d2d5220114c7f4eaf6e37b460f599d2d2cccf02b120f3ea7c",
-      "frames": 8,
+      "sha256": "4cf50871c9ab2f8d8b7dc134e0c906fce121aaf698537c761a88e9de0d4d33f3",
+      "frames": 12,
       "seamOpaqueCrossings": [
-        1,
-        3,
-        12,
         0,
-        15,
-        3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
         0
       ],
-      "sheetScale": 0.8432,
+      "sheetScale": 0.8661,
       "manualScaleAdjust": 1,
       "airborneFrames": [],
       "horizontalAnchor": "body",
-      "bodyAnchorSheetConstant": -56.62,
       "bodyLandmarks": [
         {
           "frame": "run_0",
           "method": "body",
           "eye": [
-            220.4,
-            76.3
+            209.8,
+            58.9
           ],
-          "eyeScore": 0.85,
+          "eyeScore": 0.98,
           "medallion": [
-            195.4,
-            138.1
+            192.8,
+            118.9
           ],
-          "medallionScore": 0.82
+          "medallionScore": 0.93
         },
         {
           "frame": "run_1",
           "method": "body",
           "eye": [
-            215.9,
-            68.3
+            218.9,
+            56.3
           ],
-          "eyeScore": 0.85,
+          "eyeScore": 1,
           "medallion": [
-            194,
-            131.3
+            202.6,
+            116.2
           ],
           "medallionScore": 1
         },
@@ -144,135 +146,215 @@
           "frame": "run_2",
           "method": "body",
           "eye": [
-            229,
-            67.5
+            228.7,
+            60
           ],
-          "eyeScore": 0.74,
+          "eyeScore": 0.96,
           "medallion": [
-            214.9,
-            137.9
+            212.5,
+            120.2
           ],
-          "medallionScore": 0.55
+          "medallionScore": 0.95
         },
         {
           "frame": "run_3",
           "method": "body",
           "eye": [
-            204.2,
-            68.8
+            209,
+            58.5
           ],
-          "eyeScore": 0.86,
+          "eyeScore": 0.98,
           "medallion": [
-            195.3,
-            131.3
+            194.7,
+            117.1
           ],
-          "medallionScore": 0.79
+          "medallionScore": 0.96
         },
         {
           "frame": "run_4",
           "method": "body",
           "eye": [
-            197.2,
-            72.9
+            219.7,
+            60.4
           ],
-          "eyeScore": 0.82,
+          "eyeScore": 0.98,
           "medallion": [
-            175.3,
-            134.1
+            203.8,
+            121.1
           ],
-          "medallionScore": 0.91
+          "medallionScore": 0.94
         },
         {
           "frame": "run_5",
           "method": "body",
           "eye": [
-            214.2,
-            73.4
+            215.7,
+            61.1
           ],
-          "eyeScore": 0.83,
+          "eyeScore": 0.96,
           "medallion": [
-            199.2,
-            137.2
+            198.8,
+            119.7
           ],
-          "medallionScore": 0.57
+          "medallionScore": 0.94
         },
         {
           "frame": "run_6",
           "method": "body",
           "eye": [
-            219.6,
-            80.3
+            205.5,
+            56.9
           ],
-          "eyeScore": 0.79,
+          "eyeScore": 0.94,
           "medallion": [
-            195.8,
-            141
+            189.4,
+            112.4
           ],
-          "medallionScore": 0.82
+          "medallionScore": 0.92
         },
         {
           "frame": "run_7",
           "method": "body",
           "eye": [
-            212.3,
-            66.2
+            214.6,
+            56.4
           ],
-          "eyeScore": 0.84,
+          "eyeScore": 0.96,
           "medallion": [
-            198.5,
-            129.8
+            201.1,
+            112.2
           ],
-          "medallionScore": 0.58
+          "medallionScore": 0.8
+        },
+        {
+          "frame": "run_8",
+          "method": "body",
+          "eye": [
+            218.3,
+            57
+          ],
+          "eyeScore": 0.96,
+          "medallion": [
+            202.9,
+            113.9
+          ],
+          "medallionScore": 0.94
+        },
+        {
+          "frame": "run_9",
+          "method": "body",
+          "eye": [
+            213.2,
+            56.8
+          ],
+          "eyeScore": 0.95,
+          "medallion": [
+            196.9,
+            113.1
+          ],
+          "medallionScore": 0.88
+        },
+        {
+          "frame": "run_10",
+          "method": "body",
+          "eye": [
+            221.2,
+            57.8
+          ],
+          "eyeScore": 0.96,
+          "medallion": [
+            204.2,
+            115.1
+          ],
+          "medallionScore": 0.92
+        },
+        {
+          "frame": "run_11",
+          "method": "body",
+          "eye": [
+            221,
+            58.8
+          ],
+          "eyeScore": 0.98,
+          "medallion": [
+            203.6,
+            115.6
+          ],
+          "medallionScore": 0.94
         }
       ],
       "frameBoxes": [
         [
-          0,
-          215,
-          352,
-          555
+          3,
+          66,
+          342,
+          331
         ],
         [
-          272,
-          228,
-          622,
-          553
+          317,
+          65,
+          662,
+          326
         ],
         [
-          530,
-          204,
-          858,
-          545
+          643,
+          64,
+          1004,
+          332
         ],
         [
-          806,
-          210,
-          1147,
-          516
+          991,
+          64,
+          1322,
+          323
         ],
         [
-          1091,
-          241,
-          1384,
-          560
+          1310,
+          64,
+          1658,
+          331
         ],
         [
-          1317,
-          234,
-          1648,
-          558
+          1651,
+          66,
+          1995,
+          330
         ],
         [
-          1580,
-          237,
-          1916,
-          559
+          3,
+          384,
+          332,
+          636
         ],
         [
-          1841,
-          242,
-          2171,
-          558
+          320,
+          384,
+          670,
+          639
+        ],
+        [
+          661,
+          385,
+          1005,
+          646
+        ],
+        [
+          984,
+          383,
+          1320,
+          641
+        ],
+        [
+          1315,
+          383,
+          1663,
+          641
+        ],
+        [
+          1643,
+          386,
+          1990,
+          647
         ]
       ],
       "status": "INTEGRATED"

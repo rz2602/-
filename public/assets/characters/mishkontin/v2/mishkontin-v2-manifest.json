@@ -3,13 +3,13 @@
   "runtimePxPerLogical": 2,
   "targetIdleHeight": 150,
   "cell": {
-    "width": 375,
+    "width": 383,
     "height": 368
   },
   "anchor": {
-    "x": 213,
+    "x": 221,
     "y": 351,
-    "originX": 0.568,
+    "originX": 0.577,
     "originY": 0.9538
   },
   "flip": "frames carry a pivot at the anchor, so flipX mirrors around the anchor",
@@ -30,7 +30,11 @@
       "run_4",
       "run_5",
       "run_6",
-      "run_7"
+      "run_7",
+      "run_8",
+      "run_9",
+      "run_10",
+      "run_11"
     ],
     "jump": [
       "jump_0",

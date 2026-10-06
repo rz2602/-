@@ -1025,6 +1025,17 @@
       "bytes": 1422488,
       "sha256": "8bfc83420320740aada94b1a0b5a7bd29ff16314a8ba013e6fedfc0a8dc355c1",
       "alphaAudit": "A"
+    },
+    {
+      "master": "characters/mishkontin_v2/run/mishkontin_run_v2_12frames_master.webp",
+      "suppliedAs": "chat attachment, second upload (replaces a wrongly supplied first image that was never committed): 12-frame run master, 2 rows x 6, numbered labels, black background",
+      "role": "Mishkontin V2 run cycle (12 frames) - replaces the 8-frame run in gameplay",
+      "width": 2000,
+      "height": 667,
+      "mode": "RGB (lossy WebP, no alpha: black background removed by the build matte)",
+      "bytes": 183320,
+      "sha256": "4cf50871c9ab2f8d8b7dc134e0c906fce121aaf698537c761a88e9de0d4d33f3",
+      "alphaAudit": "none - opaque black background; see art/MISHKONTIN_V2_RUN12_REPORT.md"
     }
   ]
 }

@@ -2,6 +2,19 @@
 
 # v0.1.1 - Forest art pass
 
+## Mishkontin V2: 12-frame run cycle
+
+- New 12-frame run master (2 rows x 6, black background, labels). The build removes the background
+  (gaps, shadow and pupils are told apart by measurement), drops the labels and grounds each row on
+  its own ground line, so the flight poses keep their lift.
+- Run frames are anchored on the upper-body centre (head + torso), which sits on the physics anchor.
+  Head and torso stay over the collision body facing either way. Head jitter between run poses is
+  0.8 / 3.0 logical px (old run: 8.6 / 16.9).
+- 15 fps (800 ms cycle): one step covers about the drawn stride, with an even 8 display frames per
+  pose at 120 Hz. The cadence stays velocity-aware, and run entry frames were re-picked.
+- Physics, collision, camera, level, menu and other animations unchanged.
+  `art/MISHKONTIN_V2_RUN12_REPORT.md`.
+
 ## Mishkontin V2: run alignment and facing-left fix
 
 - Run frames are placed horizontally on the upper-body centre (head + torso, found automatically
