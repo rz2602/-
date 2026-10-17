@@ -47,7 +47,7 @@ export interface BattleSide {
 }
 
 export type BattleEvent =
-  | { t: 'move'; uid: number; path: number[] }
+  | { t: 'move'; uid: number; from: number; path: number[] }
   | { t: 'hit'; uid: number; target: number; dmg: number; killed: number; ranged: boolean; lucky: boolean; retaliation: boolean }
   | { t: 'spell'; spell: SpellId; side: 0 | 1; targets: number[]; dmg: number }
   | { t: 'morale'; uid: number; good: boolean }
@@ -622,9 +622,10 @@ export function actMove(s: GameState, b: Battle, hex: number): boolean {
   const reach = reachable(s, b, u);
   const path = reach.get(hex);
   if (!path) return false;
+  const from = hexIndex(u.q, u.r);
   u.q = hexQ(hex);
   u.r = hexR(hex);
-  b.events.push({ t: 'move', uid: u.uid, path });
+  b.events.push({ t: 'move', uid: u.uid, from, path });
   afterAction(s, b, u);
   return true;
 }
@@ -639,9 +640,10 @@ export function actMelee(s: GameState, b: Battle, targetUid: number, fromHex: nu
   if (fromHex !== hexIndex(u.q, u.r)) {
     const path = reachable(s, b, u).get(fromHex)!;
     moved = path.length;
+    const start = hexIndex(u.q, u.r);
     u.q = hexQ(fromHex);
     u.r = hexR(fromHex);
-    b.events.push({ t: 'move', uid: u.uid, path });
+    b.events.push({ t: 'move', uid: u.uid, from: start, path });
   }
   meleeExchange(s, b, u, t, moved);
   afterAction(s, b, u);
