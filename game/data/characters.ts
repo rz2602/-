@@ -30,7 +30,7 @@ export const CHARACTERS: Record<string, Character> = {
   ruzha: { id: 'ruzha', name: 'Баба Ружа', icon: '🐭', badge: '🧶', color: '#a07a8c' },
   mouselings: { id: 'mouselings', name: 'Мишлетата', icon: '🐭', badge: '🐭', color: '#c9a35b' },
   narrator: { id: 'narrator', name: '', icon: '📖', color: '#5a4a32' },
-  borko: { id: 'borko', name: 'Борко', icon: '🦫', badge: '🪵', color: '#7a5532' },
+  borko: { id: 'borko', name: 'Борко', icon: '🐹', badge: '🔨', color: '#7a5532' },
 };
 
 /** Portraits for heroes on the map / in battle (non-story heroes use these too). */
@@ -38,7 +38,7 @@ export const HERO_PORTRAITS: Record<string, { icon: string; badge?: string; colo
   mishkontin: { icon: '🐭', color: '#3f7d3a' },
   iskritsa: { icon: '🐿️', badge: '🔥', color: '#d4622a' },
   rabbit: { icon: '🐇', color: '#7c8f5a' },
-  beaver: { icon: '🦫', color: '#7a5532' },
+  beaver: { icon: '🐹', badge: '🔨', color: '#7a5532' },
   grizan: { icon: '🐀', badge: '⚔️', color: '#6b4a3a' },
   shushumiga: { icon: '🐀', badge: '🎭', color: '#7a3f8c' },
   mortis: { icon: '🐀', badge: '👑', color: '#8c2f39' },

@@ -89,7 +89,7 @@ const defs: CreatureDef[] = [
   {
     id: 'beetle', name: 'Бръмбар-щитоносец', plural: 'Бръмбари-щитоносци', faction: 'rats', tier: 2,
     att: 3, def: 9, dmin: 1, dmax: 3, hp: 15, spd: 3, abilities: ['shielded'], growth: 8, cost: { acorns: 90 }, value: 140,
-    icon: '🪲', desc: 'Носи черупката си като щит. Стрелите отскачат.',
+    icon: '🐞', desc: 'Носи черупката си като щит. Стрелите отскачат.',
   },
   {
     id: 'ratbow', name: 'Плъх-самострелец', plural: 'Плъхове-самострелци', faction: 'rats', tier: 3,

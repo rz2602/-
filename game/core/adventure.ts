@@ -34,8 +34,8 @@ export const SAVE_V = 1;
 
 export const RES_INFO: Record<keyof Resources, { name: string; icon: string }> = {
   acorns: { name: 'Жълъди', icon: '🌰' },
-  wood: { name: 'Дърво', icon: '🪵' },
-  stone: { name: 'Камък', icon: '🪨' },
+  wood: { name: 'Дърво', icon: '🌲' },
+  stone: { name: 'Камък', icon: '🧱' },
   cheese: { name: 'Сирене', icon: '🧀' },
 };
 
@@ -467,7 +467,7 @@ function interactAdjacent(s: GameState, h: Hero, o: MapObject): StepOutcome {
       fireEvent(s, { t: 'visit', objId: o.id, heroId: h.id });
       return 'stop';
     case 'sign':
-      if (human) s.prompt = { kind: 'info', title: 'Табела', text: o.text, icon: '🪧' };
+      if (human) s.prompt = { kind: 'info', title: 'Табела', text: o.text, icon: '📜' };
       return 'stop';
     case 'gate':
       if (s.flags[o.needFlag]) {
@@ -536,7 +536,7 @@ export const SHRINE_INFO: Record<string, { name: string; icon: string }> = {
   def: { name: 'Старият дъб-закрилник', icon: '🌳' },
   pow: { name: 'Кристалният извор', icon: '💎' },
   kno: { name: 'Книжното дърво', icon: '📚' },
-  xp: { name: 'Камъкът на знанието', icon: '🪨' },
+  xp: { name: 'Камъкът на знанието', icon: '🗿' },
   spell: { name: 'Олтарът на светулките', icon: '🕯️' },
   mp: { name: 'Конюшнята на зайците', icon: '🐇' },
   sp: { name: 'Вълшебният кладенец', icon: '⛲' },

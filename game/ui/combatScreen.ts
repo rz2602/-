@@ -45,6 +45,50 @@ import { creatureTip } from './widgets';
 
 const SQ3 = Math.sqrt(3);
 
+function drawRock(ctx: CanvasRenderingContext2D, x: number, y: number, R: number): void {
+  ctx.fillStyle = '#0004';
+  ctx.beginPath();
+  ctx.ellipse(x, y + R * 0.45, R * 0.7, R * 0.2, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#8b8a80';
+  ctx.beginPath();
+  ctx.moveTo(x - R * 0.65, y + R * 0.45);
+  ctx.lineTo(x - R * 0.45, y - R * 0.2);
+  ctx.lineTo(x - R * 0.05, y - R * 0.5);
+  ctx.lineTo(x + R * 0.45, y - R * 0.25);
+  ctx.lineTo(x + R * 0.65, y + R * 0.45);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = '#b3b1a5';
+  ctx.beginPath();
+  ctx.moveTo(x - R * 0.45, y - R * 0.2);
+  ctx.lineTo(x - R * 0.05, y - R * 0.5);
+  ctx.lineTo(x + R * 0.05, y + R * 0.1);
+  ctx.closePath();
+  ctx.fill();
+}
+
+function drawStump(ctx: CanvasRenderingContext2D, x: number, y: number, R: number): void {
+  ctx.fillStyle = '#0004';
+  ctx.beginPath();
+  ctx.ellipse(x, y + R * 0.45, R * 0.6, R * 0.18, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#7a4f2a';
+  ctx.fillRect(x - R * 0.4, y - R * 0.2, R * 0.8, R * 0.6);
+  ctx.beginPath();
+  ctx.ellipse(x, y + R * 0.4, R * 0.4, R * 0.14, 0, 0, Math.PI);
+  ctx.fill();
+  ctx.fillStyle = '#d9b07a';
+  ctx.beginPath();
+  ctx.ellipse(x, y - R * 0.2, R * 0.4, R * 0.15, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = '#9a6b3c';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.ellipse(x, y - R * 0.2, R * 0.22, R * 0.08, 0, 0, Math.PI * 2);
+  ctx.stroke();
+}
+
 interface Floater {
   x: number;
   y: number;
@@ -410,7 +454,7 @@ export class CombatScreen {
     if (hx == null) return;
     const t = unitAt(this.b, hexQ(hx), hexR(hx));
     if (!t) return;
-    const eff = t.effects.map((x) => ({ haste: '💨 Бързина', shield: '🛡️ Кора', slow: '🫧 Кал', bless: '🎵 Песен', web: '🕸️ Паяжина' })[x.id] + ` (${x.rounds})`).join(', ');
+    const eff = t.effects.map((x) => ({ haste: '💨 Бързина', shield: '🛡️ Кора', slow: '💧 Кал', bless: '🎵 Песен', web: '🕸️ Паяжина' })[x.id] + ` (${x.rounds})`).join(', ');
     showTip(
       e.clientX,
       e.clientY,
@@ -647,7 +691,8 @@ export class CombatScreen {
     // obstacles
     for (const o of b.obstacles) {
       const c = this.center(o);
-      drawEmoji(ctx, hash2(o, 1) > 0.5 ? '🪨' : '🪵', c.x, c.y, R * 1.1);
+      if (hash2(o, 1) > 0.5) drawRock(ctx, c.x, c.y, R);
+      else drawStump(ctx, c.x, c.y, R);
     }
     // heroes at the sides
     for (const sd of [0, 1] as const) {
@@ -708,7 +753,7 @@ export class CombatScreen {
       ctx.textBaseline = 'alphabetic';
       // effects
       un.effects.forEach((e, i) => {
-        const icon = { haste: '💨', shield: '🛡️', slow: '🫧', bless: '🎵', web: '🕸️' }[e.id];
+        const icon = { haste: '💨', shield: '🛡️', slow: '💧', bless: '🎵', web: '🕸️' }[e.id];
         drawEmoji(ctx, icon, p.x - R * 0.6 + i * R * 0.34, p.y - R * 0.72, R * 0.3);
       });
       if (un.defending) drawEmoji(ctx, '🛡️', p.x - R * 0.62, p.y + R * 0.5, R * 0.34);

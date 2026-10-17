@@ -54,7 +54,7 @@ const T: HeroTemplate[] = [
     bio: 'Носи писма из цялата гора. Казва, че е видял края ѝ. Два пъти.',
   },
   {
-    id: 'borko', name: 'Борко', title: 'Бобър-строител', faction: 'forest', portrait: 'beaver',
+    id: 'borko', name: 'Борко', title: 'Хамстер-строител', faction: 'forest', portrait: 'beaver',
     specialty: 'builder', att: 0, def: 2, pow: 1, kno: 1, skills: { estates: 1 },
     spells: [], artifacts: [], weights: [20, 40, 20, 20], army: [['hedgehog', 4], ['mouse', 6]],
     bio: 'Ако нещо може да се построи, Борко вече го е измерил.',

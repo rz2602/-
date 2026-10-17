@@ -355,7 +355,21 @@ export function drawObject(ctx: CanvasRenderingContext2D, s: GameState, o: MapOb
       break;
     }
     case 'sign':
-      drawEmoji(ctx, '🪧', cx, cy, T * 0.55);
+      shadow(0.2);
+      ctx.fillStyle = '#6b4523';
+      ctx.fillRect(cx - T * 0.04, cy - T * 0.15, T * 0.08, T * 0.5);
+      ctx.fillStyle = '#c9975a';
+      ctx.strokeStyle = '#5a3a1c';
+      ctx.lineWidth = 1.5;
+      ctx.fillRect(cx - T * 0.3, cy - T * 0.3, T * 0.6, T * 0.24);
+      ctx.strokeRect(cx - T * 0.3, cy - T * 0.3, T * 0.6, T * 0.24);
+      ctx.strokeStyle = '#7a5532';
+      ctx.beginPath();
+      ctx.moveTo(cx - T * 0.2, cy - T * 0.22);
+      ctx.lineTo(cx + T * 0.2, cy - T * 0.22);
+      ctx.moveTo(cx - T * 0.2, cy - T * 0.14);
+      ctx.lineTo(cx + T * 0.12, cy - T * 0.14);
+      ctx.stroke();
       break;
     case 'gate':
       drawEmoji(ctx, '🚪', cx, cy, T * 0.62);
@@ -382,7 +396,7 @@ export function drawObject(ctx: CanvasRenderingContext2D, s: GameState, o: MapOb
 }
 
 function npcIcon(npc: string): string {
-  return { mouselings: '🐭', troshko: '🦔', letokril: '🦇', belagor: '🦉', iskritsa: '🐿️', borko: '🦫' }[npc] ?? '🧑';
+  return { mouselings: '🐭', troshko: '🦔', letokril: '🦇', belagor: '🦉', iskritsa: '🐿️', borko: '🐹' }[npc] ?? '🧑';
 }
 
 export function drawTownAt(ctx: CanvasRenderingContext2D, t: Town, px: number, py: number, T: number): void {
