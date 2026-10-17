@@ -13,6 +13,7 @@ declare global {
       app: typeof app;
       state: () => GameState | null;
       botFinish: (maxDays?: number) => string | null;
+      tile: (x: number, y: number) => { x: number; y: number } | null;
     };
   }
 }
@@ -20,6 +21,7 @@ declare global {
 window.__game = {
   app,
   state: () => app.adventure?.s ?? null,
+  tile: (x, y) => app.adventure?.tileCenterClient(x, y) ?? null,
   botFinish: (maxDays = 60) => {
     const adv = app.adventure;
     if (!adv) return null;

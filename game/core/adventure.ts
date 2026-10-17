@@ -26,7 +26,7 @@ import {
 import { distances, guardingMonster, heroAt, inBounds, objectAt, pathFromDist, reveal, revealAround, stepCost, terrainDef, tileAt, townAt } from './map';
 import { chance, shuffle } from './rng';
 import type { Action, GameEvent, ScenarioDef } from './scenario';
-import { weeklyGrowth } from './town';
+import { recruitFromDwelling, weeklyGrowth } from './town';
 import type { Army, CampaignState, Difficulty, GameState, Hero, HeroCarry, MapObject, PlayerId, Resources, SpellId, Town } from './types';
 import { RES_KEYS } from './types';
 
@@ -159,6 +159,7 @@ export function newGame(scenarioId: string, campaign: CampaignState, seed = Date
     vars: {},
   };
 
+  for (const k of Object.keys(sc.legend)) if (k in TERRAIN_CHARS) throw new Error(`Scenario ${sc.id}: legend key '${k}' clashes with a terrain character`);
   const terr: string[] = [];
   const pendingHeroes: { x: number; y: number; hero: NonNullable<ScenarioDef['legend'][string]['hero']> }[] = [];
   for (let y = 0; y < h; y++) {
@@ -478,6 +479,10 @@ function interactAdjacent(s: GameState, h: Hero, o: MapObject): StepOutcome {
       return 'stop';
     case 'goal':
       if (!human) return 'stop';
+      if (o.needHero && h.id !== o.needHero) {
+        s.prompt = { kind: 'info', title: o.label, text: o.needText ?? 'Тук трябва да дойде друг герой.', icon: '⛩️' };
+        return 'stop';
+      }
       s.flags[o.flag] = true;
       s.pendingDialogues.push(o.dialogue);
       fireEvent(s, { t: 'visit', objId: o.id, heroId: h.id });
@@ -498,7 +503,9 @@ function interactOn(s: GameState, h: Hero, o: MapObject): void {
       break;
     case 'dwelling':
       o.owner = h.owner;
-      if (!human) {
+      if (human) {
+        if (o.available > 0) s.prompt = { kind: 'dwelling', heroId: h.id, objId: o.id };
+      } else {
         const c = creature(o.cid);
         const can = Math.min(o.available, Math.floor(s.players[h.owner].res.acorns / (c.cost.acorns ?? 1)));
         if (can > 0 && canAddToArmy(h.army, o.cid)) {
@@ -614,6 +621,9 @@ export function resolvePrompt(s: GameState, choice: number): void {
       toast(s, `+${xp} опит за ${h.name}`, '⭐');
     }
     fireEvent(s, { t: 'visit', objId: o.id, heroId: h.id });
+  } else if (p.kind === 'dwelling') {
+    const h = hero(s, p.heroId);
+    if (h && choice > 0) recruitFromDwelling(s, h, p.objId, choice);
   } else if (p.kind === 'join') {
     const h = hero(s, p.heroId)!;
     const o = s.objects.find((x) => x.id === p.objId);
@@ -683,7 +693,11 @@ function startMonsterBattle(s: GameState, h: Hero, o: MapObject): void {
 function startHeroBattle(s: GameState, a: Hero, d: Hero): void {
   const t = townAt(s, d.x, d.y);
   const def = sideOf(s, d);
-  if (t && t.owner === d.owner) applyTownDefense(t, def);
+  if (t && t.owner === d.owner) {
+    applyTownDefense(t, def);
+    // The garrison stands on the walls next to the visiting hero.
+    if (!armyIsEmpty(t.garrison)) def.extraArmy = t.garrison;
+  }
   s.battle = createBattle(s, 'hero', sideOf(s, a), def, { attackerHeroId: a.id, defenderHeroId: d.id, monsterObjId: null, townId: t?.id ?? null }, battleTerrainAt(s, d.x, d.y));
 }
 
@@ -723,8 +737,11 @@ export function finishBattle(s: GameState): void {
   const mon = b.monsterObjId ? s.objects.find((o) => o.id === b.monsterObjId)! : null;
 
   writeBack(att.army, survivors(b, 0));
-  if (defHero) writeBack(defHero.army, survivors(b, 1));
-  else if (town) writeBack(town.garrison, survivors(b, 1));
+  const defSurv = survivors(b, 1);
+  if (defHero) {
+    writeBack(defHero.army, new Map([...defSurv].filter(([slot]) => slot < 5)));
+    if (town) writeBack(town.garrison, new Map([...defSurv].filter(([slot]) => slot >= 5).map(([slot, n]) => [slot - 5, n])));
+  } else if (town) writeBack(town.garrison, defSurv);
   else if (mon && mon.kind === 'monster') {
     let rest = 0;
     for (const [, n] of survivors(b, 1)) rest += n;
@@ -754,7 +771,7 @@ export function finishBattle(s: GameState): void {
       if (s.players[att.owner].human && mon.afterDialogue) s.pendingDialogues.push(mon.afterDialogue);
       fireEvent(s, { t: 'defeatMonster', objId: mon.id, heroId: att.id });
     }
-    if (town && !defHero && armyIsEmpty(town.garrison)) {
+    if (town && town.owner !== att.owner && armyIsEmpty(town.garrison) && !(defHero && defHero.alive)) {
       moveTo(s, att, town.x, town.y);
       captureTown(s, town, att.owner);
     }

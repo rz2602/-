@@ -135,12 +135,12 @@ export type MapObject =
   | (ObjBase & { kind: 'mine'; res: ResKey; owner: Owner })
   | (ObjBase & { kind: 'dwelling'; cid: string; available: number; owner: Owner })
   | (ObjBase & { kind: 'shrine'; effect: ShrineEffect; value: number; spell?: SpellId; label?: string })
-  | (ObjBase & { kind: 'npc'; npc: string; label: string; dialogue: string; repeatDialogue?: string; doneFlag?: string })
+  | (ObjBase & { kind: 'npc'; npc: string; label: string; dialogue: string; repeatDialogue?: string; doneFlag?: string; wantItem?: string; wantFlag?: string })
   | (ObjBase & { kind: 'event'; dialogue: string; onlyHuman?: boolean })
   | (ObjBase & { kind: 'sign'; text: string })
   | (ObjBase & { kind: 'questItem'; item: string; label: string; dialogue?: string })
   | (ObjBase & { kind: 'gate'; needFlag: string; label: string; lockedText: string })
-  | (ObjBase & { kind: 'goal'; label: string; dialogue: string; flag: string });
+  | (ObjBase & { kind: 'goal'; label: string; dialogue: string; flag: string; needHero?: string; needText?: string });
 
 export type ShrineEffect = 'att' | 'def' | 'pow' | 'kno' | 'xp' | 'spell' | 'mp' | 'sp' | 'reveal' | 'luckDay' | 'moraleDay';
 
@@ -233,4 +233,5 @@ export interface GameState {
 export type Prompt =
   | { kind: 'chest'; heroId: string; objId: string; acorns: number; xp: number }
   | { kind: 'join'; heroId: string; objId: string; cid: string; n: number; cost: number }
-  | { kind: 'info'; title: string; text: string; icon?: string };
+  | { kind: 'info'; title: string; text: string; icon?: string }
+  | { kind: 'dwelling'; heroId: string; objId: string };

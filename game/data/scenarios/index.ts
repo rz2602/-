@@ -2,9 +2,11 @@ import { newCampaign } from '../../core/adventure';
 import type { ScenarioDef } from '../../core/scenario';
 import type { CampaignState, HeroCarry } from '../../core/types';
 import { S1 } from './s1';
+import { S2 } from './s2';
+import { S3 } from './s3';
 
-export const SCENARIOS: Record<string, ScenarioDef> = { s1: S1 };
-export const SCENARIO_ORDER = ['s1'];
+export const SCENARIOS: Record<string, ScenarioDef> = { s1: S1, s2: S2, s3: S3 };
+export const SCENARIO_ORDER = ['s1', 's2', 's3'];
 
 export function getScenario(id: string): ScenarioDef {
   const s = SCENARIOS[id];

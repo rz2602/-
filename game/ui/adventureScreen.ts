@@ -1,4 +1,5 @@
 import {
+  costText,
   dailyIncome,
   dayLabel,
   endPlayerTurn,
@@ -16,7 +17,7 @@ import {
 import { aiStep, newAiCursor, type AiCursor } from '../core/ai';
 import { heroMaxMp, maxSp, VIRTUE_INFO, virtueRank } from '../core/hero';
 import { guardingMonster, heroAt, isExplored, objectAt, reveal, terrainDef, tileAt, townAt, type PathStep } from '../core/map';
-import { visitTown } from '../core/town';
+import { maxRecruit, recruitUnitCost, visitTown } from '../core/town';
 import type { GameState, Hero, MapObject, ResKey } from '../core/types';
 import { RES_KEYS, VIRTUES } from '../core/types';
 import { creature, sizeWord, stackLabel } from '../data/creatures';
@@ -449,6 +450,39 @@ export class AdventureScreen {
         ),
       );
       close = modal(this.app.root, box, { closable: false, parch: true });
+    } else if (p.kind === 'dwelling') {
+      const o = s.objects.find((x) => x.id === p.objId);
+      const hero = s.heroes.find((x) => x.id === p.heroId);
+      if (!o || o.kind !== 'dwelling' || !hero) {
+        choose(0);
+        return;
+      }
+      const c = creature(o.cid);
+      const max = maxRecruit(s, 'player', o.cid, o.available);
+      const room = hero.army.some((st) => !st || st.cid === o.cid);
+      let n = max;
+      const label = h('b', null, String(n));
+      const costEl = h('span', { class: 'muted' }, '');
+      const upd = () => {
+        label.textContent = String(n);
+        costEl.textContent = costText(Object.fromEntries(Object.entries(recruitUnitCost(s, o.cid, 'player')).map(([k, v]) => [k, (v ?? 0) * n])));
+      };
+      upd();
+      const box = h(
+        'div',
+        { style: 'width:min(460px,90vw);text-align:center' },
+        h('div', { class: 'emoji', style: 'font-size:54px' }, c.icon),
+        h('h3', null, `Жилище: ${c.plural}`),
+        h('p', null, `Свободни: ${o.available}. Цена: ${costText(recruitUnitCost(s, o.cid, 'player'))} за един.`),
+        !room ? h('p', null, 'Армията на героя няма свободно място за тях.') : null,
+        max > 0 && room
+          ? h('div', { class: 'qty', style: 'margin:8px 0' }, h('input', { type: 'range', min: 1, max, value: max, oninput: (e: Event) => { n = Number((e.target as HTMLInputElement).value); upd(); } }), label, costEl)
+          : h('p', { class: 'muted' }, max > 0 ? '' : 'Не стигат ресурсите.'),
+        h('div', { class: 'row', style: 'justify-content:center' },
+          h('button', { class: 'primary', disabled: !(max > 0 && room), onclick: () => choose(n) }, 'Наеми'),
+          h('button', { onclick: () => choose(0) }, 'Затвори')),
+      );
+      close = modal(this.app.root, box, { closable: false, parch: true });
     } else if (p.kind === 'join') {
       const c = creature(p.cid);
       const can = s.players.player.res.acorns >= p.cost;
@@ -877,6 +911,13 @@ export class AdventureScreen {
         btn('⏳ Край на хода', 'Край на хода (E)', () => this.endTurn(), 'wide primary'),
       ),
     );
+  }
+
+  /** Test hook: screen position of a tile's centre (scrolls it into view first). */
+  tileCenterClient(x: number, y: number): { x: number; y: number } {
+    this.ensureVisible(x, y);
+    const r = this.canvas.getBoundingClientRect();
+    return { x: r.left + x * this.T + this.T / 2 - this.camX, y: r.top + y * this.T + this.T / 2 - this.camY };
   }
 
   /** Test hook: let the bot finish the current human day instantly. */

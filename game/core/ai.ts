@@ -6,7 +6,7 @@
 import { creature } from '../data/creatures';
 import { dwellingCreature } from '../data/towns';
 import { battleNeedsHuman, finishBattle, heroStep, playerHeroes, playerTowns, type StepOutcome } from './adventure';
-import { autoResolve } from './combat';
+import { actFlee, autoResolve, canFlee } from './combat';
 import { addToArmy, armyValue, heroMaxMp, heroStrength } from './hero';
 import { distances, pathFromDist, townAt, type PathStep } from './map';
 import { build, buildBlocker, canHire, hireCandidates, hireHero, maxRecruit, recruit, visitingHero, visitTown } from './town';
@@ -72,11 +72,17 @@ function pickupGarrison(s: GameState, h: Hero): void {
   if (!t || t.owner !== h.owner) return;
   visitTown(s, h, t);
   if (effectiveRole(s, h) === 'guard' || h.ai?.role === 'raider') return;
-  // The bot (forest side) leaves the weakest troops at home as a garrison.
+  // The bot (forest side) leaves the weakest troops at home as a garrison;
+  // the rat AI keeps about half of the garrison's value to defend the town.
   const human = s.players[h.owner].human;
-  for (let i = 0; i < t.garrison.length; i++) {
-    const st = t.garrison[i];
+  const keep = human ? 0 : armyValue(t.garrison) * 0.5;
+  const order = t.garrison
+    .map((st, i) => ({ st, i }))
+    .filter((x) => x.st)
+    .sort((a, b) => creature(b.st!.cid).value * b.st!.n - creature(a.st!.cid).value * a.st!.n);
+  for (const { st, i } of order) {
     if (!st || (human && creature(st.cid).tier <= 1)) continue;
+    if (!human && armyValue(t.garrison) - creature(st.cid).value * st.n < keep) continue;
     if (addToArmy(h.army, st.cid, st.n)) t.garrison[i] = null;
   }
 }
@@ -99,13 +105,15 @@ function goals(s: GameState, h: Hero): Goal[] {
 
   for (const e of playerHeroes(s, enemyPid)) {
     const t = townAt(s, e.x, e.y);
-    let their = heroStrength(e);
-    if (t) their *= 1.3;
+    const their = t && t.owner === e.owner ? townDefense(s, t) : heroStrength(e);
     if (role === 'guard' && !near(e.x, e.y, 7)) continue;
-    if (me > their * 1.3) out.push({ key: `h:${e.id}`, x: e.x, y: e.y, value: (hunting ? 9000 : 4000) + their * 0.3 });
+    if (me > their * (hunting ? 0.9 : 1.3)) out.push({ key: `h:${e.id}`, x: e.x, y: e.y, value: (hunting ? 9000 : 4000) + their * 0.3 });
   }
   for (const t of s.towns) {
     if (t.owner === h.owner) {
+      // Rush home when an enemy hero threatens a weakly defended town.
+      const danger = playerHeroes(s, enemyPid).filter((e) => Math.max(Math.abs(e.x - t.x), Math.abs(e.y - t.y)) <= 12 && heroStrength(e) > townDefense(s, t));
+      if (danger.length && (h.x !== t.x || h.y !== t.y) && role !== 'raider') out.push({ key: `t:${t.id}`, x: t.x, y: t.y, value: 12000 });
       // Return home to pick up fresh recruits.
       const human = s.players[h.owner].human;
       const gv = armyValue(t.garrison.map((st) => (st && (!human || creature(st.cid).tier > 1) ? st : null)));
@@ -114,7 +122,9 @@ function goals(s: GameState, h: Hero): Goal[] {
     }
     const def = townDefense(s, t);
     if (role === 'guard') continue;
-    if (me > def * 1.25 + 150) out.push({ key: `t:${t.id}`, x: t.x, y: t.y, value: hunting ? 15000 : 6000 });
+    // An active boss goes all in against enemy towns.
+    const allIn = hunting && h.ai?.role === 'boss' && t.owner != null;
+    if (allIn || me > (hunting ? def * 0.9 : def * 1.25 + 150)) out.push({ key: `t:${t.id}`, x: t.x, y: t.y, value: hunting ? 15000 : 6000 });
   }
   const greedy = role !== 'raider';
   for (const o of s.objects) {
@@ -139,7 +149,7 @@ function goals(s: GameState, h: Hero): Goal[] {
         break;
       }
       case 'dwelling':
-        if (o.owner !== h.owner || o.available > 0) v = 500 + Math.min(o.available, 10) * creature(o.cid).value * 0.3;
+        if (o.owner !== h.owner || (o.available > 0 && maxRecruit(s, h.owner, o.cid, o.available) > 0)) v = 500 + Math.min(o.available, 10) * creature(o.cid).value * 0.3;
         break;
       case 'shrine':
         if (['att', 'def', 'pow', 'kno', 'xp'].includes(o.effect) && !h.visited.includes(o.id)) v = 700;
@@ -147,13 +157,24 @@ function goals(s: GameState, h: Hero): Goal[] {
       // Story objects matter only to the forest (bot) side.
       case 'npc':
         if (h.owner === 'player' && (!s.flags[`seen_${o.id}`] || (o.doneFlag && !s.flags[o.doneFlag]))) v = 5000;
+        if (h.owner === 'player' && o.wantItem && s.items.includes(o.wantItem) && !s.flags[o.wantFlag ?? '']) v = 6000;
         break;
       case 'questItem':
       case 'goal':
-        if (h.owner === 'player') v = 8000;
+        if (h.owner === 'player') {
+          v = 8000;
+          // Clear the guards that stand in the way of a story goal.
+          for (const m of s.objects) {
+            if (m.done || m.kind !== 'monster' || Math.max(Math.abs(m.x - o.x), Math.abs(m.y - o.y)) > 2) continue;
+            if (me > creature(m.cid).value * m.n * 1.3) out.push({ key: `o:${m.id}`, x: m.x, y: m.y, value: 7000 });
+          }
+        }
         break;
       case 'event':
         if (h.owner === 'player') v = 1500;
+        break;
+      case 'gate':
+        if (h.owner === 'player' && s.flags[o.needFlag]) v = 3000;
         break;
       default:
         break;
@@ -164,7 +185,14 @@ function goals(s: GameState, h: Hero): Goal[] {
     out.push({ key: `o:${o.id}`, x: o.x, y: o.y, value: v });
   }
   if (role === 'guard' && home && (h.x !== home.x || h.y !== home.y)) out.push({ key: `t:${home.id}`, x: home.x, y: home.y, value: 400 });
-  return out;
+  // Stay out of reach of enemy heroes that would win a fight (except when going home).
+  const threats = playerHeroes(s, enemyPid)
+    .filter((e) => heroStrength(e) > me * 0.9)
+    .map((e) => ({ x: e.x, y: e.y, r: Math.ceil(heroMaxMp(e) / 85) }));
+  if (!threats.length || (hunting && h.ai?.role === 'boss')) return out;
+  return out.filter((g) => g.key.startsWith('t:') && s.towns.find((t) => `t:${t.id}` === g.key)?.owner === h.owner
+    ? true
+    : !threats.some((t) => Math.max(Math.abs(t.x - g.x), Math.abs(t.y - g.y)) <= t.r));
 }
 
 function chooseTarget(s: GameState, h: Hero, cur: AiCursor): PathStep[] | null {
@@ -265,9 +293,25 @@ export function runAiTurn(s: GameState, pid: PlayerId = 'enemy', maxSteps = 5000
   for (let i = 0; i < maxSteps; i++) {
     const r = aiStep(s, cur);
     if (r === 'done') return;
-    if (r === 'battle') {
-      autoResolve(s, s.battle!);
-      finishBattle(s);
-    }
+    if (r === 'battle') resolveBattleAsBot(s);
   }
+}
+
+/**
+ * Resolves the current battle automatically. A human side (played by the test
+ * bot) retreats from hopeless fights instead of losing its hero, like a
+ * sensible player would.
+ */
+export function resolveBattleAsBot(s: GameState): void {
+  const b = s.battle;
+  if (!b) return;
+  const humanSide = b.sides[0].human ? 0 : b.sides[1].human ? 1 : null;
+  if (humanSide != null && canFlee(b, humanSide)) {
+    // Peek at the outcome on a copy; retreat if it would be lost.
+    const probe = structuredClone(s);
+    autoResolve(probe, probe.battle!);
+    if (probe.battle!.winner !== humanSide) actFlee(b, humanSide);
+  }
+  if (!b.over) autoResolve(s, b);
+  finishBattle(s);
 }

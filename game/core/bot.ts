@@ -3,10 +3,10 @@
  * playthrough: it answers dialogues/prompts and lets the adventure AI play the
  * forest side, then runs the rat turn and advances the day.
  */
-import { availableChoices, closeDialogue, endPlayerTurn, finishBattle, resolvePrompt, startNewDay } from './adventure';
-import { aiStep, newAiCursor, runAiTurn } from './ai';
-import { autoResolve } from './combat';
+import { availableChoices, closeDialogue, endPlayerTurn, resolvePrompt, startNewDay } from './adventure';
+import { aiStep, newAiCursor, resolveBattleAsBot, runAiTurn } from './ai';
 import { applyLevelUp } from './hero';
+import { maxRecruit } from './town';
 import type { GameState } from './types';
 
 export type ChoicePolicy = (s: GameState, dialogueId: string, count: number) => number;
@@ -21,8 +21,7 @@ export const firstChoice: ChoicePolicy = (s, id) => {
 export function botResolveUi(s: GameState, policy: ChoicePolicy = firstChoice): void {
   for (let guard = 0; guard < 50; guard++) {
     if (s.battle) {
-      autoResolve(s, s.battle);
-      finishBattle(s);
+      resolveBattleAsBot(s);
       continue;
     }
     if (s.pendingDialogues.length) {
@@ -31,7 +30,12 @@ export function botResolveUi(s: GameState, policy: ChoicePolicy = firstChoice): 
       continue;
     }
     if (s.prompt) {
-      resolvePrompt(s, 0);
+      const p = s.prompt;
+      if (p.kind === 'dwelling') {
+        const o = s.objects.find((x) => x.id === p.objId);
+        const h = s.heroes.find((x) => x.id === p.heroId);
+        resolvePrompt(s, o && o.kind === 'dwelling' && h ? maxRecruit(s, h.owner, o.cid, o.available) : 0);
+      } else resolvePrompt(s, 0);
       continue;
     }
     let changed = false;

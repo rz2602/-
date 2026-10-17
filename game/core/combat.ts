@@ -141,6 +141,8 @@ export interface SideSetup {
   portrait: string;
   /** Army slots (kept index-aligned so casualties can be written back). */
   army: Army;
+  /** A town garrison fighting next to a defending hero (slots 5..9). */
+  extraArmy?: Army;
   defBonus?: number;
   moraleBonus?: number;
   tower?: boolean;
@@ -173,10 +175,12 @@ export function createBattle(
     moraleUsed: [],
     nextUid: 1,
   };
-  placeArmy(b, 0, att.army);
-  placeArmy(b, 1, def.army);
+  placeArmy(b, 0, att.army, 0, 0);
+  placeArmy(b, 1, def.army, 0, 0);
+  if (def.extraArmy) placeArmy(b, 1, def.extraArmy, 5, 1);
   if (def.tower) {
-    b.units.push(mkUnit(b, 1, 'tower', 1, COLS - 1, 3, -1));
+    const spot = [3, 5, 1, 7].map((r) => [COLS - 1, r]).concat([3, 5, 1, 7].map((r) => [COLS - 2, r])).find(([q, r]) => !unitAt(b, q, r));
+    if (spot) b.units.push(mkUnit(b, 1, 'tower', 1, spot[0], spot[1], -1));
   }
   // A few obstacles in the middle of the field.
   const count = randInt(s.rng, 2, 5);
@@ -224,7 +228,7 @@ function mkUnit(b: Battle, side: 0 | 1, cid: string, n: number, q: number, r: nu
   };
 }
 
-function placeArmy(b: Battle, side: 0 | 1, army: Army): void {
+function placeArmy(b: Battle, side: 0 | 1, army: Army, slotOffset: number, column: number): void {
   const slots: number[] = [];
   army.forEach((st, i) => {
     if (st && st.n > 0) slots.push(i);
@@ -233,8 +237,8 @@ function placeArmy(b: Battle, side: 0 | 1, army: Army): void {
   slots.forEach((slot, k) => {
     const st = army[slot]!;
     const r = rows[k % rows.length];
-    const q = side === 0 ? 0 : COLS - 1;
-    b.units.push(mkUnit(b, side, st.cid, st.n, q, r, slot));
+    const q = side === 0 ? column : COLS - 1 - column;
+    b.units.push(mkUnit(b, side, st.cid, st.n, q, r, slot + slotOffset));
   });
 }
 
