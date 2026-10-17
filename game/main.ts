@@ -1,5 +1,5 @@
 import './ui/style.css';
-import { botPlay, botResolveUi } from './core/bot';
+import { botPlay, botPlayDay, botResolveUi } from './core/bot';
 import type { GameState } from './core/types';
 import { mountApp } from './ui/app';
 
@@ -14,6 +14,7 @@ declare global {
       state: () => GameState | null;
       botFinish: (maxDays?: number) => string | null;
       tile: (x: number, y: number) => { x: number; y: number } | null;
+      botDays: (days: number) => void;
     };
   }
 }
@@ -22,6 +23,15 @@ window.__game = {
   app,
   state: () => app.adventure?.s ?? null,
   tile: (x, y) => app.adventure?.tileCenterClient(x, y) ?? null,
+  botDays: (days) => {
+    const adv = app.adventure;
+    if (!adv) return;
+    for (const o of Array.from(root.querySelectorAll('.overlay, .combat'))) o.remove();
+    botResolveUi(adv.s);
+    for (let i = 0; i < days && adv.s.status === 'play'; i++) botPlayDay(adv.s);
+    adv.s.toasts = [];
+    adv.replaceState(adv.s);
+  },
   botFinish: (maxDays = 60) => {
     const adv = app.adventure;
     if (!adv) return null;
