@@ -55,7 +55,7 @@ export const S3: ScenarioDef = {
     'Но под стените вече е разпънат Опашатият лагер. Кралят плъх Мортис е довел цялата си орда. Всяка нощ плъховете опитват стените, а всяка сутрин стават повече.',
     'Белагор, последният Пазител на картите, чака Мишконтин в Звездната кула. Той знае нещо за Мортис, което никой друг не знае.',
   ],
-  goals: ['Победи Кралят плъх Мортис.', 'Не позволявай Сиренград да падне.', 'Мишконтин трябва да оцелее.'],
+  goals: ['Победи Кралят плъх Мортис.', 'Пази Сиренград (ако падне, имаш 3 дни да си го върнеш).', 'Мишконтин трябва да оцелее.'],
   map: [
     'MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM',
     'MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM',
@@ -181,9 +181,27 @@ export const S3: ScenarioDef = {
     { id: 'mortis_moves', when: (s, e) => e.t === 'day' && s.day === 15, actions: [{ a: 'dialogue', id: 's3_mortis_moves' }, { a: 'call', fn: mortisGathers }] },
     { id: 'mortis_beaten', when: (_s, e) => e.t === 'defeatHero' && e.heroId === 'mortis', actions: [{ a: 'dialogue', id: 's3_mortis_end' }] },
     { id: 'camp_taken', when: (_s, e) => e.t === 'capture' && e.townId === 'camp' && e.by === 'player', actions: [{ a: 'dialogue', id: 's3_camp' }] },
-    { id: 'siren_lost', when: (_s, e) => e.t === 'capture' && e.townId === 'sirengrad' && e.by === 'enemy', actions: [{ a: 'lose', reason: 'Плъховете превзеха Сиренград и отнесоха Вечната пита. Тази зима гората ще гладува.' }] },
+    {
+      id: 'siren_lost',
+      repeat: true,
+      when: (s, e) => e.t === 'capture' && e.townId === 'sirengrad' && e.by === 'enemy' && !s.vars.sirenLost,
+      actions: [
+        { a: 'call', fn: (s) => (s.vars.sirenLost = s.day) },
+        { a: 'dialogue', id: 's3_siren_lost' },
+      ],
+    },
+    {
+      id: 'siren_back',
+      repeat: true,
+      when: (_s, e) => e.t === 'capture' && e.townId === 'sirengrad' && e.by === 'player',
+      actions: [{ a: 'call', fn: (s) => (s.vars.sirenLost = 0) }, { a: 'toast', text: 'Сиренград отново е свободен!', icon: '🏰' }],
+    },
   ],
   checkEnd: (s) => {
+    const lost = s.vars.sirenLost ?? 0;
+    if (lost && s.day >= lost + 3 && s.towns.find((t) => t.id === 'sirengrad')?.owner !== 'player') {
+      return { status: 'lost', reason: 'Плъховете задържаха Сиренград и отнесоха Вечната пита. Тази зима гората ще гладува.' };
+    }
     const m = s.heroes.find((h) => h.id === 'mortis');
     if (m && !m.alive && s.pendingDialogues.length === 0 && (s.flags.ending_peace || s.flags.ending_exile || s.flags.ending_justice)) return { status: 'won', reason: '' };
     return null;
@@ -299,6 +317,15 @@ export const S3: ScenarioDef = {
         L('mortis', 'Плъхове! Днес влизаме в Сиренград! И този път никой няма да ни затвори портата под носа!'),
         L('mishkontin', 'Мортис идва лично. Сега е моментът — всичко или нищо.', 'surprised'),
       ],
+    },
+    s3_siren_lost: {
+      id: 's3_siren_lost',
+      title: 'Сиренград падна',
+      lines: [
+        L('mortis', 'Ха-ха! Сиренград е мой! Двайсет зими чаках този момент!'),
+        L('belagor', 'Мишконтине… Градът падна, но не и надеждата. Вечната пита е още в избите. Имаш три дни, преди да я изнесат.'),
+      ],
+      after: [{ a: 'quest', id: 'retake', title: 'Върни Сиренград', text: 'Плъховете превзеха града. Имаш 3 дни да си го върнеш.' }],
     },
     s3_camp: {
       id: 's3_camp',

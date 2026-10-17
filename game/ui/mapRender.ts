@@ -15,7 +15,7 @@ const BASE: Record<string, string> = {
   d: '#9a7a4e',
   h: '#86a258',
   s: '#5f7446',
-  n: '#e3ecf2',
+  n: '#d5e0e8',
   T: '#4f7f3a',
   '^': '#8d8a72',
   '~': '#3f7fb8',
@@ -97,7 +97,15 @@ export function renderTerrain(s: GameState, T: number): HTMLCanvasElement {
         ctx.fill();
       }
       if (ch === 'n') {
-        ctx.fillStyle = '#ffffffaa';
+        ctx.fillStyle = '#b7c8d6';
+        ctx.beginPath();
+        ctx.ellipse(px + T * (0.3 + 0.4 * hash2(x, y, 3)), py + T * (0.62 + 0.2 * hash2(x, y, 4)), T * 0.3, T * 0.08, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#f4f8fb';
+        ctx.beginPath();
+        ctx.ellipse(px + T * (0.25 + 0.5 * hash2(x, y, 5)), py + T * (0.3 + 0.2 * hash2(x, y, 6)), T * 0.26, T * 0.1, 0, Math.PI, 0);
+        ctx.fill();
+        ctx.fillStyle = '#ffffffcc';
         for (let i = 0; i < 4; i++) ctx.fillRect(px + hash2(x, y, i) * T, py + hash2(x, y, i + 7) * T, 2, 2);
       }
       if (ch === 'd') {

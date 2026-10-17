@@ -74,7 +74,7 @@ export const S2: ScenarioDef = {
   ],
   legend: {
     A: { town: { kind: 'town', id: 'stonestep', name: 'Каменна стъпка', faction: 'forest', owner: 'player', built: ['hall', 'fort', 'd1', 'd2', 'd3', 'market'], garrison: [['mouse', 10], ['hedgehog', 4]] } },
-    B: { town: { kind: 'town', id: 'outpost', name: 'Сивата застава', faction: 'rats', owner: 'enemy', built: ['hall', 'fort', 'd1', 'd2'], garrison: [['rat', 24], ['beetle', 8], ['ratbow', 8]] } },
+    B: { town: { kind: 'town', id: 'outpost', name: 'Сивата застава', faction: 'rats', owner: 'enemy', built: ['fort', 'd1', 'd2'], garrison: [['rat', 20], ['beetle', 6], ['ratbow', 6]] } },
     '@': { terrain: ':', hero: { kind: 'hero', tpl: 'mishkontin', owner: 'player', carry: true } },
     G: { terrain: 'n', hero: { kind: 'hero', tpl: 'shushumiga', owner: 'enemy', role: 'boss', activeFrom: 14, targetTown: 'outpost', army: [['ratbow', 8], ['rat', 18], ['beetle', 6]] } },
     I: { obj: { id: 'iskritsa', kind: 'npc', npc: 'iskritsa', label: 'Лагерът на Искрица', dialogue: 's2_iskritsa' } },
