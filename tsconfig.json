@@ -12,8 +12,8 @@
     "isolatedModules": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "types": ["vite/client"],
+    "types": ["vite/client", "node"],
     "noEmit": true
   },
-  "include": ["src"]
+  "include": ["game", "tests", "e2e", "playwright.config.ts"]
 }

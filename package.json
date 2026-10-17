@@ -1,28 +1,24 @@
 {
-  "name": "mishkontin",
+  "name": "mishkontin-heroes",
   "private": true,
-  "version": "0.1.1",
-  "description": "Mishkontin and King Mortis the Rat \u2014 browser 2D platformer (v0.1 movement prototype)",
+  "version": "0.2.0",
+  "description": "Мишконтин и кралят плъх Мортис — приказна стратегия в стил Heroes of Might and Magic III (концепция)",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
-    "preview": "vite preview",
+    "preview": "vite preview --port 4173 --strictPort",
     "typecheck": "tsc --noEmit",
-    "atlas": "node tools/build-mishkontin-atlas.mjs",
-    "build:single": "tsc --noEmit && node tools/build-single-file.mjs",
-    "forest-kit": "node tools/extract-forest-kit.mjs",
-    "production-assets": "node tools/build-production-assets.mjs",
-    "mishkontin-v2": "node tools/build-mishkontin-v2.mjs"
-  },
-  "dependencies": {
-    "phaser": "^3.90.0"
+    "test": "vitest run",
+    "e2e": "playwright test",
+    "balance": "vitest run tests/balance.test.ts --reporter=verbose"
   },
   "devDependencies": {
-    "pngjs": "^7.0.0",
-    "sharp": "^0.35.5",
+    "@playwright/test": "1.56.1",
+    "@types/node": "^22.10.0",
     "typescript": "~5.9.3",
-    "vite": "^6.4.3"
+    "vite": "^6.4.3",
+    "vitest": "^3.2.4"
   },
   "engines": {
     "node": ">=18"
