@@ -5,6 +5,7 @@ import { VIRTUES } from '../core/types';
 import { CHARACTERS } from '../data/characters';
 import { getScenario, presetCampaign, SCENARIO_ORDER, SCENARIOS } from '../data/scenarios';
 import { AdventureScreen } from './adventureScreen';
+import { isMusicOn, isSfxOn, mapTheme, music, setMusicOn, setSfxOn, sfx } from './audio';
 import { clear, confirmBox, h, infoBox, modal } from './dom';
 import { portraitEl, preloadImages } from './gfx';
 import { saveLoadModal } from './panels';
@@ -35,6 +36,7 @@ export class App {
 
   showMenu(): void {
     this.clearScreen();
+    music('menu');
     const last = latestSave();
     const camp = loadCampaign();
     const buttons = h('div', { class: 'menu-buttons' });
@@ -47,7 +49,9 @@ export class App {
       h('div', { class: 'row', style: 'gap:9px' },
         h('button', { class: 'grow', onclick: () => this.help() }, '❓ Как се играе'),
         h('button', { class: 'grow', onclick: () => this.storyBook() }, '🦉 Героите')),
+      this.soundRow(),
     );
+    if ('ontouchstart' in window && document.fullscreenEnabled) buttons.append(h('button', { onclick: () => goFullscreen() }, '⛶ Цял екран'));
     const el = h(
       'div',
       { class: 'screen' },
@@ -60,6 +64,20 @@ export class App {
     );
     this.screenEl = el;
     this.root.append(el);
+  }
+
+  /** Music / sound toggles (also used in the in-game menu). */
+  soundRow(): HTMLElement {
+    const row = h('div', { class: 'row', style: 'gap:9px' });
+    const render = () => {
+      clear(row);
+      row.append(
+        h('button', { class: 'grow', onclick: () => { setMusicOn(!isMusicOn()); render(); } }, isMusicOn() ? '🎵 Музика: да' : '🔇 Музика: не'),
+        h('button', { class: 'grow', onclick: () => { setSfxOn(!isSfxOn()); render(); } }, isSfxOn() ? '🔔 Звуци: да' : '🔕 Звуци: не'),
+      );
+    };
+    render();
+    return row;
   }
 
   private chooseDifficulty(): void {
@@ -152,6 +170,7 @@ export class App {
 
   startScenario(id: string, campaign: CampaignState): void {
     this.clearScreen();
+    music('menu');
     const sc = getScenario(id);
     const el = h(
       'div',
@@ -179,6 +198,7 @@ export class App {
 
   startState(s: GameState): void {
     this.clearScreen();
+    music(mapTheme(s));
     this.adventure = new AdventureScreen(this, s);
     this.adventure.mount();
   }
@@ -201,6 +221,7 @@ export class App {
         h('button', { class: 'primary', onclick: () => close() }, 'Продължи играта'),
         h('button', { onclick: () => { close(); saveLoadModal(this, adv.s, adv); } }, '💾 Запис / зареждане'),
         h('button', { onclick: () => { close(); this.help(); } }, '❓ Как се играе'),
+        this.soundRow(),
         h('button', { onclick: () => { close(); confirmBox(this.root, 'Да започна ли главата отначало?', 'Отначало', () => this.startScenario(adv.s.scenario, adv.s.campaign)); } }, '↺ Започни главата отначало'),
         h('button', { class: 'danger', onclick: () => { close(); confirmBox(this.root, 'Към главното меню? Последният автоматичен запис е от началото на деня.', 'Главно меню', () => this.showMenu()); } }, '⌂ Главно меню')),
     );
@@ -209,6 +230,8 @@ export class App {
   showEnd(s: GameState): void {
     const sc = getScenario(s.scenario);
     const won = s.status === 'won';
+    sfx(won ? 'victory' : 'defeat');
+    music(won ? 'menu' : null);
     const idx = SCENARIO_ORDER.indexOf(s.scenario);
     const next = won ? SCENARIO_ORDER[idx + 1] ?? null : null;
     let camp: CampaignState | null = null;
@@ -234,6 +257,14 @@ export class App {
     );
     close = modal(this.root, box, { closable: false, parch: false });
   }
+}
+
+/** Fullscreen + landscape where the browser allows it (phones). */
+export function goFullscreen(): void {
+  const el = document.documentElement;
+  el.requestFullscreen?.()
+    .then(() => (screen.orientation as unknown as { lock?: (o: string) => Promise<void> }).lock?.('landscape'))
+    .catch(() => {});
 }
 
 export function mountApp(root: HTMLElement): App {

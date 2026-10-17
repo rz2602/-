@@ -847,3 +847,286 @@ h3 {
     height: 130px;
   }
 }
+
+/* ---------- Touch & small screens ---------- */
+html,
+body {
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  touch-action: manipulation;
+}
+.mapwrap canvas,
+.combat-field canvas,
+.minimap {
+  touch-action: none;
+}
+.panel {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Phones in portrait / narrow windows: sidebar becomes a bottom bar. */
+@media (max-width: 760px) {
+  #app {
+    font-size: 14px;
+  }
+  .adv {
+    grid-template-columns: 1fr;
+    grid-template-rows: 40px 1fr auto;
+  }
+  .topbar {
+    grid-column: 1;
+    gap: 10px;
+    padding: 0 8px;
+    overflow-x: auto;
+    font-size: 13px;
+  }
+  .res {
+    font-size: 14px;
+  }
+  .res small,
+  .topbar .day {
+    display: none;
+  }
+  .statusbar {
+    display: none;
+  }
+  .sidebar {
+    grid-row: 3;
+    grid-column: 1;
+    flex-direction: row;
+    align-items: stretch;
+    overflow-x: auto;
+    overflow-y: hidden;
+    border-left: none;
+    border-top: 2px solid var(--gold-dim);
+    padding: 6px;
+    padding-bottom: max(6px, env(safe-area-inset-bottom, 0px));
+    gap: 6px;
+  }
+  .minimap,
+  .side-title {
+    display: none;
+  }
+  .card-list {
+    flex-direction: row;
+  }
+  .hero-card,
+  .town-card {
+    min-width: 136px;
+  }
+  .side-buttons {
+    margin-top: 0;
+    grid-template-columns: repeat(4, minmax(70px, auto));
+    min-width: 330px;
+    gap: 4px;
+  }
+  .side-buttons button {
+    font-size: 12px;
+    padding: 4px 6px;
+  }
+  .side-buttons .wide {
+    grid-column: auto / span 2;
+  }
+  .panel {
+    padding: 12px;
+    max-width: calc(100% - 10px);
+    max-height: calc(100% - 10px);
+  }
+  .town {
+    width: calc(100vw - 34px);
+    height: auto;
+    max-height: none;
+    grid-template-columns: 1fr;
+    overflow: visible;
+  }
+  .town-head,
+  .town-armies {
+    grid-column: 1;
+    flex-wrap: wrap;
+  }
+  .town-head h2 {
+    font-size: 21px;
+  }
+  .buildings {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  }
+  .combat-bar {
+    grid-template-columns: 1fr;
+    gap: 6px;
+    padding: 6px;
+    padding-bottom: max(6px, env(safe-area-inset-bottom, 0px));
+  }
+  .combat-bar > div:first-child {
+    display: none;
+  }
+  .combat-log {
+    height: 38px;
+    font-size: 12px;
+  }
+  .combat-bar .row {
+    max-width: none !important;
+    justify-content: center !important;
+  }
+  .combat-bar button {
+    font-size: 12px;
+    padding: 5px 8px;
+  }
+  .dlg {
+    gap: 8px;
+    bottom: max(10px, env(safe-area-inset-bottom, 0px));
+  }
+  .dlg-portrait {
+    width: 84px;
+    height: 110px;
+  }
+  .dlg-text {
+    font-size: 15px;
+  }
+  .dlg-box {
+    padding: 10px 12px;
+    min-height: 120px;
+  }
+  .slot {
+    width: 54px;
+    height: 54px;
+    font-size: 28px;
+  }
+  .toast {
+    font-size: 13px;
+    max-width: 78vw;
+  }
+  .intro p {
+    font-size: 15px;
+  }
+}
+
+/* Phones in landscape: keep the side panel, but slimmer and denser. */
+@media (max-height: 520px) and (min-width: 761px) {
+  #app {
+    font-size: 13px;
+  }
+  .adv {
+    grid-template-columns: 1fr 210px;
+    grid-template-rows: 34px 1fr;
+  }
+  .topbar {
+    gap: 12px;
+    font-size: 13px;
+  }
+  .res {
+    font-size: 14px;
+  }
+  .topbar .day,
+  .statusbar {
+    display: none;
+  }
+  .sidebar {
+    grid-row: 2 / 3;
+    gap: 5px;
+    padding: 5px;
+  }
+  .minimap,
+  .side-title {
+    display: none;
+  }
+  .hero-card,
+  .town-card {
+    padding: 2px 5px;
+  }
+  .hero-card .pic {
+    width: 32px;
+    height: 32px;
+  }
+  .side-buttons {
+    gap: 4px;
+  }
+  .side-buttons button {
+    font-size: 12px;
+    padding: 4px 6px;
+  }
+  .panel {
+    padding: 10px 12px;
+    max-height: calc(100% - 8px);
+  }
+  .town {
+    height: calc(100vh - 30px);
+    gap: 8px;
+  }
+  .town-head h2 {
+    font-size: 20px;
+  }
+  .buildings {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  }
+  .slot {
+    width: 50px;
+    height: 50px;
+    font-size: 26px;
+  }
+  .combat-bar {
+    padding: 4px 8px;
+  }
+  .combat-log {
+    height: 34px;
+  }
+  .combat-bar button {
+    font-size: 12px;
+    padding: 4px 8px;
+  }
+  .dlg-portrait {
+    width: 110px;
+    height: 120px;
+  }
+  .dlg-box {
+    min-height: 100px;
+    padding: 8px 14px;
+  }
+  .dlg-text {
+    font-size: 15px;
+    margin: 3px 0 6px;
+  }
+  .menu-title {
+    font-size: 30px;
+  }
+  .menu-sub {
+    margin: 2px 0 8px;
+  }
+  .menu-buttons {
+    gap: 5px;
+  }
+  .menu-buttons button {
+    padding: 6px 12px;
+    font-size: 15px;
+  }
+  .menu-box {
+    bottom: 2vh;
+  }
+  .intro .panel {
+    max-height: calc(100vh - 16px);
+  }
+  .intro p {
+    font-size: 14px;
+    margin-bottom: 6px;
+  }
+}
+
+.rotate-hint {
+  display: none;
+}
+@media (orientation: portrait) and (max-width: 760px) {
+  .rotate-hint {
+    display: block;
+    position: absolute;
+    left: 50%;
+    bottom: 10px;
+    transform: translateX(-50%);
+    background: #241b13ee;
+    border: 2px solid var(--gold-dim);
+    border-radius: 10px;
+    padding: 6px 12px;
+    font-size: 13px;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+}

@@ -2,7 +2,9 @@ import './ui/style.css';
 import { botPlay, botPlayDay, botResolveUi } from './core/bot';
 import type { GameState } from './core/types';
 import { mountApp } from './ui/app';
+import { initAudio } from './ui/audio';
 
+initAudio();
 const root = document.getElementById('app')!;
 const app = mountApp(root);
 

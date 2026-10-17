@@ -12,6 +12,7 @@ import { clear, confirmBox, esc, h, infoBox, modal, tip } from './dom';
 import { portraitEl } from './gfx';
 import { listSaves, loadGame, saveGame, SLOTS, type Slot } from './save';
 import { armyRow } from './widgets';
+import { sfx } from './audio';
 
 export function heroPanel(root: HTMLElement, s: GameState, hero: Hero, onChange: () => void): void {
   const body = h('div', { style: 'width:min(760px,92vw)' });
@@ -89,6 +90,7 @@ function statChip(icon: string, name: string, value: number | string, desc: stri
 
 export function levelUpModal(root: HTMLElement, s: GameState, hero: Hero, next: () => void): void {
   const offer = hero.pendingLevelUps[0];
+  sfx('levelup');
   const statName = { att: '⚔️ Нападение', def: '🛡️ Защита', pow: '🔮 Сила', kno: '📚 Знание' }[offer.stat];
   let close = () => {};
   const pickSkill = (k: (typeof offer.options)[number] | null) => {

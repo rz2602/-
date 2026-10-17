@@ -5,6 +5,7 @@ import { CHARACTERS } from '../data/characters';
 import { getScenario } from '../data/scenarios';
 import { clear, h } from './dom';
 import { portraitEl } from './gfx';
+import { sfx } from './audio';
 
 const VIRTUE_TAG: Record<VirtueId, string> = {
   courage: `${VIRTUE_INFO.courage.icon} Смелост`,
@@ -80,6 +81,7 @@ export function playDialogue(root: HTMLElement, s: GameState, id: string, done: 
       return;
     }
     const ch = CHARACTERS[line.who];
+    sfx('page');
     clear(portrait);
     if (ch && line.who !== 'narrator') portrait.append(portraitEl(line.who, line.who === 'mishkontin' ? 200 : 150, line.mood ?? 'idle'));
     portrait.style.visibility = line.who === 'narrator' ? 'hidden' : 'visible';

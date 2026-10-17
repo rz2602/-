@@ -42,6 +42,7 @@ import type { App } from './app';
 import { clear, esc, h, hideTip, modal, showTip } from './dom';
 import { drawEmoji, drawPortrait, drawToken, hash2 } from './gfx';
 import { creatureTip } from './widgets';
+import { mapTheme, music, sfx } from './audio';
 
 const SQ3 = Math.sqrt(3);
 
@@ -142,7 +143,7 @@ export class CombatScreen {
     this.canvas = h('canvas');
     this.ctx = this.canvas.getContext('2d')!;
     this.hint = h('div', { class: 'combat-hint' }, '');
-    this.field = h('div', { class: 'combat-field' }, this.canvas, this.hint);
+    this.field = h('div', { class: 'combat-field' }, this.canvas, this.hint, h('div', { class: 'rotate-hint' }, '📱↻ Завърти телефона за по-голямо поле'));
     this.logEl = h('div', { class: 'combat-log' });
     this.infoEl = h('div', { style: 'min-width:210px;max-width:260px;font-size:13px' });
     this.buttons = h('div', { class: 'row wrap', style: 'justify-content:flex-end;max-width:380px' });
@@ -151,12 +152,30 @@ export class CombatScreen {
   }
 
   mount(): void {
+    music('combat');
     this.app.root.append(this.el);
     this.b.events = [];
     this.resize();
     window.addEventListener('resize', this.resize);
     window.addEventListener('keydown', this.onKey, true);
-    this.canvas.addEventListener('mousemove', this.onMove);
+    this.canvas.addEventListener('pointermove', this.onMove);
+    // Touch: the tap position decides the target / attack side; long-press shows info.
+    let press: number | null = null;
+    this.canvas.addEventListener('pointerdown', (e) => {
+      this.onMove(e);
+      if (e.pointerType === 'mouse') return;
+      press = window.setTimeout(() => {
+        press = null;
+        this.longPressed = true;
+        this.onRight(e);
+      }, 550);
+    });
+    const endPress = () => {
+      if (press != null) clearTimeout(press);
+      press = null;
+    };
+    this.canvas.addEventListener('pointerup', endPress);
+    this.canvas.addEventListener('pointercancel', endPress);
     this.canvas.addEventListener('mouseleave', () => {
       this.hoverHex = null;
       hideTip();
@@ -171,6 +190,7 @@ export class CombatScreen {
 
   private destroy(): void {
     this.alive = false;
+    music(mapTheme(this.s));
     cancelAnimationFrame(this.raf);
     if (this.aiTimer) clearTimeout(this.aiTimer);
     window.removeEventListener('resize', this.resize);
@@ -270,6 +290,8 @@ export class CombatScreen {
         }
       } else if (e.t === 'hit') {
         const target = e.target;
+        const isRanged = e.ranged;
+        this.anims.push({ dur: 1, t0: null, step: () => {}, done: () => sfx(isRanged ? 'shoot' : 'hit') });
         const att = unitById(this.b, e.uid);
         const tu = unitById(this.b, target);
         if (e.ranged && att && tu) {
@@ -312,6 +334,7 @@ export class CombatScreen {
       } else if (e.t === 'spell') {
         const targets = e.targets;
         const icon = SPELLS[e.spell].icon;
+        sfx('spell');
         this.anims.push({
           dur: 420,
           t0: null,
@@ -328,6 +351,7 @@ export class CombatScreen {
         });
       } else if (e.t === 'morale') {
         const p = this.drawPos.get(e.uid);
+        if (e.good) sfx('morale');
         if (p) this.floaters.push({ x: p.x, y: p.y - this.R, text: e.good ? '🙂 Морал!' : '😟 Страх', color: e.good ? '#b8ff9a' : '#ffb0a0', t0: performance.now() });
       }
     }
@@ -418,7 +442,13 @@ export class CombatScreen {
     return best;
   }
 
+  private longPressed = false;
+
   private onClick = (): void => {
+    if (this.longPressed) {
+      this.longPressed = false;
+      return;
+    }
     if (this.anims.length || !this.humanTurn()) return;
     const b = this.b;
     const hx = this.hoverHex;
@@ -444,7 +474,7 @@ export class CombatScreen {
   };
 
   private onRight = (e: MouseEvent): void => {
-    e.preventDefault();
+    if (e.cancelable) e.preventDefault();
     if (this.casting) {
       this.casting = null;
       this.renderBar();
@@ -589,6 +619,7 @@ export class CombatScreen {
       return l.length ? l.map((x) => h('div', null, `${creature(x.cid).icon} ${stackLabel(x.cid, x.lost)}`)) : [h('div', { class: 'muted' }, 'Без загуби')];
     };
     const xp = won ? killedHp(b, side) + (b.kind === 'hero' ? 500 : 0) : 0;
+    sfx(won ? 'victory' : 'defeat');
     let close = () => {};
     const box = h(
       'div',

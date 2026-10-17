@@ -25,6 +25,7 @@ import type { App } from './app';
 import { clear, esc, h, modal, tip } from './dom';
 import { drawTown, ownerColor, portraitCanvas } from './gfx';
 import { armyRow, slotEl } from './widgets';
+import { sfx } from './audio';
 
 type Tab = 'build' | 'market' | 'tavern';
 
@@ -97,6 +98,7 @@ export class TownScreen {
           class: `bld${built ? ' built' : ''}${!built && !block ? ' can' : ''}`,
           onclick: () => {
             if (!built && !block && build(s, t, id)) {
+              sfx('build');
               s.toasts.push({ text: `Построено: ${buildingName(t.faction, id)}`, icon: '🏗️' });
               this.render();
             }
@@ -188,7 +190,7 @@ export class TownScreen {
         box.append(
           h('div', { class: 'recruit-row', style: 'border-color:var(--gold)' },
             h('div', { class: 'qty grow' }, range, label, cost),
-            h('button', { class: 'small primary', onclick: () => { if (recruit(s, t, cid, n)) { this.recruitOpen = null; this.render(); } } }, 'Купи')),
+            h('button', { class: 'small primary', onclick: () => { if (recruit(s, t, cid, n)) { sfx('coin'); this.recruitOpen = null; this.render(); } } }, 'Купи')),
         );
       }
     }

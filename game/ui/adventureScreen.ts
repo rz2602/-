@@ -25,6 +25,7 @@ import { ARTIFACTS, SPELLS } from '../data/magic';
 import { getScenario } from '../data/scenarios';
 import type { App } from './app';
 import { CombatScreen } from './combatScreen';
+import { sfx } from './audio';
 import { playDialogue } from './dialogue';
 import { clear, confirmBox, esc, h, hideTip, infoBox, modal, showTip } from './dom';
 import { drawPortrait, image, portraitCanvas } from './gfx';
@@ -45,8 +46,8 @@ export class AdventureScreen {
   private topbar: HTMLElement;
   private status: HTMLElement;
   private toastBox: HTMLElement;
-  private zoomIdx = 2;
-  private T = ZOOMS[2];
+  private zoomIdx = Math.min(window.innerWidth, window.innerHeight) < 600 ? 1 : 2;
+  private T = ZOOMS[this.zoomIdx];
   private terrainCache: HTMLCanvasElement | null = null;
   private fogCanvas: HTMLCanvasElement;
   private camX = 0;
@@ -185,31 +186,86 @@ export class AdventureScreen {
   // -------------------------------------------------------------------------
 
   private bindInput(): void {
-    this.canvas.addEventListener('mousedown', (e) => {
-      if (e.button === 0) this.drag = { x: e.clientX, y: e.clientY, cx: this.camX, cy: this.camY, moved: false };
+    // Pointer events: mouse drag, touch drag, two-finger pinch zoom, long-press info.
+    const pts = new Map<number, { x: number; y: number }>();
+    let pinch: { d: number } | null = null;
+    let longPress: number | null = null;
+    const cancelLong = () => {
+      if (longPress != null) clearTimeout(longPress);
+      longPress = null;
+    };
+    const dist = () => {
+      const [a, b] = [...pts.values()];
+      return Math.hypot(a.x - b.x, a.y - b.y);
+    };
+    this.canvas.addEventListener('pointerdown', (e) => {
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      this.canvas.setPointerCapture(e.pointerId);
+      pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (pts.size === 1) {
+        this.drag = { x: e.clientX, y: e.clientY, cx: this.camX, cy: this.camY, moved: false };
+        if (e.pointerType !== 'mouse') {
+          const t = this.tileFromEvent(e);
+          longPress = window.setTimeout(() => {
+            longPress = null;
+            if (this.drag && !this.drag.moved && t) {
+              this.drag.moved = true; // swallow the tap
+              this.inspect(t.x, t.y, e.clientX, e.clientY);
+            }
+          }, 550);
+        }
+      } else if (pts.size === 2) {
+        cancelLong();
+        if (this.drag) this.drag.moved = true;
+        pinch = { d: dist() };
+      }
     });
-    window.addEventListener('mousemove', (e) => {
-      if (!this.alive) return;
-      if (this.drag && e.buttons & 1) {
+    this.canvas.addEventListener('pointermove', (e) => {
+      if (!this.alive || !pts.has(e.pointerId)) return;
+      pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (pinch && pts.size >= 2) {
+        const d = dist();
+        if (d > pinch.d * 1.3) {
+          this.setZoom(1);
+          pinch.d = d;
+        } else if (d < pinch.d / 1.3) {
+          this.setZoom(-1);
+          pinch.d = d;
+        }
+        return;
+      }
+      if (this.drag) {
         const dx = e.clientX - this.drag.x;
         const dy = e.clientY - this.drag.y;
-        if (Math.abs(dx) + Math.abs(dy) > 6) this.drag.moved = true;
-        if (this.drag.moved) {
+        if (Math.abs(dx) + Math.abs(dy) > (e.pointerType === 'mouse' ? 6 : 12)) {
+          this.drag.moved = true;
+          cancelLong();
+        }
+        if (this.drag.moved && !pinch) {
           this.camX = this.drag.cx - dx;
           this.camY = this.drag.cy - dy;
           this.clampCam();
         }
       }
     });
-    window.addEventListener('mouseup', (e) => {
-      if (!this.alive || !this.drag) return;
+    const up = (e: PointerEvent) => {
+      if (!pts.has(e.pointerId)) return;
+      pts.delete(e.pointerId);
+      cancelLong();
+      if (pts.size > 0) return;
       const d = this.drag;
       this.drag = null;
-      if (!d.moved && e.target === this.canvas) {
-        const t = this.tileFromEvent(e);
-        if (t) this.clickTile(t.x, t.y);
+      const wasPinch = !!pinch;
+      pinch = null;
+      if (!this.alive || !d || d.moved || wasPinch || e.type === 'pointercancel') return;
+      const t = this.tileFromEvent(e);
+      if (t) {
+        if (e.pointerType !== 'mouse') this.hover = t;
+        this.clickTile(t.x, t.y);
       }
-    });
+    };
+    this.canvas.addEventListener('pointerup', up);
+    this.canvas.addEventListener('pointercancel', up);
     this.canvas.addEventListener('mousemove', (e) => {
       const t = this.tileFromEvent(e);
       this.hover = t;
@@ -234,7 +290,7 @@ export class AdventureScreen {
       },
       { passive: false },
     );
-    this.mini.addEventListener('mousedown', (e) => {
+    this.mini.addEventListener('pointerdown', (e) => {
       const r = this.mini.getBoundingClientRect();
       const x = ((e.clientX - r.left) / r.width) * this.s.w;
       const y = ((e.clientY - r.top) / r.height) * this.s.h;
@@ -346,6 +402,7 @@ export class AdventureScreen {
       }
       const r = heroStep(this.s, hero, p.x, p.y);
       if (r === 'moved') {
+        sfx('step');
         this.path!.shift();
         this.ensureVisible(hero.x, hero.y);
         this.refreshTop();
@@ -504,6 +561,7 @@ export class AdventureScreen {
 
   private showToasts(): void {
     const list = this.s.toasts.splice(0);
+    if (list.length) sfx(list.some((t) => t.icon === '📅') ? 'week' : list.some((t) => t.icon === '⭐') ? 'morale' : 'pickup');
     for (const t of list) {
       const el = h('div', { class: 'toast' }, t.icon ? h('span', { class: 'emoji' }, `${t.icon} `) : null, t.text);
       this.toastBox.append(el);
