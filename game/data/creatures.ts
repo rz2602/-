@@ -16,7 +16,7 @@ export type Ability =
 export interface CreatureDef {
   id: string;
   name: string;
-  /** Plural form for counts ("12 таралежа"). */
+  /** Plural form for counts ("12 полевки"). */
   plural: string;
   faction: Faction;
   tier: number;
@@ -53,108 +53,93 @@ export const ABILITY_TEXT: Record<Ability, string> = {
 };
 
 const defs: CreatureDef[] = [
-  // ---- Горският съюз (Mishkontin) ----
+  // ---- Съюзът на малките (Мишконтин и горските гризачи) ----
   {
-    id: 'mouse', name: 'Мишка-опълченец', plural: 'Мишки-опълченци', faction: 'forest', tier: 1,
+    id: 'mouse', name: 'Полска мишка', plural: 'Полски мишки', faction: 'forest', tier: 1,
     att: 3, def: 3, dmin: 1, dmax: 3, hp: 6, spd: 5, abilities: [], growth: 12, cost: { acorns: 45 }, value: 70,
-    icon: '🐭', badge: '🗡️', desc: 'Смели, бързи и много. Носят тенджери вместо шлемове.',
+    icon: '🐭', badge: '🗡️', desc: 'Изгонени от домовете си от плъховете на Мортис. Малки, но много — и с големи сърца.',
   },
   {
-    id: 'hedgehog', name: 'Таралеж-пазач', plural: 'Таралежи-пазачи', faction: 'forest', tier: 2,
-    att: 4, def: 8, dmin: 2, dmax: 3, hp: 13, spd: 4, abilities: ['thorns'], growth: 8, cost: { acorns: 95 }, value: 150,
-    icon: '🦔', desc: 'Бавен, но никой не обича да го прегръща.',
+    id: 'vole', name: 'Полевка', plural: 'Полевки', faction: 'forest', tier: 2,
+    att: 4, def: 7, dmin: 2, dmax: 3, hp: 12, spd: 4, abilities: ['shielded'], growth: 8, cost: { acorns: 90 }, value: 145,
+    icon: '🐹', desc: 'Копае ходници и се крие от изстрелите.',
   },
   {
-    id: 'squirrel', name: 'Катерица-прашкар', plural: 'Катерици-прашкари', faction: 'forest', tier: 3,
+    id: 'squirrel', name: 'Катерица', plural: 'Катерици', faction: 'forest', tier: 3,
     att: 6, def: 3, dmin: 2, dmax: 4, hp: 10, spd: 7, shots: 10, abilities: ['ranged'], growth: 6,
-    cost: { acorns: 140 }, value: 210, icon: '🐿️', badge: '🌰', desc: 'Стрелят с жълъди. Улучват почти винаги.',
+    cost: { acorns: 140 }, value: 210, icon: '🐿️', badge: '🌲', desc: 'Замеря с шишарки от върха на дървото. Рядко пропуска.',
   },
   {
-    id: 'owl', name: 'Бухал-страж', plural: 'Бухали-стражи', faction: 'forest', tier: 4,
-    att: 9, def: 7, dmin: 5, dmax: 8, hp: 26, spd: 9, abilities: ['flyer'], growth: 3,
-    cost: { acorns: 320, wood: 1 }, value: 470, icon: '🦉', desc: 'Нощни пазачи на Сиренград. Виждат всичко.',
+    id: 'hare', name: 'Заек', plural: 'Зайци', faction: 'forest', tier: 4,
+    att: 8, def: 6, dmin: 4, dmax: 7, hp: 24, spd: 10, abilities: ['charge'], growth: 3,
+    cost: { acorns: 300, wood: 1 }, value: 450, icon: '🐇', desc: 'Най-бързият в гората. Рита със задните лапи.',
   },
   {
-    id: 'bear', name: 'Мечок-закрилник', plural: 'Мечоци-закрилници', faction: 'forest', tier: 5,
-    att: 12, def: 12, dmin: 9, dmax: 14, hp: 72, spd: 5, abilities: ['unlimitedRetaliation'], growth: 1,
-    cost: { acorns: 950, cheese: 1 }, value: 1400, icon: '🐻', desc: 'Сънлив великан, който се събужда за приятелите си.',
+    id: 'eagle', name: 'Орел', plural: 'Орли', faction: 'forest', tier: 5,
+    att: 13, def: 11, dmin: 10, dmax: 15, hp: 70, spd: 11, abilities: ['flyer', 'fearless'], growth: 1,
+    cost: { acorns: 1000, cheese: 1 }, value: 1500, icon: '🦅', desc: 'Воините на крал Златокрил. Сянката им гони плъховете.',
   },
 
-  // ---- Плъховата орда (Mortis) ----
+  // ---- Ордата на крал Мортис ----
   {
-    id: 'rat', name: 'Плъх-дрипльо', plural: 'Плъхове-дрипльовци', faction: 'rats', tier: 1,
+    id: 'rat', name: 'Плъх от тунелите', plural: 'Плъхове от тунелите', faction: 'rats', tier: 1,
     att: 4, def: 2, dmin: 1, dmax: 3, hp: 6, spd: 6, abilities: [], growth: 14, cost: { acorns: 40 }, value: 65,
-    icon: '🐀', desc: 'Гладни, нахални и винаги на тълпа.',
+    icon: '🐀', desc: 'Едри, зъбати и винаги на тълпа.',
   },
   {
-    id: 'beetle', name: 'Бръмбар-щитоносец', plural: 'Бръмбари-щитоносци', faction: 'rats', tier: 2,
-    att: 3, def: 9, dmin: 1, dmax: 3, hp: 15, spd: 3, abilities: ['shielded'], growth: 8, cost: { acorns: 90 }, value: 140,
-    icon: '🐞', desc: 'Носи черупката си като щит. Стрелите отскачат.',
+    id: 'ratspear', name: 'Плъх-копиеносец', plural: 'Плъхове-копиеносци', faction: 'rats', tier: 2,
+    att: 5, def: 7, dmin: 2, dmax: 4, hp: 13, spd: 5, abilities: [], growth: 8, cost: { acorns: 95 }, value: 150,
+    icon: '🐀', badge: '🔱', desc: 'Тъмно наметало и дълго, остро копие.',
   },
   {
-    id: 'ratbow', name: 'Плъх-самострелец', plural: 'Плъхове-самострелци', faction: 'rats', tier: 3,
-    att: 6, def: 3, dmin: 2, dmax: 5, hp: 9, spd: 5, shots: 8, abilities: ['ranged'], growth: 6,
-    cost: { acorns: 135 }, value: 200, icon: '🐀', badge: '🏹', desc: 'Самострел от кламер и ластик. Боли.',
+    id: 'trapper', name: 'Плъх-капанджия', plural: 'Плъхове-капанджии', faction: 'rats', tier: 3,
+    att: 5, def: 3, dmin: 2, dmax: 4, hp: 9, spd: 5, shots: 8, abilities: ['ranged', 'web'], growth: 6,
+    cost: { acorns: 130 }, value: 200, icon: '🐀', badge: '⛓️', desc: 'Мята мрежи и ръждиви капани. Който се заплете, едва пълзи.',
   },
   {
-    id: 'bat', name: 'Прилеп-вестоносец', plural: 'Прилепи-вестоносци', faction: 'rats', tier: 4,
-    att: 8, def: 5, dmin: 3, dmax: 7, hp: 19, spd: 10, abilities: ['flyer', 'noRetaliation'], growth: 3,
-    cost: { acorns: 300, wood: 1 }, value: 430, icon: '🦇', desc: 'Удря и изчезва в тъмното.',
+    id: 'veteran', name: 'Плъх-ветеран', plural: 'Плъхове-ветерани', faction: 'rats', tier: 4,
+    att: 9, def: 6, dmin: 4, dmax: 7, hp: 24, spd: 7, abilities: ['doubleStrike'], growth: 3,
+    cost: { acorns: 320, wood: 1 }, value: 470, icon: '🐀', badge: '⚔️', desc: 'Белязан в много битки — като капитана си Белегор.',
   },
   {
-    id: 'badger', name: 'Язовец-наемник', plural: 'Язовци-наемници', faction: 'rats', tier: 5,
-    att: 11, def: 10, dmin: 6, dmax: 9, hp: 66, spd: 6, abilities: ['doubleStrike'], growth: 1,
-    cost: { acorns: 900, cheese: 1 }, value: 1350, icon: '🦡', desc: 'Бие се за сирене. Много сирене.',
+    id: 'guard', name: 'Червеноок гвардеец', plural: 'Червенооки гвардейци', faction: 'rats', tier: 5,
+    att: 12, def: 12, dmin: 8, dmax: 13, hp: 70, spd: 6, abilities: ['unlimitedRetaliation', 'fearless'], growth: 1,
+    cost: { acorns: 950, cheese: 1 }, value: 1400, icon: '🐀', badge: '🛡️', desc: 'Стражата на тронната зала. Очите им светят червено в мрака.',
   },
 
-  // ---- Неутрални ----
+  // ---- Обитатели на гората ----
   {
-    id: 'wasp', name: 'Оса', plural: 'Оси', faction: 'neutral', tier: 1,
-    att: 4, def: 2, dmin: 1, dmax: 3, hp: 5, spd: 9, abilities: ['flyer'], growth: 10, cost: { acorns: 50 }, value: 70,
-    icon: '🐝', desc: 'Жужат сърдито около всичко сладко.',
+    id: 'wanderer', name: 'Скитник от Зелендол', plural: 'Скитници от Зелендол', faction: 'neutral', tier: 2,
+    att: 4, def: 4, dmin: 2, dmax: 3, hp: 10, spd: 6, abilities: [], growth: 6, cost: { acorns: 80 }, value: 120,
+    icon: '🐭', badge: '🎒', desc: 'Мишки без дом. Търсят Вечната пита отвъд Сивите хълмове.',
   },
   {
-    id: 'spider', name: 'Горски паяк', plural: 'Горски паяци', faction: 'neutral', tier: 2,
-    att: 5, def: 4, dmin: 2, dmax: 4, hp: 11, spd: 5, abilities: ['web'], growth: 7, cost: { acorns: 100 }, value: 150,
-    icon: '🕷️', desc: 'Плете мрежи там, където е най-неудобно.',
+    id: 'ferret', name: 'Пор', plural: 'Порове', faction: 'neutral', tier: 4,
+    att: 10, def: 8, dmin: 5, dmax: 9, hp: 34, spd: 7, abilities: ['charge'], growth: 2, cost: { acorns: 450 }, value: 600,
+    icon: '🦦', desc: 'Дълъг, лъскав и гладен.',
   },
   {
-    id: 'frog', name: 'Блатна жаба', plural: 'Блатни жаби', faction: 'neutral', tier: 2,
-    att: 5, def: 5, dmin: 2, dmax: 4, hp: 14, spd: 4, abilities: [], growth: 7, cost: { acorns: 90 }, value: 140,
-    icon: '🐸', desc: 'Квака страшно, но е по-скоро любопитна.',
+    id: 'wildcat', name: 'Дива котка', plural: 'Диви котки', faction: 'neutral', tier: 5,
+    att: 14, def: 10, dmin: 10, dmax: 16, hp: 80, spd: 9, abilities: ['fearless'], growth: 1, cost: { acorns: 1200 },
+    value: 1600, icon: '🐈', desc: 'Белегор ги е надхитрил много пъти. Ти още не.',
   },
   {
-    id: 'mushroom', name: 'Гъбар', plural: 'Гъбари', faction: 'neutral', tier: 2,
-    att: 3, def: 7, dmin: 1, dmax: 4, hp: 14, spd: 3, abilities: ['fearless'], growth: 7, cost: { acorns: 80 }, value: 120,
-    icon: '🍄', desc: 'Тих горски народ. Не обича да го настъпват.',
-  },
-  {
-    id: 'wolf', name: 'Вълк', plural: 'Вълци', faction: 'neutral', tier: 3,
-    att: 7, def: 5, dmin: 3, dmax: 6, hp: 18, spd: 8, abilities: ['charge'], growth: 5, cost: { acorns: 200 }, value: 260,
-    icon: '🐺', desc: 'Бързи ловци от Сивия гъсталак.',
-  },
-  {
-    id: 'boar', name: 'Глиган', plural: 'Глигани', faction: 'neutral', tier: 4,
-    att: 10, def: 8, dmin: 5, dmax: 9, hp: 36, spd: 7, abilities: ['charge'], growth: 2, cost: { acorns: 450 }, value: 620,
-    icon: '🐗', desc: 'Минава направо. През всичко.',
-  },
-  {
-    id: 'ghost', name: 'Таласъм', plural: 'Таласъми', faction: 'neutral', tier: 4,
-    att: 9, def: 7, dmin: 4, dmax: 8, hp: 30, spd: 7, abilities: ['flyer', 'fearless'], growth: 2, cost: { acorns: 420 },
-    value: 540, icon: '👻', desc: 'Стар страх от старите мини. Всъщност е самотен.',
+    id: 'zubodrobko', name: 'Зъбодробко', plural: 'Зъбодробко', faction: 'neutral', tier: 6,
+    att: 14, def: 12, dmin: 12, dmax: 20, hp: 420, spd: 7, abilities: ['charge', 'fearless'], growth: 0, cost: {},
+    value: 5200, icon: '🦦', badge: '🦷', desc: 'Тиранинът на гората. Взима храната на всички малки гризачи.',
   },
   {
     id: 'tower', name: 'Стрелкова кула', plural: 'Стрелкови кули', faction: 'neutral', tier: 0,
     att: 10, def: 10, dmin: 8, dmax: 14, hp: 120, spd: 1, shots: 99, abilities: ['ranged', 'immobile', 'fearless'], growth: 0,
-    cost: {}, value: 0, icon: '🗼', desc: 'Защитава града.',
+    cost: {}, value: 0, icon: '🗼', desc: 'Защитава укреплението.',
   },
 ];
 
 export const CREATURES: Record<string, CreatureDef> = Object.fromEntries(defs.map((d) => [d.id, d]));
 
 export const FACTION_LINE: Record<'forest' | 'rats', string[]> = {
-  forest: ['mouse', 'hedgehog', 'squirrel', 'owl', 'bear'],
-  rats: ['rat', 'beetle', 'ratbow', 'bat', 'badger'],
+  forest: ['mouse', 'vole', 'squirrel', 'hare', 'eagle'],
+  rats: ['rat', 'ratspear', 'trapper', 'veteran', 'guard'],
 };
 
 export function creature(id: string): CreatureDef {

@@ -117,13 +117,13 @@ export class TownScreen {
 
   private marketPanel(): HTMLElement {
     const s = this.s;
-    const box = h('div', null, h('h3', null, '⚖️ Пазар'), h('p', { class: 'muted' }, 'Тук може да размениш ресурси срещу жълъди и обратно.'));
+    const box = h('div', null, h('h3', null, '⚖️ Пазар'), h('p', { class: 'muted' }, 'Тук може да размениш ресурси срещу трохи и обратно.'));
     for (const k of ['wood', 'stone', 'cheese'] as const) {
       const rate = MARKET_RATE[k];
       box.append(
         h('div', { class: 'recruit-row' },
           h('div', { class: 'emoji', style: 'font-size:30px' }, RES_INFO[k].icon),
-          h('div', { class: 'grow' }, h('b', null, RES_INFO[k].name), h('div', { class: 'muted', style: 'font-size:13px' }, `Продаваш за ${rate.sell} 🌰 · купуваш за ${rate.buy} 🌰 · имаш ${s.players.player.res[k]}`)),
+          h('div', { class: 'grow' }, h('b', null, RES_INFO[k].name), h('div', { class: 'muted', style: 'font-size:13px' }, `Продаваш за ${rate.sell} 🍞 · купуваш за ${rate.buy} 🍞 · имаш ${s.players.player.res[k]}`)),
           h('button', { class: 'small', disabled: s.players.player.res[k] < 1, onclick: () => { marketSell(s, 'player', k, 1); this.render(); } }, 'Продай 1'),
           h('button', { class: 'small', disabled: s.players.player.res[k] < 5, onclick: () => { marketSell(s, 'player', k, 5); this.render(); } }, 'Продай 5'),
           h('button', { class: 'small primary', disabled: s.players.player.res.acorns < rate.buy, onclick: () => { marketBuy(s, 'player', k, 1); this.render(); } }, 'Купи 1'),
@@ -135,7 +135,7 @@ export class TownScreen {
 
   private tavernPanel(): HTMLElement {
     const { s, t } = this;
-    const box = h('div', null, h('h3', null, '🍺 Странноприемница'), h('p', { class: 'muted' }, `Наеми нов герой за ${TAVERN_HERO_COST} 🌰. Героите събират ресурси и пазят земите ти.`));
+    const box = h('div', null, h('h3', null, '🍺 Странноприемница'), h('p', { class: 'muted' }, `Наеми нов герой за ${TAVERN_HERO_COST} 🍞. Героите събират ресурси и пазят земите ти.`));
     const block = canHire(s, t);
     for (const id of hireCandidates(s, 'player')) {
       const tpl = HERO_TEMPLATES[id];

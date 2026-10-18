@@ -176,6 +176,102 @@ export function drawTown(ctx: CanvasRenderingContext2D, cx: number, cy: number, 
     ctx.fill();
     ctx.stroke();
   };
+  if (special === 'sirengrad') {
+    // The old mill by the river: stone body, wooden roof and a big water wheel.
+    const wx = cx + s * 0.36;
+    const wy = base - s * 0.3;
+    ctx.strokeStyle = '#5a3a1c';
+    ctx.lineWidth = Math.max(1.5, s * 0.04);
+    ctx.fillStyle = '#7a5532';
+    ctx.beginPath();
+    ctx.arc(wx, wy, s * 0.3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    for (let i = 0; i < 8; i++) {
+      const a = (i / 8) * Math.PI * 2;
+      ctx.beginPath();
+      ctx.moveTo(wx, wy);
+      ctx.lineTo(wx + Math.cos(a) * s * 0.32, wy + Math.sin(a) * s * 0.32);
+      ctx.stroke();
+    }
+    ctx.fillStyle = '#d8ccb0';
+    ctx.fillRect(cx - s * 0.42, base - s * 0.72, s * 0.62, s * 0.72);
+    ctx.strokeStyle = '#0006';
+    ctx.lineWidth = 1.2;
+    ctx.strokeRect(cx - s * 0.42, base - s * 0.72, s * 0.62, s * 0.72);
+    ctx.fillStyle = '#8a4a2a';
+    ctx.beginPath();
+    ctx.moveTo(cx - s * 0.5, base - s * 0.72);
+    ctx.lineTo(cx - s * 0.11, base - s * 1.08);
+    ctx.lineTo(cx + s * 0.28, base - s * 0.72);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = '#ffd98a';
+    ctx.fillRect(cx - s * 0.3, base - s * 0.56, s * 0.1, s * 0.1);
+    ctx.fillRect(cx - s * 0.04, base - s * 0.56, s * 0.1, s * 0.1);
+    // The little gate of two pieces of bark.
+    ctx.fillStyle = '#5a3a1c';
+    ctx.fillRect(cx - s * 0.2, base - s * 0.2, s * 0.08, s * 0.2);
+    ctx.fillRect(cx - s * 0.11, base - s * 0.2, s * 0.08, s * 0.2);
+    drawFlag(ctx, cx - s * 0.11, base - s * 1.3, s * 0.3, color);
+    ctx.restore();
+    return;
+  }
+  if (special === 'oak' || special === 'camp') {
+    // A glade under an old oak / a camp by the dry oak: roots, a trunk and burrow doors.
+    const dry = special === 'camp';
+    ctx.fillStyle = '#6b4523';
+    ctx.fillRect(cx - s * 0.12, base - s * 0.75, s * 0.24, s * 0.75);
+    ctx.fillStyle = dry ? '#8a7a5a' : '#4f7f3a';
+    for (const [dx, dy, r] of [[0, -1.0, 0.38], [-0.3, -0.82, 0.28], [0.3, -0.82, 0.28]] as const) {
+      ctx.beginPath();
+      ctx.arc(cx + dx * s, base + dy * s, r * s * (dry ? 0.7 : 1), 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.fillStyle = '#2a1a10';
+    for (const dx of [-0.34, 0.34]) {
+      ctx.beginPath();
+      ctx.ellipse(cx + dx * s, base, s * 0.09, s * 0.12, 0, Math.PI, 0);
+      ctx.fill();
+    }
+    if (dry) {
+      ctx.fillStyle = '#e9dcc0';
+      ctx.beginPath();
+      ctx.moveTo(cx + s * 0.18, base);
+      ctx.lineTo(cx + s * 0.4, base - s * 0.3);
+      ctx.lineTo(cx + s * 0.62, base);
+      ctx.closePath();
+      ctx.fill();
+    }
+    drawFlag(ctx, cx, base - s * 1.45, s * 0.3, color);
+    ctx.restore();
+    return;
+  }
+  if (rats && special === 'tunnels') {
+    // Black, tooth-like rocks around the mouth of the Dark Tunnels.
+    ctx.fillStyle = '#26211e';
+    for (const [dx, w, hgt] of [[-0.42, 0.3, 0.7], [-0.15, 0.32, 0.95], [0.15, 0.3, 0.85], [0.42, 0.28, 0.6]] as const) {
+      ctx.beginPath();
+      ctx.moveTo(cx + (dx - w / 2) * s, base);
+      ctx.lineTo(cx + dx * s, base - hgt * s);
+      ctx.lineTo(cx + (dx + w / 2) * s, base);
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.fillStyle = '#000';
+    ctx.beginPath();
+    ctx.ellipse(cx, base, s * 0.2, s * 0.3, 0, Math.PI, 0);
+    ctx.fill();
+    ctx.fillStyle = '#e04a2a';
+    ctx.beginPath();
+    ctx.arc(cx - s * 0.06, base - s * 0.14, s * 0.025, 0, Math.PI * 2);
+    ctx.arc(cx + s * 0.06, base - s * 0.14, s * 0.025, 0, Math.PI * 2);
+    ctx.fill();
+    drawFlag(ctx, cx - s * 0.15, base - s * 1.15, s * 0.3, color);
+    ctx.restore();
+    return;
+  }
   if (rats) {
     // A heap-like burrow with a crooked tower.
     ctx.fillStyle = '#4a3f36';
@@ -297,4 +393,19 @@ export function drawPortrait(ctx: CanvasRenderingContext2D, key: string, cx: num
   }
   const p = portraitInfo(key);
   drawToken(ctx, cx, cy, r - Math.max(2, r * 0.1) / 2, p.icon, { fill: p.color, badge: p.badge, ring: '#d9b45f' });
+  if (key === 'belegor') {
+    // The long scar from the eye to the tip of the snout.
+    ctx.save();
+    ctx.strokeStyle = '#e8d9c8';
+    ctx.lineWidth = Math.max(1.5, r * 0.07);
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(cx - r * 0.35, cy - r * 0.35);
+    ctx.lineTo(cx + r * 0.3, cy + r * 0.25);
+    ctx.stroke();
+    ctx.strokeStyle = '#a33';
+    ctx.lineWidth = Math.max(1, r * 0.03);
+    ctx.stroke();
+    ctx.restore();
+  }
 }

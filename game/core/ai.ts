@@ -155,13 +155,23 @@ function goals(s: GameState, h: Hero): Goal[] {
         if (['att', 'def', 'pow', 'kno', 'xp'].includes(o.effect) && !h.visited.includes(o.id)) v = 700;
         break;
       // Story objects matter only to the forest (bot) side.
-      case 'npc':
-        if (h.owner === 'player' && (!s.flags[`seen_${o.id}`] || (o.doneFlag && !s.flags[o.doneFlag]))) v = 5000;
-        if (h.owner === 'player' && o.wantItem && s.items.includes(o.wantItem) && !s.flags[o.wantFlag ?? '']) v = 6000;
+      case 'npc': {
+        if (h.owner !== 'player') break;
+        const ready = !o.readyFlag || !!s.flags[o.readyFlag];
+        if (!s.flags[`seen_${o.id}`] || (ready && o.doneFlag && !s.flags[o.doneFlag])) v = 5000;
+        if (o.wantItem && s.items.includes(o.wantItem) && !s.flags[o.wantFlag ?? '']) v = 6000;
+        if (!ready) {
+          // Clear the guards that keep this story step locked.
+          for (const m of s.objects) {
+            if (m.done || m.kind !== 'monster' || Math.max(Math.abs(m.x - o.x), Math.abs(m.y - o.y)) > 2) continue;
+            if (me > creature(m.cid).value * m.n * 1.3) out.push({ key: `o:${m.id}`, x: m.x, y: m.y, value: 7000 });
+          }
+        }
         break;
+      }
       case 'questItem':
       case 'goal':
-        if (h.owner === 'player') {
+        if (h.owner === 'player' && !(o.kind === 'goal' && s.flags[o.flag])) {
           v = 8000;
           // Clear the guards that stand in the way of a story goal.
           for (const m of s.objects) {
@@ -186,13 +196,17 @@ function goals(s: GameState, h: Hero): Goal[] {
   }
   if (role === 'guard' && home && (h.x !== home.x || h.y !== home.y)) out.push({ key: `t:${home.id}`, x: home.x, y: home.y, value: 400 });
   // Stay out of reach of enemy heroes that would win a fight (except when going home).
+  // A threat is a stronger enemy hero that could walk to the goal within about a day
+  // (heroes locked behind walls, fire or guards do not count).
   const threats = playerHeroes(s, enemyPid)
     .filter((e) => heroStrength(e) > me * 0.9)
-    .map((e) => ({ x: e.x, y: e.y, r: Math.ceil(heroMaxMp(e) / 85) }));
+    .map((e) => ({ dm: distances(s, e, { ignoreFog: true }), mp: heroMaxMp(e) * 1.1 }));
   if (!threats.length || (hunting && h.ai?.role === 'boss')) return out;
-  return out.filter((g) => g.key.startsWith('t:') && s.towns.find((t) => `t:${t.id}` === g.key)?.owner === h.owner
+  // Story steps (talking, quest goals) are worth the risk.
+  const story = new Set(s.objects.filter((o) => o.kind === 'npc' || o.kind === 'goal' || o.kind === 'questItem').map((o) => `o:${o.id}`));
+  return out.filter((g) => (g.key.startsWith('t:') && s.towns.find((t) => `t:${t.id}` === g.key)?.owner === h.owner) || (h.owner === 'player' && story.has(g.key))
     ? true
-    : !threats.some((t) => Math.max(Math.abs(t.x - g.x), Math.abs(t.y - g.y)) <= t.r));
+    : !threats.some((t) => t.dm.dist[g.y * s.w + g.x] <= t.mp));
 }
 
 function chooseTarget(s: GameState, h: Hero, cur: AiCursor): PathStep[] | null {

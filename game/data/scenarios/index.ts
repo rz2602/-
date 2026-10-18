@@ -16,23 +16,28 @@ export function getScenario(id: string): ScenarioDef {
 
 const MISH_S2: HeroCarry = {
   level: 4, xp: 4700, att: 3, def: 2, pow: 2, kno: 3,
-  skills: { cartography: 2, leadership: 1, offense: 1 },
-  spells: ['farsight', 'arrow', 'shield', 'heal'], artifacts: ['medallion', 'acornHelm'],
+  skills: { leadership: 1, cartography: 1, offense: 1 },
+  spells: ['heal', 'shield'], artifacts: ['medallion', 'featherQuill', 'acornHelm'],
+};
+const ISK_S2: HeroCarry = {
+  level: 3, xp: 2400, att: 2, def: 1, pow: 3, kno: 3,
+  skills: { cartography: 1, archery: 1, sorcery: 1 },
+  spells: ['bless', 'arrow'], artifacts: ['compass'],
 };
 const MISH_S3: HeroCarry = {
   level: 7, xp: 10100, att: 5, def: 4, pow: 3, kno: 4,
-  skills: { cartography: 3, leadership: 2, offense: 2, armor: 1 },
-  spells: ['farsight', 'arrow', 'shield', 'heal', 'haste', 'slow'], artifacts: ['medallion', 'acornHelm', 'mossBoots'],
+  skills: { leadership: 2, cartography: 2, offense: 2, armor: 1 },
+  spells: ['heal', 'shield', 'haste', 'arrow'], artifacts: ['medallion', 'featherQuill', 'acornHelm', 'bellCharm'],
 };
 const ISK_S3: HeroCarry = {
-  level: 5, xp: 5200, att: 4, def: 1, pow: 3, kno: 2,
-  skills: { archery: 2, offense: 1, sorcery: 1 },
-  spells: ['fireflies', 'arrow'], artifacts: ['clover'],
+  level: 6, xp: 6500, att: 4, def: 2, pow: 4, kno: 4,
+  skills: { cartography: 2, archery: 2, sorcery: 1, luck: 1 },
+  spells: ['bless', 'arrow', 'fireflies', 'slow'], artifacts: ['compass', 'owlLens'],
 };
 
 /**
- * Campaign state for starting a chapter directly. If the player's own campaign
- * already finished the previous chapter, that one is used instead.
+ * Campaign state for starting a chapter directly (the book path: honest, kind and patient).
+ * If the player's own campaign already finished the previous chapter, that one is used instead.
  */
 export function presetCampaign(id: string, own?: CampaignState): CampaignState {
   const idx = SCENARIO_ORDER.indexOf(id);
@@ -40,14 +45,15 @@ export function presetCampaign(id: string, own?: CampaignState): CampaignState {
   const c = newCampaign(own?.difficulty ?? 'normal');
   if (id === 's1') return c;
   c.completed = ['s1'];
-  c.flags = { letokril_freed: true, letokril_trust: true, grizan_fed: true, troshko_helped: true, mouselings_done: true };
-  c.virtues = { courage: 1, kindness: 3, wisdom: 1 };
-  c.items = ['map1', 'map2', 'map3'];
-  c.carry = { mishkontin: MISH_S2 };
+  c.flags = { iskritsa_joined: true, zelendol_truth: true, shushulka_done: true, has_zdravets: true, letko_stay: true, letko_done: true, letokril_friend: true };
+  c.virtues = { courage: 2, honesty: 2, kindness: 2, wisdom: 1 };
+  c.items = ['zdravets'];
+  c.carry = { mishkontin: MISH_S2, iskritsa: ISK_S2 };
   if (id === 's3') {
     c.completed.push('s2');
-    Object.assign(c.flags, { iskritsa_joined: true, iskritsa_planned: true, letokril_friend: true, troshko_friend: true });
-    c.virtues = { courage: 2, kindness: 4, wisdom: 3 };
+    Object.assign(c.flags, { plan_ready: true, zub_done: true, zub_forgiven: true });
+    c.virtues = { courage: 4, honesty: 2, kindness: 5, wisdom: 2 };
+    c.items.push('ladder');
     c.carry = { mishkontin: MISH_S3, iskritsa: ISK_S3 };
   }
   return c;

@@ -11,8 +11,9 @@ import { ARMY_SLOTS } from './types';
 
 export const VIRTUE_INFO: Record<VirtueId, { name: string; icon: string; ranks: [string, string, string] }> = {
   courage: { name: 'Смелост', icon: '🦁', ranks: ['—', '+1 морал за всички твои герои', '+2 морал за всички твои герои'] },
-  kindness: { name: 'Доброта', icon: '💚', ranks: ['—', 'Самотни същества понякога молят да се присъединят', 'Още повече приятели + 10% по-евтино наемане'] },
-  wisdom: { name: 'Мъдрост', icon: '🦉', ranks: ['—', '+1 знание и +10% опит', '+2 знание и +20% опит'] },
+  honesty: { name: 'Честност', icon: '🤝', ranks: ['—', 'Приятелите ти вярват: наемането е с 10% по-евтино', 'Наемането е с 20% по-евтино'] },
+  kindness: { name: 'Доброта', icon: '💚', ranks: ['—', 'Самотни същества понякога молят да се присъединят', 'Още повече приятели — и на половин цена'] },
+  wisdom: { name: 'Мъдрост и търпение', icon: '🦉', ranks: ['—', '+1 знание и +10% опит', '+2 знание и +20% опит'] },
 };
 
 /** 0 (0-1 points), 1 (2-3 points) or 2 (4+ points). */
@@ -60,8 +61,7 @@ export function heroSpeedBonus(h: Hero): number {
 
 export function heroVision(h: Hero): number {
   let v = 5 + skill(h, 'cartography') + artSum(h, 'vision');
-  if (h.specialty === 'cartographer') v += 2;
-  if (h.specialty === 'spy') v += 3;
+  if (h.specialty === 'pathfinder' || h.specialty === 'patrol') v += 2;
   return v;
 }
 
@@ -69,13 +69,13 @@ export function heroVision(h: Hero): number {
 export function terrainReduction(h: Hero): number {
   const lvl = skill(h, 'cartography');
   let r = [0, 0.25, 0.5, 1][lvl];
-  if (h.specialty === 'cartographer') r += 0.25;
+  if (h.specialty === 'pathfinder') r += 0.25;
   return Math.min(1, r);
 }
 
 export function heroMorale(h: Hero, s: GameState | null = null): number {
   let m = skill(h, 'leadership') + artSum(h, 'morale') + playerVirtue(s, h, 'courage');
-  if (h.specialty === 'king') m += 1;
+  if (h.specialty === 'king' || h.specialty === 'brave') m += 1;
   if (s?.dayBonus[h.id]) m += s.dayBonus[h.id].morale;
   return Math.max(-3, Math.min(3, m));
 }
@@ -97,7 +97,7 @@ export function heroMaxMp(h: Hero): number {
   let mp = 1000 + 60 * spd;
   let pct = [0, 10, 20, 30][skill(h, 'logistics')] + artSum(h, 'mpPct');
   if (h.specialty === 'swift') pct += 20;
-  if (h.specialty === 'spy') pct += 10;
+  if (h.specialty === 'pathfinder') pct += 10;
   mp = Math.round((mp * (100 + pct)) / 100);
   return mp;
 }
@@ -162,7 +162,7 @@ const ALL_SKILLS = Object.keys(SKILLS) as SkillId[];
 const MAX_SKILLS = 6;
 
 export function makeLevelUpOffer(s: GameState, h: Hero): LevelUpOffer {
-  const tpl = HERO_TEMPLATES[h.id] ?? HERO_TEMPLATES.barzonog;
+  const tpl = HERO_TEMPLATES[h.id] ?? HERO_TEMPLATES.mishkontin;
   const w = tpl.weights;
   const roll = randInt(s.rng, 1, w[0] + w[1] + w[2] + w[3]);
   const stat: LevelUpOffer['stat'] = roll <= w[0] ? 'att' : roll <= w[0] + w[1] ? 'def' : roll <= w[0] + w[1] + w[2] ? 'pow' : 'kno';

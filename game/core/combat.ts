@@ -281,7 +281,6 @@ export function unitSpeed(s: GameState, b: Battle, u: BUnit): number {
   const h = sideHero(s, b, u.side);
   if (h) {
     spd += heroSpeedBonus(h);
-    if (h.specialty === 'night' && u.cid === 'bat') spd += 2;
   }
   if (hasEffect(u, 'haste')) spd += 3;
   if (hasEffect(u, 'slow')) spd = Math.floor(spd / 2);
@@ -292,21 +291,24 @@ export function unitSpeed(s: GameState, b: Battle, u: BUnit): number {
 function specialtyBonus(h: Hero | null, cid: string): { att: number; def: number } {
   if (!h) return { att: 0, def: 0 };
   const faction = creature(cid).faction;
+  const none = { att: 0, def: 0 };
   switch (h.specialty) {
-    case 'cartographer':
-      return cid === 'mouse' ? { att: 1, def: 1 } : { att: 0, def: 0 };
-    case 'spark':
-      return cid === 'squirrel' ? { att: 2, def: 0 } : { att: 0, def: 0 };
-    case 'gnaw':
-      return cid === 'rat' ? { att: 2, def: 1 } : { att: 0, def: 0 };
-    case 'spy':
-      return cid === 'ratbow' ? { att: 1, def: 0 } : { att: 0, def: 0 };
+    case 'brave':
+      return cid === 'mouse' ? { att: 1, def: 1 } : none;
+    case 'pathfinder':
+      return cid === 'squirrel' ? { att: 2, def: 0 } : none;
+    case 'gatherer':
+      return cid === 'squirrel' ? { att: 1, def: 1 } : none;
+    case 'captain':
+      if (cid === 'veteran') return { att: 3, def: 1 };
+      return faction === 'rats' ? { att: 1, def: 1 } : none;
+    case 'patrol':
+      return cid === 'rat' ? { att: 2, def: 1 } : none;
     case 'king':
-      return faction === 'rats' ? { att: 1, def: 1 } : { att: 0, def: 0 };
-    case 'night':
-      return cid === 'bat' ? { att: 2, def: 0 } : { att: 0, def: 0 };
+      if (cid === 'guard') return { att: 1, def: 3 };
+      return faction === 'rats' ? { att: 1, def: 1 } : none;
     default:
-      return { att: 0, def: 0 };
+      return none;
   }
 }
 
@@ -704,9 +706,8 @@ export function actFlee(b: Battle, side: 0 | 1): void {
 // Spells
 // ---------------------------------------------------------------------------
 
-export function spellPowerMult(h: Hero, spell: SpellId): number {
+export function spellPowerMult(h: Hero, _spell: SpellId): number {
   let m = 1 + [0, 0.15, 0.3, 0.5][skill(h, 'sorcery')];
-  if (spell === 'fireflies' && h.specialty === 'spark') m *= 1.5;
   return m;
 }
 

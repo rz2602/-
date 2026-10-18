@@ -502,7 +502,7 @@ export class AdventureScreen {
         h('h3', null, 'Сандък със съкровище!'),
         h('p', null, 'Какво ще вземеш?'),
         h('div', { class: 'row', style: 'justify-content:center' },
-          h('button', { class: 'primary', onclick: () => choose(0) }, `🌰 ${p.acorns} жълъда`),
+          h('button', { class: 'primary', onclick: () => choose(0) }, `🍞 ${p.acorns} трохи`),
           h('button', { class: 'primary', onclick: () => choose(1) }, `⭐ ${p.xp} опит`),
         ),
       );
@@ -550,7 +550,7 @@ export class AdventureScreen {
         h('h3', null, `${stackLabel(p.cid, p.n)} искат да тръгнат с теб!`),
         h('p', null, 'Добротата ти е позната в гората. Те няма да се бият — питат дали могат да станат твои приятели.'),
         h('div', { class: 'row wrap', style: 'justify-content:center' },
-          h('button', { class: 'primary', disabled: !can, onclick: () => choose(0) }, p.cost ? `Приеми (${p.cost} 🌰)` : 'Приеми безплатно'),
+          h('button', { class: 'primary', disabled: !can, onclick: () => choose(0) }, p.cost ? `Приеми (${p.cost} 🍞)` : 'Приеми безплатно'),
           h('button', { onclick: () => choose(1) }, '⚔️ Битка'),
           h('button', { onclick: () => choose(2) }, 'Отмини'),
         ),
@@ -701,7 +701,7 @@ export class AdventureScreen {
     const terr = terrainDef(tileAt(s, x, y)).name;
     const g = guardingMonster(s, x, y);
     const warn = g && g.kind === 'monster' && !o ? ` ⚔️ Пазено от ${creature(g.cid).plural.toLowerCase()}!` : '';
-    if (!o) return terr + warn;
+    if (!o || (o.kind === 'trap' && !s.flags.traps_seen)) return terr + warn;
     return objectText(s, o, rich);
   }
 
@@ -1028,6 +1028,8 @@ export function objectText(s: GameState, o: MapObject, rich: boolean): string {
       return o.label;
     case 'event':
       return 'Нещо интересно…';
+    case 'trap':
+      return s.flags.traps_seen ? 'Ръждясал капан' : terrainDef(tileAt(s, o.x, o.y)).name;
   }
   void s;
   return '';

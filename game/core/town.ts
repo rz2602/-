@@ -41,7 +41,7 @@ export function build(s: GameState, t: Town, b: string): boolean {
 
 export function recruitUnitCost(s: GameState, cid: string, owner: PlayerId): Cost {
   const base = creature(cid).cost;
-  const discount = owner === 'player' && virtueRank(s, 'kindness') >= 2 ? 0.9 : 1;
+  const discount = owner === 'player' ? [1, 0.9, 0.8][virtueRank(s, 'honesty')] : 1;
   const out: Cost = {};
   for (const k of Object.keys(base) as ResKey[]) out[k] = k === 'acorns' ? Math.round((base[k] ?? 0) * discount) : base[k];
   return out;
@@ -153,7 +153,7 @@ export function canHire(s: GameState, t: Town): string | null {
   if (!t.owner) return 'Няма собственик.';
   if (!t.built.includes('tavern')) return 'Нужна е странноприемница.';
   if (visitingHero(s, t) || heroAt(s, t.x, t.y)) return 'В града вече има герой.';
-  if (s.players[t.owner].res.acorns < TAVERN_HERO_COST) return 'Не стигат жълъдите.';
+  if (s.players[t.owner].res.acorns < TAVERN_HERO_COST) return 'Не стигат трохите.';
   if (s.heroes.filter((h) => h.alive && h.owner === t.owner).length >= 4) return 'Можеш да водиш най-много 4 героя.';
   if (!hireCandidates(s, t.owner).length) return 'Няма свободни герои.';
   return null;

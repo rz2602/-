@@ -42,6 +42,11 @@ export function objectAt(s: GameState, x: number, y: number): MapObject | undefi
   return s.objects.find((o) => !o.done && o.x === x && o.y === y);
 }
 
+/** Traps stay hidden until the canyon has been watched long enough. */
+export function hiddenTrap(s: GameState, o: MapObject): boolean {
+  return o.kind === 'trap' && !s.flags.traps_seen;
+}
+
 export function townAt(s: GameState, x: number, y: number): Town | undefined {
   return s.towns.find((t) => t.x === x && t.y === y);
 }
@@ -63,7 +68,7 @@ export function guardingMonster(s: GameState, x: number, y: number): MapObject |
 /** Tiles you can step onto but not walk through (objects, towns, heroes). */
 export function isStopTile(s: GameState, x: number, y: number, hero: Hero): boolean {
   const o = objectAt(s, x, y);
-  if (o && o.kind !== 'event') return true;
+  if (o && o.kind !== 'event' && !hiddenTrap(s, o)) return true;
   if (townAt(s, x, y)) return true;
   const h = heroAt(s, x, y);
   return !!h && h.id !== hero.id;

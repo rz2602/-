@@ -9,6 +9,7 @@ import { sfx } from './audio';
 
 const VIRTUE_TAG: Record<VirtueId, string> = {
   courage: `${VIRTUE_INFO.courage.icon} Смелост`,
+  honesty: `${VIRTUE_INFO.honesty.icon} Честност`,
   kindness: `${VIRTUE_INFO.kindness.icon} Доброта`,
   wisdom: `${VIRTUE_INFO.wisdom.icon} Мъдрост`,
 };

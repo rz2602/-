@@ -13,6 +13,8 @@ export interface SaveMeta {
   day: number;
   level: number;
   savedAt: number;
+  /** Save format version (older saves are hidden). */
+  v?: number;
 }
 
 function get(key: string): string | null {
@@ -49,6 +51,7 @@ export function saveGame(s: GameState, slot: Slot): boolean {
     day: s.day,
     level: mish?.level ?? 1,
     savedAt: Date.now(),
+    v: SAVE_V,
   };
   let json: string;
   try {
@@ -80,7 +83,8 @@ export function listSaves(): SaveMeta[] {
     const m = get(`meta.${slot}`);
     if (!m) continue;
     try {
-      out.push(JSON.parse(m) as SaveMeta);
+      const meta = JSON.parse(m) as SaveMeta;
+      if (meta.v === SAVE_V) out.push(meta);
     } catch {
       // ignore broken meta
     }
@@ -100,14 +104,15 @@ export function deleteSave(slot: Slot): void {
 
 /** Campaign progress between chapters (carried heroes, flags, virtues). */
 export function saveCampaign(c: CampaignState, nextScenario: string | null): void {
-  set('campaign', JSON.stringify({ c, next: nextScenario }));
+  set('campaign', JSON.stringify({ c, next: nextScenario, v: SAVE_V }));
 }
 
 export function loadCampaign(): { c: CampaignState; next: string | null } | null {
   const json = get('campaign');
   if (!json) return null;
   try {
-    return JSON.parse(json) as { c: CampaignState; next: string | null };
+    const data = JSON.parse(json) as { c: CampaignState; next: string | null; v?: number };
+    return data.v === SAVE_V ? { c: data.c, next: data.next } : null;
   } catch {
     return null;
   }

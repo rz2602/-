@@ -17,6 +17,7 @@ import { heroMaxMp } from '../game/core/hero';
 import { findPath, isExplored, stepCost } from '../game/core/map';
 import { build, buildBlocker, marketBuy, marketSell, maxRecruit, recruit, recruitUnitCost } from '../game/core/town';
 import type { GameState } from '../game/core/types';
+import { CHARACTERS } from '../game/data/characters';
 import { getScenario, presetCampaign, SCENARIO_ORDER, SCENARIOS } from '../game/data/scenarios';
 import { freshState, mish } from './helpers';
 
@@ -24,15 +25,17 @@ describe('movement', () => {
   it('charges terrain costs (road cheaper, diagonals ×1.41, swamp eased by cartography)', () => {
     const s = freshState();
     const h = mish(s);
-    // (6,11) is road, (5,13) grass, (5,16) swamp in chapter 1
-    expect(stepCost(s, h, 6, 11, false)).toBe(70);
-    expect(stepCost(s, h, 5, 13, false)).toBe(100);
-    expect(stepCost(s, h, 5, 13, true)).toBe(141);
-    const swamp = stepCost(s, h, 5, 16, false);
-    expect(swamp).toBeLessThan(175); // Mishkontin is a cartographer
-    expect(swamp).toBeGreaterThan(100);
+    // (9,17) is road, (9,16) grass, (18,17) swamp in chapter 1
+    expect(stepCost(s, h, 9, 17, false)).toBe(70);
+    expect(stepCost(s, h, 9, 16, false)).toBe(100);
+    expect(stepCost(s, h, 9, 16, true)).toBe(141);
+    expect(stepCost(s, h, 18, 17, false)).toBe(175);
+    h.skills.cartography = 1;
+    const eased = stepCost(s, h, 18, 17, false);
+    expect(eased).toBeLessThan(175);
+    expect(eased).toBeGreaterThan(100);
     h.skills.cartography = 3;
-    expect(stepCost(s, h, 5, 16, false)).toBe(100);
+    expect(stepCost(s, h, 18, 17, false)).toBe(100);
   });
 
   it('paths avoid water and stop next to guarding monsters', () => {
@@ -43,9 +46,9 @@ describe('movement', () => {
     const p = findPath(s, h, 20, 10)!;
     expect(p).not.toBeNull();
     for (const st of p) expect('~^TM').not.toContain(s.terrain[st.y * s.w + st.x]);
-    // The mouselings (8,2) are only reachable through the wolves' zone of control.
-    expect(findPath(s, h, 8, 2)).toBeNull();
-    expect(findPath(s, h, 9, 3)).not.toBeNull(); // but the wolves can be attacked
+    // The zdravets (19,2) is only reachable through the rat patrol's zone of control.
+    expect(findPath(s, h, 19, 2)).toBeNull();
+    expect(findPath(s, h, 19, 3)).not.toBeNull(); // but the patrol can be attacked
   });
 
   it('spends movement points and stops when tired', () => {
@@ -53,22 +56,22 @@ describe('movement', () => {
     const h = mish(s);
     const start = h.mp;
     expect(start).toBe(heroMaxMp(h));
-    expect(heroStep(s, h, 6, 12)).toBe('moved');
-    expect(h.mp).toBe(start - 70); // (6,12) is road
-    expect(heroStep(s, h, 7, 11)).toBe('moved'); // diagonal onto the road
-    expect(h.mp).toBe(start - 70 - 99);
+    expect(heroStep(s, h, 9, 17)).toBe('moved'); // diagonal onto the road
+    expect(h.mp).toBe(start - 99);
+    expect(heroStep(s, h, 10, 17)).toBe('moved');
+    expect(h.mp).toBe(start - 99 - 70);
     h.mp = 10;
-    expect(heroStep(s, h, 8, 11)).toBe('blocked');
-    expect(h.x).toBe(7);
+    expect(heroStep(s, h, 11, 17)).toBe('blocked');
+    expect(h.x).toBe(10);
   });
 
   it('reveals the fog around a moving hero', () => {
     const s = freshState();
     const h = mish(s);
     expect(isExplored(s, 'player', 20, 10)).toBe(false);
-    h.x = 12;
+    h.x = 14;
     h.y = 11;
-    expect(heroStep(s, h, 12, 10)).toBe('moved');
+    expect(heroStep(s, h, 15, 11)).toBe('moved');
     expect(isExplored(s, 'player', 20, 10)).toBe(true);
   });
 
@@ -76,7 +79,9 @@ describe('movement', () => {
     const s = freshState();
     const h = mish(s);
     s.players.player.explored.fill(1);
-    const p = pathTo(s, h, 6, 17)!; // the spiders
+    s.objects.find((o) => o.id === 'tracks')!.done = true; // skip the story event on the way
+    h.mp = 99999; // it is a long walk
+    const p = pathTo(s, h, 19, 3)!; // the rat patrol guarding the zdravets
     let r = 'moved';
     for (const st of p) {
       r = heroStep(s, h, st.x, st.y);
@@ -106,7 +111,7 @@ describe('economy and towns', () => {
 
   it('builds one building per day with requirements and costs', () => {
     const s = freshState();
-    const t = s.towns.find((x) => x.id === 'mohovo')!;
+    const t = s.towns.find((x) => x.id === 'sirengrad')!;
     expect(buildBlocker(s, t, 'd4')).toMatch(/Нужни/);
     const acorns = s.players.player.res.acorns;
     expect(build(s, t, 'market')).toBe(true);
@@ -118,7 +123,7 @@ describe('economy and towns', () => {
 
   it('grows creatures weekly (granary +50%) and recruits within budget', () => {
     const s = freshState();
-    const t = s.towns.find((x) => x.id === 'mohovo')!;
+    const t = s.towns.find((x) => x.id === 'sirengrad')!;
     expect(t.available.mouse).toBe(12);
     t.built.push('granary');
     for (let d = 0; d < 7; d++) startNewDay(s);
@@ -131,11 +136,13 @@ describe('economy and towns', () => {
     expect(s.players.player.res.acorns).toBe(0);
   });
 
-  it('gives kind players a recruiting discount', () => {
+  it('gives honest players a recruiting discount', () => {
     const s = freshState();
-    expect(recruitUnitCost(s, 'owl', 'player').acorns).toBe(320);
-    s.virtues.kindness = 4;
-    expect(recruitUnitCost(s, 'owl', 'player').acorns).toBe(288);
+    expect(recruitUnitCost(s, 'hare', 'player').acorns).toBe(300);
+    s.virtues.honesty = 2;
+    expect(recruitUnitCost(s, 'hare', 'player').acorns).toBe(270);
+    s.virtues.honesty = 4;
+    expect(recruitUnitCost(s, 'hare', 'player').acorns).toBe(240);
   });
 
   it('trades at the market', () => {
@@ -171,6 +178,7 @@ describe('story data', () => {
       }
       refs.push(sc.victoryDialogue(s));
       for (const r of refs) expect(known.has(r), `${id}: missing dialogue ${r}`).toBe(true);
+      for (const d of Object.values(sc.dialogues)) for (const l of d.lines) expect(CHARACTERS[l.who], `${id}/${d.id}: unknown speaker ${l.who}`).toBeTruthy();
       expect(s.pendingDialogues.length).toBeGreaterThan(0); // intro plays at once
     }
     expect(Object.keys(SCENARIOS)).toHaveLength(3);
@@ -187,7 +195,9 @@ describe('story data', () => {
     expect(m.level).toBe(mish(s).level);
     expect(m.artifacts).toContain('medallion');
     expect(s2.virtues).toEqual(s.virtues);
-    expect(s2.items).toEqual(expect.arrayContaining(['map1', 'map2', 'map3']));
+    expect(s2.items).toEqual(expect.arrayContaining(['zdravets']));
+    expect(s2.flags.iskritsa_joined).toBe(true);
+    expect(s2.heroes.find((h) => h.id === 'iskritsa')?.level).toBe(s.heroes.find((h) => h.id === 'iskritsa')?.level);
   });
 });
 
@@ -207,5 +217,45 @@ describe('determinism and save data', () => {
     runAiTurn(s, 'enemy');
     startNewDay(s);
     expect(s.status).toBe('play');
+  });
+});
+
+describe('book mechanics', () => {
+  const troops = (h: { army: ({ n: number } | null)[] }) => h.army.reduce((n, st) => n + (st?.n ?? 0), 0);
+
+  it('hidden canyon traps spring under the heroes; once watched, they are obstacles', () => {
+    const s = newGame('s3', presetCampaign('s3'), 1);
+    s.pendingDialogues = [];
+    const h = mish(s);
+    const trapAt = (x: number, y: number) => s.objects.find((o) => o.kind === 'trap' && o.x === x && o.y === y)!;
+    const t1 = trapAt(13, 9);
+    h.x = 12;
+    h.y = 9;
+    h.mp = 5000;
+    const before = troops(h);
+    expect(heroStep(s, h, 13, 9)).toBe('stop');
+    expect(t1.done).toBe(true);
+    expect(troops(h)).toBeLessThan(before);
+    expect(h.mp).toBe(0);
+    s.flags.traps_seen = true;
+    const t2 = trapAt(15, 10);
+    h.x = 14;
+    h.y = 10;
+    h.mp = 5000;
+    expect(heroStep(s, h, 15, 10)).toBe('stop');
+    expect(h.x).toBe(14);
+    expect(t2.done).toBeFalsy();
+  });
+
+  it('resting with Letko keeps the story heroes in place for the chosen days', () => {
+    const s = freshState();
+    const h = mish(s);
+    s.vars.restLetko = s.day + 2;
+    endPlayerTurn(s);
+    startNewDay(s);
+    expect(h.mp).toBe(0);
+    endPlayerTurn(s);
+    startNewDay(s);
+    expect(h.mp).toBe(heroMaxMp(h));
   });
 });

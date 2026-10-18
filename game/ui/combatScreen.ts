@@ -298,7 +298,7 @@ export class CombatScreen {
           const a = this.drawPos.get(att.uid)!;
           const dst = this.drawPos.get(target)!;
           const proj = { x: a.x, y: a.y };
-          const icon = creature(att.cid).badge === '🏹' ? '➶' : '🌰';
+          const icon = creature(att.cid).badge === '🏹' ? '➶' : '🌲';
           this.anims.push({
             dur: 220,
             t0: null,

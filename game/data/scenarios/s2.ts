@@ -1,453 +1,432 @@
-import { addToArmy, armyFrom } from '../../core/hero';
+import { armyFrom } from '../../core/hero';
 import type { ScenarioDef } from '../../core/scenario';
-import type { GameState, MapObject } from '../../core/types';
-import { has, hasNot, hasRes, L, res } from './helpers';
+import type { GameState } from '../../core/types';
+import { has, hasNot, hasRes, L, res, unlockDwelling } from './helpers';
 
-function npc(s: GameState, id: string): Extract<MapObject, { kind: 'npc' }> | undefined {
-  const o = s.objects.find((x) => x.id === id);
-  return o && o.kind === 'npc' ? o : undefined;
-}
+/** Chapter 2 follows chapters 5–6 of the book: Zubodrobko, the tyrant of the forest, and the small ones who stood up together. */
 
-/** Adapts the chapter to the choices made in chapter 1. */
-function setup(s: GameState): void {
-  // Troshko remembers how he was treated.
-  const tr = npc(s, 'troshko');
-  if (tr) {
-    tr.dialogue = s.flags.troshko_robbed ? 's2_troshko_angry' : s.flags.map2_memorized ? 's2_troshko_sold' : s.flags.troshko_paid ? 's2_troshko_trade' : 's2_troshko_friend';
-  }
-  // Letokril: friend, unsure, or enemy.
-  const lk = s.objects.find((o) => o.id === 'letokril');
-  if (s.flags.letokril_trust || s.flags.letokril_left) {
-    if (lk) lk.done = true;
-  }
-  // Grizan: deserter, enemy guard or former prisoner.
-  const gz = s.objects.find((o) => o.id === 'grizan');
-  if (!s.flags.grizan_fed && gz) gz.done = true;
-  const outpost = s.towns.find((t) => t.id === 'outpost');
-  if (s.flags.grizan_released && outpost) addToArmy(outpost.garrison, 'badger', 2);
-  if (s.flags.grizan_prisoner) s.flags.tunnel_open = true;
-  // Shushumiga bought the original map piece from Troshko: she is ready sooner.
-  const sh = s.heroes.find((h) => h.id === 'shushumiga');
-  if (sh && s.flags.map2_memorized) {
-    addToArmy(sh.army, 'bat', 4);
-    if (sh.ai) sh.ai.activeFrom = 10;
-  }
-}
+const PLAN = ['squirrels_join', 'voles_join', 'hares_join', 'slope_scouted'];
+const VOLE_WOOD = 8;
+const HARE_CRUMBS = 1500;
+
+const groupJoin = (flag: string, building: string, cid: string, n: number) => [
+  { a: 'flag' as const, flag },
+  { a: 'troops' as const, cid, n },
+  { a: 'call' as const, fn: (s: GameState) => unlockDwelling(s, 'glade', building, cid, Math.ceil(n / 2)) },
+];
 
 export const S2: ScenarioDef = {
   id: 's2',
   number: 2,
-  title: 'Пътеката на Картографа',
+  title: 'Тиранинът на гората',
   subtitle: 'Втора глава',
-  bg: 'img/bg-mount.webp',
+  bg: 'img/bg-woods.webp',
   intro: [
-    'С трите парчета от картата Мишконтин откри Пътеката на Картографа — тайния път през Сребърните планини до Старата порта на Сиренград.',
-    'Но плъховете не спят. Шушумига, господарката на шпионите на Мортис, е построила застава точно на единствения мост над ждрелото. А високо горе вече мирише на сняг.',
-    'Ако проходът се затвори, Сиренград ще остане сам срещу армията на Кралят плъх. Мишконтин трябва да побърза — и да намери приятели по пътя.',
+    'Следите доведоха Мишконтин и Искрица до гора с одрани дървета. Кората беше надраскана с дълбоки белези, а въздухът миришеше на страшно.',
+    'Тук всички малки гризачи — полски мишки, полевки, катерици, дори зайци — носят храна на огромния пор Зъбодробко. Който не донесе, бива прогонен. Или изяден.',
+    'Пътят към Каньона минава точно покрай дупката му под стария дъб. А някъде зад тях Белегор вече търси мишлето, което избяга от мелницата.',
   ],
-  goals: ['Отведи Мишконтин до Старата порта на Сиренград (горе вдясно).', 'Направи го до 42-рия ден, преди снеговете.', 'Мишконтин трябва да оцелее.'],
+  goals: [
+    'Събери малките гризачи: катериците, полевките и зайците.',
+    'Огледай стръмния склон край дупката на Зъбодробко.',
+    'Изправи се срещу тиранина — с план, а не със сила.',
+    'Стигни до Изсъхналия дъб на път за Каньона.',
+    'Мишконтин трябва да оцелее. Не губи Горската поляна за повече от 3 дни.',
+  ],
   map: [
-    'MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM',
-    'MMMMMMMnnnMMMMnnMMMnnnnnMMMMMMMMMM',
-    'MMMMMMMnnnMMMMnnMMMnnnnnMMMMMMOMMM',
-    'MMMMMMMnnJnnnnnnMMMnnnnnnnnn:::nnM',
-    'MnnnnnnnnnYnnn*nMMMnnnn:::S:::RunM',
-    'Mnnnnnn?nnnnnnnn~~nn$n:nnnnnn:nnnM',
-    'Mnnnxnnnnunnn$nn~~nnn:MMnnnnn:nnnM',
-    'Mnnnnnnnnnnnnnnn~~nnneMMnnncn:nnnM',
-    'M......MMMMMM...~~..n:MMnnFnn:nnxM',
-    'M^^^.D.MMMMMM^^^~~..:nMMnnnhh:ZnnM',
-    'M^^^.........^^^~~^nnnnnLnnhh:nHnM',
-    'M.....I.P......:==B:nnnnnnnon:nnnM',
-    'M.$.hhh...r..#:.~~^^Gnn+nnnnnn:nnM',
-    'M...hhh.....f:..~~~..o....MMMMMMMM',
-    'M.w.....TTT.:...~~~.......MMMMMMMM',
-    'M.......TTT:..o..~~.....TT.::::..M',
-    'M..A:::::::.:!...~~.hhh.TT:...:..M',
-    'M...@......hh:...~~.hhh.::.....%.M',
-    'MTTTT....q.hh.:.^~~.:QU:..E......M',
-    'MTTTT..r...K....X==:.....a..TTTTTM',
-    'MTTTTTTTTT......^~~.TTTTT...TTTTTM',
-    'MTTTTTTTTT..TTT..~~VTTTTTx..TTTTTM',
-    'MTTTTTTTTT..TTT$.~~.TTTTT...TTTTTM',
-    'MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM',
+    'TTTTTTTTTTTTTTTTTTTTTTT^^TTTTT',
+    'TTT.,,,,,TTT......$..z.^^hhhhT',
+    'TTT.,,S,,....j...,.....^^hhhhT',
+    'TTTx,,,,,w.........hhh.^^...HT',
+    'TTT....P..,.y...D..hhh.^^.:G.T',
+    'TTT..........TTT.....::Z.:...T',
+    'TTT...TTT....TTT....k..^^....T',
+    'TTT...TTT....TTT.+::...^^..c.T',
+    'TTT...TTT.E......:..hhh^^.,..T',
+    'T....,.......:*::...hhh^^.B.KT',
+    'T...@..f..:::..~.b,.hhh^^.u..T',
+    'T..A::::::.#....~.N....^^....T',
+    'T...I.....:.TTT..~.....^^^^^^T',
+    'T..,.....!:.TTT...~=~....^^^^T',
+    'T.........:.TTT....W.~.......T',
+    'TTT.r.....:....o.TTT.~g....X.T',
+    'TTT...TTT..:...::::::::::....T',
+    'TTT...TTT..v:::..TTT.~...R...T',
+    'TTTF..TTT..V.........~.......T',
+    'TTT..?.....,.a.TTT.q..~J..TTTT',
+    'TTT............TTT....~...TTTT',
+    'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTT',
   ],
   legend: {
-    A: { town: { kind: 'town', id: 'stonestep', name: 'Каменна стъпка', faction: 'forest', owner: 'player', built: ['hall', 'fort', 'd1', 'd2', 'd3', 'market'], garrison: [['mouse', 10], ['hedgehog', 4]] } },
-    B: { town: { kind: 'town', id: 'outpost', name: 'Сивата застава', faction: 'rats', owner: 'enemy', built: ['fort', 'd1', 'd2'], garrison: [['rat', 20], ['beetle', 6], ['ratbow', 6]] } },
+    A: { town: { kind: 'town', id: 'glade', name: 'Горската поляна', faction: 'forest', owner: 'player', built: ['hall', 'd1', 'tavern'], garrison: [['mouse', 6]], special: 'oak' } },
+    R: { town: { kind: 'town', id: 'ratcamp', name: 'Лагерът на Белегор', faction: 'rats', owner: 'enemy', built: ['fort', 'd1', 'd2', 'd3', 'd4'], garrison: [['rat', 22], ['ratspear', 8], ['trapper', 6], ['veteran', 2]] } },
     '@': { terrain: ':', hero: { kind: 'hero', tpl: 'mishkontin', owner: 'player', carry: true } },
-    G: { terrain: 'n', hero: { kind: 'hero', tpl: 'shushumiga', owner: 'enemy', role: 'boss', activeFrom: 14, targetTown: 'outpost', army: [['ratbow', 8], ['rat', 18], ['beetle', 6]] } },
-    I: { obj: { id: 'iskritsa', kind: 'npc', npc: 'iskritsa', label: 'Лагерът на Искрица', dialogue: 's2_iskritsa' } },
-    P: { obj: { id: 'troshko', kind: 'npc', npc: 'troshko', label: 'Странноприемницата на Трошко', dialogue: 's2_troshko_friend', repeatDialogue: 's2_troshko_after', doneFlag: 'troshko_s2_done' } },
-    L: { terrain: 'n', obj: { id: 'letokril', kind: 'npc', npc: 'letokril', label: 'Прилепът на камбанарията', dialogue: 's2_letokril_tower', repeatDialogue: 's2_letokril_after', doneFlag: 'letokril_s2_done' } },
-    f: { obj: { id: 'grizan', kind: 'npc', npc: 'grizan', label: 'Самотен плъх', dialogue: 's2_grizan', repeatDialogue: 's2_grizan_after', doneFlag: 'grizan_s2_done' } },
-    X: { obj: { id: 'tunnel', kind: 'gate', needFlag: 'tunnel_open', label: 'Старият тунел', lockedText: 'Каменна врата, обрасла с мъх. Отвътре свири вятър. Някой сигурно знае как се отваря…' } },
-    O: { terrain: ':', obj: { id: 'gate', kind: 'goal', label: 'Старата порта на Сиренград', dialogue: 's2_gate', flag: 'gate_reached', needHero: 'mishkontin', needText: 'В средата на портата има вдлъбнатина с формата на буквата „М“. Само Мишконтин с медальона може да я отвори.' } },
-    K: { obj: { kind: 'shrine', effect: 'spell', value: 0, spell: 'haste', label: 'Олтарът на вятъра' } },
+    I: { hero: { kind: 'hero', tpl: 'iskritsa', owner: 'player', carry: true } },
+    f: { obj: { id: 'family', kind: 'npc', npc: 'fieldmouse', label: 'Семейството полски мишки', dialogue: 's2_family' } },
+    S: { terrain: ',', obj: { id: 'squirrels', kind: 'npc', npc: 'oldsquirrel', label: 'Катериците от бора', dialogue: 's2_squirrels', repeatDialogue: 's2_joined', doneFlag: 'squirrels_join', readyFlag: 'squirrels_freed' } },
+    P: { obj: { kind: 'monster', cid: 'trapper', n: 14, guard: true, label: 'Капанджиите на Белегор', flag: 'squirrels_freed' } },
+    V: { obj: { id: 'voles', kind: 'npc', npc: 'vole', label: 'Полевките от ливадата', dialogue: 's2_voles', repeatDialogue: 's2_joined', doneFlag: 'voles_join', readyFlag: 'voles_ready' } },
+    v: { obj: { kind: 'monster', cid: 'rat', n: 26, guard: true, label: 'Плъховете, които срутиха ходниците', flag: 'voles_freed' } },
+    N: { obj: { id: 'hares', kind: 'npc', npc: 'hareelder', label: 'Зайците от полето', dialogue: 's2_hares', repeatDialogue: 's2_joined', doneFlag: 'hares_join', readyFlag: 'hares_ready' } },
+    b: { terrain: ',', obj: { kind: 'monster', cid: 'ferret', n: 4, guard: true, label: 'Поровете — братовчеди на Зъбодробко', flag: 'hares_freed' } },
+    k: { obj: { id: 'slope', kind: 'event', dialogue: 's2_slope', onlyHuman: true } },
+    Z: { terrain: ':', obj: { id: 'zubodrobko', kind: 'npc', npc: 'zubodrobko', label: 'Зъбодробко, тиранинът на гората', dialogue: 's2_zub', doneFlag: 'zub_done', readyFlag: 'plan_ready' } },
+    G: { obj: { id: 'dryoak', kind: 'goal', label: 'Изсъхналият дъб', dialogue: 's2_goal', flag: 's2_goal', needHero: 'mishkontin', needText: 'Мишконтин трябва да дойде тук — пътят към Каньона е негов.' } },
     w: { obj: { kind: 'mine', res: 'wood', owner: null } },
-    q: { obj: { kind: 'mine', res: 'stone', owner: null } },
     a: { obj: { kind: 'mine', res: 'acorns', owner: null } },
-    E: { obj: { kind: 'monster', cid: 'boar', n: 4, guard: true, label: 'Глигани-пазачи' } },
-    c: { terrain: 'n', obj: { kind: 'mine', res: 'cheese', owner: 'enemy' } },
-    F: { terrain: 'n', obj: { kind: 'monster', cid: 'wolf', n: 9, guard: true, label: 'Снежни вълци' } },
-    D: { obj: { kind: 'dwelling', cid: 'squirrel', available: 6, owner: null } },
+    q: { obj: { kind: 'mine', res: 'stone', owner: null } },
+    c: { obj: { kind: 'mine', res: 'cheese', owner: null } },
+    B: { obj: { kind: 'monster', cid: 'veteran', n: 4, guard: true, label: 'Съгледвачите на Белегор' } },
+    K: { obj: { kind: 'artifact', art: 'bellCharm' } },
+    D: { obj: { kind: 'dwelling', cid: 'mouse', available: 8, owner: null } },
+    E: { obj: { kind: 'monster', cid: 'ferret', n: 2 } },
+    F: { obj: { kind: 'monster', cid: 'wildcat', n: 1, guard: true, label: 'Дива котка' } },
+    j: { obj: { kind: 'monster', cid: 'squirrel', n: 6, joinable: true } },
+    W: { obj: { kind: 'monster', cid: 'rat', n: 18 } },
+    g: { obj: { kind: 'monster', cid: 'ratspear', n: 8 } },
     '!': { obj: { kind: 'shrine', effect: 'moraleDay', value: 1 } },
-    '+': { terrain: 'n', obj: { kind: 'shrine', effect: 'def', value: 1 } },
-    '?': { terrain: 'n', obj: { kind: 'shrine', effect: 'xp', value: 900 } },
-    '*': { terrain: 'n', obj: { kind: 'shrine', effect: 'reveal', value: 12, label: 'Кулата на картографа' } },
-    '%': { obj: { kind: 'shrine', effect: 'kno', value: 1 } },
-    H: { terrain: 'n', obj: { kind: 'artifact', art: 'thornSword' } },
-    Z: { terrain: 'n', obj: { kind: 'monster', cid: 'boar', n: 5, guard: true, label: 'Глигани от прохода' } },
-    J: { terrain: 'n', obj: { kind: 'artifact', art: 'honeyCup' } },
-    Y: { terrain: 'n', obj: { kind: 'monster', cid: 'ghost', n: 5, guard: true, label: 'Таласъмите от старата мина' } },
-    '#': { obj: { kind: 'sign', text: 'Към Сиренград — през Сивата застава. Плъховете добавили с тебешир: „МОСТЪТ Е НАШ!“' } },
-    e: { terrain: ':', obj: { id: 'view', kind: 'event', dialogue: 's2_view', onlyHuman: true } },
-    U: { terrain: ':', obj: { kind: 'monster', cid: 'mushroom', n: 12, joinable: true } },
-    V: { obj: { kind: 'monster', cid: 'wasp', n: 15, joinable: true } },
-    R: { terrain: ':', obj: { kind: 'monster', cid: 'badger', n: 6, guard: true, label: 'Стражата на Старата порта' } },
-    Q: { terrain: ':', obj: { kind: 'monster', cid: 'ghost', n: 7, guard: true, label: 'Пазачите на тунела' } },
-    S: { terrain: ':', obj: { kind: 'monster', cid: 'wolf', n: 14, guard: true, label: 'Вълците на Шушумига' } },
-    $: { obj: { kind: 'resource', res: 'acorns', amount: 700 } },
-    r: { obj: { kind: 'resource', res: 'wood', amount: 6 } },
-    o: { obj: { kind: 'resource', res: 'stone', amount: 6 } },
-    u: { terrain: 'n', obj: { kind: 'resource', res: 'cheese', amount: 3 } },
-    x: { obj: { kind: 'chest', acorns: 1500, xp: 1100 } },
+    '+': { obj: { kind: 'shrine', effect: 'att', value: 1 } },
+    '?': { obj: { kind: 'shrine', effect: 'kno', value: 1 } },
+    '*': { obj: { kind: 'shrine', effect: 'reveal', value: 10, label: 'Високият пън' } },
+    y: { obj: { kind: 'shrine', effect: 'spell', value: 0, spell: 'haste' } },
+    H: { terrain: 'h', obj: { kind: 'artifact', art: 'shellShield' } },
+    J: { obj: { kind: 'artifact', art: 'owlLens' } },
+    '#': { terrain: ':', obj: { kind: 'sign', text: 'Някой е надраскал с нокът: „ТЕРИТОРИЯ НА ЗЪБОДРОБКО. ДАНЪКЪТ СЕ НОСИ ВСЯКА СУТРИН.“ Отдолу, с много по-малки букви: „помощ“.' } },
+    $: { obj: { kind: 'resource', res: 'acorns', amount: 600 } },
+    z: { obj: { kind: 'resource', res: 'acorns', amount: 500 } },
+    r: { obj: { kind: 'resource', res: 'wood', amount: 5 } },
+    o: { obj: { kind: 'resource', res: 'stone', amount: 5 } },
+    u: { obj: { kind: 'resource', res: 'cheese', amount: 2 } },
+    x: { obj: { kind: 'chest', acorns: 1000, xp: 900 } },
+    X: { obj: { kind: 'chest', acorns: 1200, xp: 1000 } },
   },
   carryArmies: {
-    mishkontin: armyFrom([['mouse', 22], ['hedgehog', 9], ['squirrel', 6]]),
+    mishkontin: armyFrom([['mouse', 22], ['vole', 4]]),
+    iskritsa: armyFrom([['mouse', 10], ['wanderer', 6]]),
   },
   startRes: { player: res(3000, 10, 10, 2), enemy: res(4000, 15, 15, 4) },
-  heroPool: { player: ['barzonog', 'borko'], enemy: ['muhlyo', 'opashcho'] },
-  weekNames: ['Седмица на първия сняг', 'Седмица на ледените висулки', 'Седмица на виещия вятър', 'Седмица на дългите нощи', 'Седмица на последния слънчев лъч', 'Седмица на затворените проходи'],
-  setup,
+  heroPool: { player: ['harescout', 'oldsquirrel'], enemy: ['ostrozab', 'sivoopashko'] },
+  weekNames: ['Седмица на одраните дървета', 'Седмица на гладните мишлета', 'Седмица на шишарките', 'Седмица на въжената стълба', 'Седмица на песните'],
   triggers: [
     {
       id: 'intro',
       when: (_s, e) => e.t === 'start',
-      actions: [
-        { a: 'dialogue', id: 's2_intro' },
-        { a: 'quest', id: 'gate', title: 'Старата порта', text: 'Отведи Мишконтин до Старата порта на Сиренград (горе вдясно). Пътят минава през Сивата застава на моста… а може би има и друг път.' },
-        { a: 'quest', id: 'snow', title: 'Преди снеговете', text: 'Проходът ще се затвори след 42-рия ден.' },
-      ],
+      actions: [{ a: 'dialogue', id: 's2_intro' }],
     },
     {
-      id: 'letokril_enemy',
-      when: (s, e) => e.t === 'day' && s.day === 2 && !!s.flags.letokril_left,
+      id: 'belegor_camp',
+      when: (s, e) => e.t === 'day' && s.day === 3,
       actions: [
-        { a: 'spawnHero', tpl: 'letokril', owner: 'enemy', x: 24, y: 10, role: 'roam', targetTown: 'outpost', army: [['bat', 6], ['rat', 12]] },
-        { a: 'toast', text: 'Над планината прелетя ято прилепи — водени от Летокрил.', icon: '🦇' },
-      ],
-    },
-    {
-      id: 'letokril_friend',
-      when: (s, e) => e.t === 'day' && s.day === 2 && !!s.flags.letokril_trust,
-      actions: [{ a: 'dialogue', id: 's2_letokril_friend' }],
-    },
-    {
-      id: 'troshko_ambush',
-      when: (s, e) => e.t === 'day' && s.day === 4 && !!s.flags.troshko_robbed,
-      actions: [
-        { a: 'spawnHero', tpl: 'opashcho', owner: 'enemy', x: 12, y: 12, role: 'raider', targetTown: 'outpost', army: [['rat', 20], ['ratbow', 4]] },
-        { a: 'toast', text: 'Някой е казал на плъховете къде си! Засада от запад!', icon: '⚠️' },
+        { a: 'dialogue', id: 's2_belegor' },
+        { a: 'spawnHero', tpl: 'belegor', owner: 'enemy', x: 24, y: 17, role: 'boss', activeFrom: 11, targetTown: 'ratcamp', army: [['rat', 26], ['ratspear', 10], ['trapper', 8], ['veteran', 4]] },
       ],
     },
     {
       id: 'raid1',
-      when: (s, e) => e.t === 'day' && s.day === 7,
+      when: (s, e) => e.t === 'day' && s.day === 6,
       actions: [
-        { a: 'spawnHero', tpl: 'muhlyo', owner: 'enemy', x: 20, y: 11, role: 'raider', targetTown: 'outpost', army: [['rat', 24], ['ratbow', 6], ['beetle', 4]] },
-        { a: 'toast', text: 'От Сивата застава тръгна отряд към Каменна стъпка!', icon: '🐀' },
+        { a: 'spawnHero', tpl: 'ostrozab', owner: 'enemy', x: 23, y: 16, role: 'raider', targetTown: 'ratcamp', army: [['rat', 18], ['ratspear', 5]] },
+        { a: 'toast', text: 'Патрул на Белегор тръгна към Горската поляна!', icon: '🐀' },
       ],
-    },
-    {
-      id: 'taunt',
-      when: (s, e) => e.t === 'day' && s.day === 10,
-      actions: [{ a: 'dialogue', id: 's2_taunt' }],
     },
     {
       id: 'raid2',
-      when: (s, e) => e.t === 'day' && s.day === 18,
+      when: (s, e) => e.t === 'day' && s.day === 12,
       actions: [
-        { a: 'spawnHero', tpl: 'opashcho', owner: 'enemy', x: 20, y: 11, role: 'raider', targetTown: 'outpost', army: [['rat', 30], ['beetle', 10], ['bat', 4]] },
-        { a: 'toast', text: 'Още плъхове слизат от планината!', icon: '🐀' },
+        { a: 'spawnHero', tpl: 'sivoopashko', owner: 'enemy', x: 24, y: 18, role: 'raider', targetTown: 'ratcamp', army: [['rat', 20], ['trapper', 7], ['ratspear', 5]] },
+        { a: 'toast', text: 'Още плъхове тръгнаха от лагера!', icon: '🐀' },
       ],
     },
     {
-      id: 'snow_warning',
-      when: (s, e) => e.t === 'day' && s.day === 35,
-      actions: [{ a: 'toast', text: 'Започна да вали сняг. Остава една седмица, преди проходът да се затвори!', icon: '❄️' }],
+      // Keeps the "can help now" flags in sync with the player's resources.
+      id: 'ready',
+      repeat: true,
+      when: (s) => {
+        s.flags.voles_ready = !!s.flags.voles_freed && s.players.player.res.wood >= VOLE_WOOD;
+        s.flags.hares_ready = !!s.flags.hares_freed && s.players.player.res.acorns >= HARE_CRUMBS;
+        return false;
+      },
+      actions: [],
     },
     {
-      id: 'outpost_taken',
-      when: (_s, e) => e.t === 'capture' && e.townId === 'outpost' && e.by === 'player',
-      actions: [{ a: 'dialogue', id: 's2_outpost' }],
+      id: 'plan',
+      when: (s) => PLAN.every((f) => s.flags[f]) && !s.flags.plan_ready,
+      actions: [{ a: 'flag', flag: 'plan_ready' }, { a: 'questDone', id: 'unite' }, { a: 'dialogue', id: 's2_plan' }],
     },
     {
-      id: 'shushumiga_beaten',
-      when: (_s, e) => e.t === 'defeatHero' && e.heroId === 'shushumiga',
-      actions: [{ a: 'dialogue', id: 's2_shushumiga_beaten' }],
+      id: 'glade_lost',
+      repeat: true,
+      when: (s, e) => e.t === 'capture' && e.townId === 'glade' && e.by === 'enemy' && (s.vars.gladeLost ?? 0) === 0,
+      actions: [
+        { a: 'call', fn: (s) => (s.vars.gladeLost = s.day) },
+        { a: 'toast', text: 'Плъховете превзеха Горската поляна! Имаш 3 дни да си я върнеш.', icon: '⚠️' },
+      ],
     },
     {
-      id: 'letokril_beaten',
-      when: (_s, e) => e.t === 'defeatHero' && e.heroId === 'letokril',
-      actions: [{ a: 'dialogue', id: 's2_letokril_beaten' }],
+      id: 'glade_back',
+      repeat: true,
+      when: (_s, e) => e.t === 'capture' && e.townId === 'glade' && e.by === 'player',
+      actions: [{ a: 'call', fn: (s) => (s.vars.gladeLost = 0) }],
+    },
+    {
+      id: 'camp_taken',
+      when: (_s, e) => e.t === 'capture' && e.townId === 'ratcamp' && e.by === 'player',
+      actions: [{ a: 'dialogue', id: 's2_camp' }],
     },
   ],
   checkEnd: (s) => {
-    if (s.flags.gate_reached && s.pendingDialogues.length === 0) return { status: 'won', reason: '' };
-    if (s.day > 42) return { status: 'lost', reason: 'Снегът затвори прохода. Сиренград остана сам срещу Мортис.' };
+    if (s.flags.s2_goal && s.flags.zub_done && s.pendingDialogues.length === 0) return { status: 'won', reason: '' };
+    const lost = s.vars.gladeLost ?? 0;
+    if (lost && s.day >= lost + 3 && s.towns.find((t) => t.id === 'glade')?.owner !== 'player') {
+      return { status: 'lost', reason: 'Горската поляна остана в лапите на плъховете. Малките гризачи отново останаха сами.' };
+    }
     return null;
   },
-  victoryDialogue: () => 's2_end',
+  victoryDialogue: () => 's2_victory',
   dialogues: {
     s2_intro: {
       id: 's2_intro',
-      title: 'Подножието на планината',
-      bg: 'img/bg-mount.webp',
+      title: 'Срещата с тирана на гората',
+      bg: 'img/bg-woods.webp',
       lines: [
-        L('narrator', 'Пътеката на Картографа започваше там, където свършваше гората: в подножието на Сребърните планини, при малката крепост Каменна стъпка.'),
-        L('mishkontin', 'Според картата Старата порта е горе, зад ждрелото. Но единственият мост е… ох. Плъховете са построили застава точно на него.', 'map'),
-        L('narrator', 'Над моста се вееше сиво знаме с опашка. Сивата застава на Шушумига — господарката на шпионите на Мортис.'),
-        L('mishkontin', 'Трябва да стигна портата преди снеговете. Иначе проходът ще се затвори до пролетта. А Мортис няма да чака пролетта.'),
-        L('narrator', 'Някой беше разказал на Мишконтин за стария тунел на юг. Капитан Гризан знаеше много неща — и в плен ги разказа всичките.', undefined, has('grizan_prisoner')),
-      ],
-    },
-    s2_iskritsa: {
-      id: 's2_iskritsa',
-      title: 'Пеещият бор',
-      lines: [
-        L('narrator', 'Фюю! Един жълъд отскочи от тоягата на Мишконтин. После втори. После цял дъжд от жълъди.'),
-        L('iskritsa', 'Стой! Още една крачка и ще те направя на мишеница! Шпионин на плъховете ли си?'),
-        L('mishkontin', 'Шпионин? Аз съм Мишконтин от Мъхово! Виж — медальонът на Пазителите!', 'surprised'),
-        L('iskritsa', '…О. Ооо. Значи ти си този с картата! Извинявай за жълъдите. Повечето. Аз съм Искрица, водачката на прашкарите от Пеещия бор.'),
-        L('iskritsa', 'Плъховете на Шушумига ни изгониха от моста. Искам да ги ударя! Сега! Веднага! Идваш ли?'),
+        L('iskritsa', 'Хич не ми харесва това място. Нещо не е наред тук.'),
+        L('narrator', 'Изведнъж се чу писукване — уплашено гласче. До един храст се бяха сгушили майка, татко и две съвсем малки полски мишлета. Пред тях стоеше огромен пор.'),
+        L('zubodrobko', 'Храната! Къде е храната, която трябваше да ми донесете днес?'),
+        L('fieldmouse', 'Молим те, Зъбодробко. Носихме ти храна цяла седмица. Децата ни гладуват. Остави ни малко и за нас.'),
+        L('zubodrobko', 'Малко? Аз ви позволявам да дишате въздуха тук! Ако до утре не ми донесете двойно повече — ще ви изгоня от гората. Или още по-лошо… ще ви изям.'),
+        L('narrator', 'Порът си тръгна, като си подсвиркваше доволно. Мишконтин погледна двете мишлета — гладни и изплашени — и видя себе си в нощта, когато плъховете нахлуха у дома.'),
+        L('iskritsa', 'Мишконтин, знам какво мислиш. Но този пор е огромен. Трябва да заобиколим. Не можеш да спасиш всички.'),
       ],
       choices: [
         {
-          text: '„Да ударим заедно — сега!“', virtue: 'courage',
-          actions: [{ a: 'virtue', v: 'courage', n: 1 }, { a: 'flag', flag: 'iskritsa_joined' }, { a: 'flag', flag: 'iskritsa_bold' }, { a: 'removeObj', id: 'iskritsa' }, { a: 'spawnHero', tpl: 'iskritsa', owner: 'player', x: 6, y: 12 }, { a: 'dialogue', id: 's2_iskritsa_bold' }],
+          text: '„Ако не помогна сега, какъв смисъл има да бъда смел, ако използвам силата само за себе си?“', virtue: 'courage',
+          actions: [{ a: 'virtue', v: 'courage', n: 1 }, { a: 'virtue', v: 'kindness', n: 1 }, { a: 'dialogue', id: 's2_together' }],
         },
+        { text: '„Права си… Но нека поне поговорим с другите гризачи.“', virtue: 'wisdom', actions: [{ a: 'virtue', v: 'wisdom', n: 1 }, { a: 'dialogue', id: 's2_together' }] },
+      ],
+    },
+    s2_together: {
+      id: 's2_together',
+      lines: [
+        L('iskritsa', 'Но ти не си силен, Мишконтин. Не по-силен от пора.'),
+        L('mishkontin', 'Знам. Може би не трябва да се биеш със сила срещу сила. Може би трябва да използваш главата си.', 'map'),
+        L('iskritsa', 'Добре. Ако ще го правиш, ще го правим заедно. Но трябва да имаме план.'),
+        L('mishkontin', 'Имам идея. Но ще се нуждаем от помощта на другите гризачи.'),
+      ],
+      after: [
+        { a: 'quest', id: 'unite', title: 'Заедно сме по-силни', text: 'Говори с катериците (на север, при бора), полевките (на юг, при ливадата) и зайците (на изток, при полето). Плъховете на Белегор и поровете ги държат в страх — прогони ги. Полевките ще искат клонки за подпори, а гладните зайци — трохи. Огледай и стръмния склон край пътеката на Зъбодробко.' },
+        { a: 'reveal', x: 6, y: 2, r: 3 }, { a: 'reveal', x: 11, y: 18, r: 3 }, { a: 'reveal', x: 18, y: 11, r: 3 },
+      ],
+    },
+    s2_family: {
+      id: 's2_family',
+      title: 'Полските мишки',
+      lines: [
+        L('fieldmum', 'Не сме добре. Но благодаря, че питате.'),
+        L('fieldmouse', 'Заминахме от предишното си място заради по-лош враг — крал Мортис. А ако заминем и оттук, накъде? Навсякъде има по някой тиранин. А ние сме само мишки.'),
+        L('fieldmouse', 'Всички тук му носим храна — и катериците, и полевките, и зайците. Всички мълчим и се покоряваме.', undefined, hasNot('plan_ready')),
+        L('fieldmum', 'Чух, че сте говорили с всички. Утре сутрин… и ние ще бъдем там.', 'happy', has('plan_ready')),
+      ],
+    },
+    s2_squirrels: {
+      id: 's2_squirrels',
+      title: 'Катериците от бора',
+      lines: [
+        L('oldsquirrel', 'Мишле с медальон? Ако си дошъл за данъка — Зъбодробко вчера взе последните ни шишарки.'),
+        L('narrator', 'Около бора плъховете-капанджии на Белегор са опънали мрежи. Катериците не смеят да слязат.', undefined, hasNot('squirrels_freed')),
+        L('mishkontin', 'Защо не се съберете всички заедно и не му се противопоставите?'),
+        L('oldsquirrel', 'Защото всички се страхуваме. И никой не иска да бъде първият, който ще излезе срещу него. Защото първият е този, който ще пострада.'),
+      ],
+      choices: [
+        { text: '„Тогава няма да има първи. Ще излезем всички наведнъж. Заедно.“', virtue: 'courage', requires: has('squirrels_freed'), lockedHint: 'Първо прогони капанджиите.', actions: [{ a: 'virtue', v: 'courage', n: 1 }, ...groupJoin('squirrels_join', 'd3', 'squirrel', 8), { a: 'dialogue', id: 's2_squirrels_yes' }] },
+        { text: '„Първо ще махна мрежите от бора ви.“', requires: hasNot('squirrels_freed'), actions: [] },
+      ],
+    },
+    s2_squirrels_yes: {
+      id: 's2_squirrels_yes',
+      lines: [L('oldsquirrel', 'Всички наведнъж… Хм. Ние знаем къде растат най-дългите лози в гората. И имаме много шишарки. Ще дойдем.', 'happy')],
+    },
+    s2_voles: {
+      id: 's2_voles',
+      title: 'Полевките от ливадата',
+      lines: [
+        L('vole', 'Шшт! Плъховете срутиха ходниците ни, докато търсеха някакво избягало мишле. А после дойде и Зъбодробко за данъка.', undefined, hasNot('voles_freed')),
+        L('vole', 'Ти ли прогони плъховете? Значи ти си избягалото мишле! Какво искаш от нас?', 'surprised', has('voles_freed')),
+        L('mishkontin', 'Искам да спрете да мълчите. Всички заедно.'),
+        L('vole', 'Първо трябва да подпрем ходниците, иначе малките няма къде да спят. Трябват ни 8 здрави клонки.', undefined, has('voles_freed')),
+      ],
+      choices: [
         {
-          text: '„Първо да разузнаем. Добрият план е половин победа.“', virtue: 'wisdom',
-          actions: [{ a: 'virtue', v: 'wisdom', n: 1 }, { a: 'flag', flag: 'iskritsa_joined' }, { a: 'flag', flag: 'iskritsa_planned' }, { a: 'removeObj', id: 'iskritsa' }, { a: 'spawnHero', tpl: 'iskritsa', owner: 'player', x: 6, y: 12 }, { a: 'troops', cid: 'squirrel', n: 4, hero: 'iskritsa' }, { a: 'reveal', x: 19, y: 11, r: 5 }, { a: 'dialogue', id: 's2_iskritsa_plan' }],
+          text: `„Ето клонки за подпорите. Никой няма да е сам.“ (${VOLE_WOOD} 🌲)`, virtue: 'kindness', requires: (s) => !!s.flags.voles_freed && hasRes({ wood: VOLE_WOOD })(s), lockedHint: 'Прогони плъховете и събери 8 клонки.',
+          actions: [{ a: 'res', res: { wood: -VOLE_WOOD } }, { a: 'virtue', v: 'kindness', n: 1 }, ...groupJoin('voles_join', 'd2', 'vole', 8), { a: 'dialogue', id: 's2_voles_yes' }],
         },
+        { text: '„Ще се върна.“', actions: [] },
+      ],
+    },
+    s2_voles_yes: {
+      id: 's2_voles_yes',
+      lines: [L('vole', 'Ние сме дребни, но копаем бързо и връзваме здраво. Кажи ни кога.', 'happy')],
+    },
+    s2_hares: {
+      id: 's2_hares',
+      title: 'Зайците от полето',
+      lines: [
+        L('hare', 'Внимавай! Поровете — братовчедите на Зъбодробко — дебнат точно там. Ние тичаме бързо, но от тях не можем да избягаме.', undefined, hasNot('hares_freed')),
+        L('hare', 'Мишле прогони поровете?! Това трябва да го видя пак. Но малките ни гладуват — Зъбодробко взе всичко. Гладен заек не тича.', 'surprised', has('hares_freed')),
+      ],
+      choices: [
         {
-          text: '„Гората има нужда от теб тук. Пази Пеещия бор.“', virtue: 'kindness',
-          actions: [{ a: 'virtue', v: 'kindness', n: 1 }, { a: 'flag', flag: 'iskritsa_stayed' }, { a: 'removeObj', id: 'iskritsa' }, { a: 'troops', cid: 'squirrel', n: 8 }, { a: 'dialogue', id: 's2_iskritsa_stay' }],
+          text: `„Ето трохи за малките. Ще ни трябват здрави клони — и вашите бързи крака.“ (${HARE_CRUMBS} 🍞)`, virtue: 'courage', requires: (s) => !!s.flags.hares_freed && hasRes({ acorns: HARE_CRUMBS })(s), lockedHint: 'Прогони поровете и събери 1500 трохи.',
+          actions: [{ a: 'res', res: { acorns: -HARE_CRUMBS } }, { a: 'virtue', v: 'courage', n: 1 }, ...groupJoin('hares_join', 'd4', 'hare', 3), { a: 'dialogue', id: 's2_hares_yes' }],
         },
+        { text: '„Ще се върна.“', actions: [] },
       ],
     },
-    s2_iskritsa_bold: { id: 's2_iskritsa_bold', lines: [L('iskritsa', 'Ха! Това е приказка, каквато обичам! Катерици — след мен! Ъъъ… след нас!'), L('mishkontin', 'Само не стреляй по мен.', 'happy')] },
-    s2_iskritsa_plan: {
-      id: 's2_iskritsa_plan',
-      lines: [
-        L('iskritsa', 'Разузнаване… Добре. Ще се опитам да не стрелям първа. Ще се опитам.'),
-        L('mishkontin', 'Виж: на моста има застава, а зад нея — Шушумига. Ако изчакаме седмица, ще имаме двойно повече прашкари.', 'map'),
-        L('iskritsa', 'Двойно повече жълъди във въздуха… Харесва ми как мислиш, картографе.'),
-      ],
+    s2_hares_yes: {
+      id: 's2_hares_yes',
+      lines: [L('hare', 'Клони ли? Ние знаем къде са най-здравите. Тичаме!', 'happy')],
     },
-    s2_iskritsa_stay: {
-      id: 's2_iskritsa_stay',
-      lines: [
-        L('iskritsa', 'Да пазя гората? …Добре. Някой трябва да го направи. Вземи поне моите най-добри прашкари.'),
-        L('iskritsa', 'Но ако Мортис стигне до Сиренград — ще дойда. Обещавам с опашка на сърцето!'),
-      ],
+    s2_joined: {
+      id: 's2_joined',
+      lines: [L('narrator', 'Тук вече не се крие никой. Гризачите говорят тихо за утрешния ден — и никой не казва „аз съм първият“, защото ще бъдат всички.')],
     },
-    s2_troshko_friend: {
-      id: 's2_troshko_friend',
-      title: 'Странноприемницата на Трошко',
+    s2_slope: {
+      id: 's2_slope',
+      title: 'Стръмният склон',
       lines: [
-        L('troshko', 'Мишконтин! Моят спасител! Колелото още се върти благодарение на теб! Отворих си странноприемница — „При Трошко: топла супа и почти нови лъжици“.'),
-        L('troshko', 'Ето — моят компас. Не, не, подарък е! Горе в планината пътят е хитър, а компасът е по-хитър.'),
+        L('narrator', 'Пътеката, по която Зъбодробко минава всяка сутрин, се вие покрай стръмен склон. Склонът е покрит със сухи листа и хлъзгави камъни и завършва с голяма дупка.'),
+        L('mishkontin', 'Ако го изненадаме точно тук, ще изгуби равновесие и ще се претърколи надолу…', 'map'),
+        L('mishkontin', 'Всеки камък. Всяко дърво. Всеки корен. Трябва да ги запомня наизуст.'),
       ],
-      after: [{ a: 'artifact', art: 'compass' }, { a: 'flag', flag: 'troshko_friend' }, { a: 'flag', flag: 'troshko_s2_done' }, { a: 'res', res: { acorns: 500 } }],
+      after: [{ a: 'flag', flag: 'slope_scouted' }, { a: 'virtue', v: 'wisdom', n: 1 }],
     },
-    s2_troshko_trade: {
-      id: 's2_troshko_trade',
-      title: 'Странноприемницата на Трошко',
+    s2_plan: {
+      id: 's2_plan',
+      title: 'Планът',
       lines: [
-        L('troshko', 'А, клиентът с честните жълъди! Добре дошъл. Имам точно това, което ти трябва: компас! Почти не е ял никой. Искам да кажа — почти не е ползван.'),
+        L('narrator', 'Мишконтин прекара цялата нощ в обмисляне на детайлите. На зазоряване двамата седяха зад един храст до пътеката.'),
+        L('iskritsa', 'Ако продължиш да стискаш лапите си така, ще направиш сок от тревата.'),
+        L('mishkontin', 'Просто… ги подготвям. Дано планът ми не е глупав…'),
+        L('iskritsa', 'Тогава ще измислим по-умен. Ние сме двама. Това вече удвоява мозъците ни.'),
+        L('mishkontin', 'Добре… значи не съм луд?'),
+        L('iskritsa', 'Не. Само си смело мишле с малко треперещи лапи. Хайде. Една крачка напред. Аз ще пазя от храста.', 'happy'),
+        L('narrator', 'Всички са по местата си. Сега Мишконтин трябва да излезе на пътеката пред Зъбодробко.'),
+      ],
+      after: [{ a: 'quest', id: 'tyrant', title: 'Първата крачка', text: 'Излез на пътеката пред Зъбодробко (при прохода на изток). Катериците, полевките и зайците чакат в засада.' }],
+    },
+    s2_zub: {
+      id: 's2_zub',
+      title: 'Зъбодробко',
+      lines: [
+        L('zubodrobko', 'Какво е това? Едно мъничко мишле се е решило да застане пред мен? Да не си ми донесло закуска?'),
+        L('iskritsa', 'Мишконтин, не така! Сам срещу него нямаш шанс. Трябва ни план — и всички гризачи заедно.', 'surprised', hasNot('plan_ready')),
+        L('mishkontin', 'Не съм дошъл да ти нося нищо. Дошъл съм да ти кажа, че времето ти тук свърши. Няма повече да тормозиш малките животни в тази гора.', undefined, has('plan_ready')),
+        L('zubodrobko', 'Ти… ти, малко нещастно мишле! Ти смееш да ми говориш така?', undefined, has('plan_ready')),
+        L('mishkontin', 'Смея.', undefined, has('plan_ready')),
       ],
       choices: [
-        { text: 'Купи компаса за 1500 жълъда.', requires: hasRes({ acorns: 1500 }), lockedHint: 'Нямаш 1500 жълъда.', actions: [{ a: 'res', res: { acorns: -1500 } }, { a: 'artifact', art: 'compass' }, { a: 'flag', flag: 'troshko_s2_done' }] },
-        { text: '„Разкажи ми за пътя нагоре.“', virtue: 'wisdom', actions: [{ a: 'virtue', v: 'wisdom', n: 1 }, { a: 'reveal', x: 22, y: 6, r: 7 }, { a: 'flag', flag: 'troshko_s2_done' }, { a: 'dialogue', id: 's2_troshko_tale' }] },
-        { text: '„Ще мина по-късно.“', actions: [] },
-      ],
-    },
-    s2_troshko_tale: {
-      id: 's2_troshko_tale',
-      lines: [L('troshko', 'Нагоре пътят минава покрай голяма стража бръмбари. Казват, че пазят Старата порта от сто години. Аз лично не съм проверявал. Аз съм търговец, не герой.')],
-    },
-    s2_troshko_sold: {
-      id: 's2_troshko_sold',
-      title: 'Странноприемницата на Трошко',
-      lines: [
-        L('troshko', 'Мишконтин… трябва да ти призная нещо. Онова парче карта, дето го запомни наизуст… Продадох оригинала.'),
-        L('troshko', 'На една дама-плъх с маска. Плати с истинско сирене! Откъде да знам, че е Шушумига?'),
-        L('mishkontin', 'Значи и Шушумига знае пътя…', 'surprised'),
-      ],
-      choices: [
-        { text: '„Случва се. Важно е, че ми каза истината.“', virtue: 'kindness', actions: [{ a: 'virtue', v: 'kindness', n: 1 }, { a: 'flag', flag: 'troshko_friend' }, { a: 'flag', flag: 'troshko_s2_done' }, { a: 'res', res: { acorns: 800 } }, { a: 'dialogue', id: 's2_troshko_thanks' }] },
-        { text: '„Тогава ще трябва да съм по-бърз от нея.“', virtue: 'courage', actions: [{ a: 'virtue', v: 'courage', n: 1 }, { a: 'flag', flag: 'troshko_s2_done' }] },
-      ],
-    },
-    s2_troshko_thanks: { id: 's2_troshko_thanks', lines: [L('troshko', 'Ти… не ми се сърдиш? Ето, вземи сиренените пари. На мен не ми носят радост.')] },
-    s2_troshko_angry: {
-      id: 's2_troshko_angry',
-      title: 'Странноприемницата на Трошко',
-      lines: [
-        L('troshko', 'Ти! Крадецът от гората! Как смееш да влизаш в моята странноприемница?'),
-        L('troshko', 'Да знаеш — казах на плъховете, че идваш. Да видиш как е, когато някой ти вземе нещо!'),
-      ],
-      choices: [
-        { text: '„Прости ми, Трошко. Сгреших. Ето 1000 жълъда за картата.“', virtue: 'kindness', requires: hasRes({ acorns: 1000 }), lockedHint: 'Нямаш 1000 жълъда.', actions: [{ a: 'res', res: { acorns: -1000 } }, { a: 'virtue', v: 'kindness', n: 2 }, { a: 'flag', flag: 'troshko_friend' }, { a: 'flag', flag: 'troshko_robbed', value: false }, { a: 'flag', flag: 'troshko_s2_done' }, { a: 'dialogue', id: 's2_troshko_forgive' }] },
-        { text: 'Тръгни си мълчаливо.', actions: [] },
-      ],
-    },
-    s2_troshko_forgive: {
-      id: 's2_troshko_forgive',
-      lines: [
-        L('troshko', '…Хмф. Признаваш си. Това е повече, отколкото правят повечето.'),
-        L('troshko', 'Добре. Простено ти е. Почти. Вземи този компас — и никога вече не грабвай нищо от таралеж!'),
-      ],
-      after: [{ a: 'artifact', art: 'compass' }],
-    },
-    s2_troshko_after: {
-      id: 's2_troshko_after',
-      lines: [
-        L('troshko', 'Супа? Лъжица? Перо от врабче? Не? Е, приятен път, картографе!', undefined, hasNot('troshko_robbed')),
-        L('troshko', 'Нямам какво да ти кажа.', undefined, has('troshko_robbed')),
-      ],
-    },
-    s2_letokril_friend: {
-      id: 's2_letokril_friend',
-      title: 'Познат силует',
-      lines: [
-        L('letokril', 'Пст! Горе! Не, по-горе! Аз съм — Летокрил. Помниш ли паяжината?'),
-        L('mishkontin', 'Летокрил! Какво правиш тук?', 'happy'),
-        L('letokril', 'Напуснах Мортис. Някой веднъж ми помогна без нищо в замяна и… не можах да спра да мисля за това.'),
-        L('letokril', 'Слушай: на юг има стар тунел под ждрелото. Вратата се отваря, ако натиснеш камъка с буквата „М“. Шушумига не знае за него.'),
-        L('letokril', 'И още нещо — облетях цялата планина. Ето какво видях.'),
-      ],
-      after: [{ a: 'flag', flag: 'tunnel_open' }, { a: 'flag', flag: 'letokril_friend' }, { a: 'reveal', x: 17, y: 19, r: 4 }, { a: 'reveal', x: 26, y: 5, r: 7 }, { a: 'quest', id: 'tunnel', title: 'Старият тунел', text: 'Летокрил каза, че на юг има тунел под ждрелото. Вратата вече може да се отвори.' }],
-    },
-    s2_letokril_tower: {
-      id: 's2_letokril_tower',
-      title: 'Камбанарията',
-      lines: [
-        L('letokril', 'Пак ти… Дойде чак дотук? Кажи ми нещо, мишле. Защо изобщо ме пусна тогава, в мрежата?'),
-      ],
-      choices: [
-        { text: '„Защото и ти заслужаваше помощ.“', virtue: 'kindness', actions: [{ a: 'virtue', v: 'kindness', n: 1 }, { a: 'flag', flag: 'letokril_friend' }, { a: 'flag', flag: 'letokril_s2_done' }, { a: 'artifact', art: 'featherQuill' }, { a: 'dialogue', id: 's2_letokril_gift' }] },
-        { text: '„Честно? Трябваше ми информация.“', virtue: 'wisdom', actions: [{ a: 'virtue', v: 'wisdom', n: 1 }, { a: 'flag', flag: 'letokril_s2_done' }, { a: 'reveal', x: 28, y: 3, r: 6 }, { a: 'dialogue', id: 's2_letokril_honest' }] },
-      ],
-    },
-    s2_letokril_gift: {
-      id: 's2_letokril_gift',
-      lines: [
-        L('letokril', '…Никой не ми е казвал такова нещо. Никога.'),
-        L('letokril', 'Вземи това перо. Носи вятъра. Ще ти трябва там горе. И ако някога имаш нужда от прилеп — просто погледни нагоре.'),
-      ],
-    },
-    s2_letokril_honest: { id: 's2_letokril_honest', lines: [L('letokril', 'Поне си честен. Това е повече от Мортис. Ето — порталът е горе, зад стражата на бръмбарите. Довиждане, картографе.')] },
-    s2_letokril_after: { id: 's2_letokril_after', lines: [L('narrator', 'Камбанарията е празна. Само едно перо се върти във вятъра.')] },
-    s2_letokril_beaten: {
-      id: 's2_letokril_beaten',
-      title: 'Паднал прилеп',
-      lines: [
-        L('letokril', 'Пак ти. Винаги ти. Хайде, свършвай. Нали затова дойде?'),
-        L('mishkontin', 'Не. Дойдох, защото ти ме помоли за помощ веднъж, а аз не ти я дадох.'),
-      ],
-      choices: [
-        { text: '„Прости ми за паяжината. Свободен си.“', virtue: 'kindness', actions: [{ a: 'virtue', v: 'kindness', n: 1 }, { a: 'flag', flag: 'letokril_friend' }, { a: 'flag', flag: 'tunnel_open' }, { a: 'dialogue', id: 's2_letokril_second' }] },
-        { text: '„Лети си. И не се връщай.“', virtue: 'courage', actions: [{ a: 'virtue', v: 'courage', n: 1 }] },
-      ],
-    },
-    s2_letokril_second: {
-      id: 's2_letokril_second',
-      lines: [
-        L('letokril', '…Втори шанс. Не знаех, че ги раздават.'),
-        L('letokril', 'На юг има стар тунел под ждрелото. Вратата вече е отворена — погрижих се. Довиждане… приятелю.'),
-      ],
-    },
-    s2_grizan: {
-      id: 's2_grizan',
-      title: 'Самотен плъх',
-      lines: [
-        L('grizan', 'Мишле! Чакай, не стреляй! Аз съм — Гризан. Без шлем. Без армия. Без сирене.'),
-        L('grizan', 'Избягах от Шушумига. Тя казва, че гладният плъх е послушен плъх. А аз си спомних твоя хляб.'),
-        L('grizan', 'Знам за стария тунел на юг. Вратата се отваря с ритник отдолу. Сериозно. Пробвах.'),
-      ],
-      choices: [
-        { text: '„Ела с нас, Гризане.“', virtue: 'kindness', actions: [{ a: 'virtue', v: 'kindness', n: 1 }, { a: 'flag', flag: 'tunnel_open' }, { a: 'flag', flag: 'grizan_friend' }, { a: 'flag', flag: 'grizan_s2_done' }, { a: 'troops', cid: 'rat', n: 12 }, { a: 'removeObj', id: 'grizan' }, { a: 'dialogue', id: 's2_grizan_join' }] },
         {
-          text: '„Иди в Каменна стъпка. Там ще имаш хляб и работа.“', virtue: 'wisdom',
-          actions: [
-            { a: 'virtue', v: 'wisdom', n: 1 }, { a: 'flag', flag: 'tunnel_open' }, { a: 'flag', flag: 'grizan_friend' }, { a: 'flag', flag: 'grizan_s2_done' }, { a: 'removeObj', id: 'grizan' },
-            { a: 'call', fn: (s) => { const t = s.towns.find((x) => x.id === 'stonestep'); if (t && t.owner === 'player') addToArmy(t.garrison, 'rat', 15); } },
-            { a: 'toast', text: 'Гризан и петнайсет плъха пазят Каменна стъпка.', icon: '🐀' },
-          ],
+          text: 'Бягай към склона — точно по плана!', virtue: 'courage', requires: has('plan_ready'), lockedHint: 'Нужни са катериците, полевките, зайците и огледан склон.',
+          actions: [{ a: 'virtue', v: 'courage', n: 1 }, { a: 'dialogue', id: 's2_chase' }],
         },
+        { text: 'Отстъпи. Още не сме готови.', requires: hasNot('plan_ready'), actions: [] },
       ],
     },
-    s2_grizan_join: { id: 's2_grizan_join', lines: [L('grizan', 'Плъх в горската армия! Мама нямаше да повярва. Ама нищо — свиквай, мишле. Аз хъркам.'), L('narrator', 'Плъховете и горските не се познават добре — смесената армия има малко по-нисък морал.')] },
-    s2_grizan_after: { id: 's2_grizan_after', lines: [L('narrator', 'Тук Гризан беше оставил огризка от хляб. Изглежда я пази за спомен.')] },
-    s2_view: {
-      id: 's2_view',
-      title: 'Над облаците',
+    s2_chase: {
+      id: 's2_chase',
+      title: 'Първата голяма победа',
+      bg: 'img/bg-woods.webp',
       lines: [
-        L('mishkontin', 'Оттук се вижда Сиренград! А там долу… това армия ли е?', 'map'),
-        L('narrator', 'По главния път към града пълзеше черна река от опашки. Начело вървеше едра фигура с лъскава капачка вместо корона.'),
-        L('mishkontin', 'Мортис. Тръгнал е към Сиренград! Трябва да стигна портата преди него.', 'surprised'),
+        L('narrator', 'Зъбодробко се втурна право към Мишконтин. Земята се разтърси. А лапите на мишлето сякаш бяха залепнали за земята.'),
+        L('iskritsa', 'Мишконтин, бягаааай!'),
+        L('zubodrobko', 'Няма да ми избягаш, мишле! Ще те изям още тук и сега!'),
+        L('narrator', 'Мишконтин знаеше пътеката наизуст. На първия завой от двете страни изскочиха катериците, полевките, дори зайците — и всички в един глас завикаха и захвърляха шишарки.'),
+        L('oldsquirrel', 'Хей, тлъстак! Тук сме!'),
+        L('vole', 'Не можеш да ни хванеш всички, грознико!'),
+        L('narrator', 'Лапите на пора се подхлъзнаха на сухите листа. „Не, не, нееееее!“ — и след продължително търкаляне, което предизвика много кискане, Зъбодробко се стовари в голямата дупка.'),
+        L('zubodrobko', 'Помощ… Някой да ме извади оттук… Обещавам, че ще се променя!'),
+        L('fieldmum', 'Години наред ни тормозеше, Зъбодробко. Гладувахме, за да те храним. Защо сега да ти помагаме?'),
+      ],
+      choices: [
+        {
+          text: '„Може да е лъжа. Но ние не сме като него. Ще го извадим.“', virtue: 'kindness',
+          actions: [{ a: 'virtue', v: 'kindness', n: 2 }, { a: 'flag', flag: 'zub_forgiven' }, { a: 'item', item: 'ladder' }, { a: 'dialogue', id: 's2_ladder' }],
+        },
+        { text: '„Нека си стои в дупката. Заслужи си го.“', actions: [{ a: 'virtue', v: 'kindness', n: -1 }, { a: 'flag', flag: 'zub_left' }, { a: 'dialogue', id: 's2_leave' }] },
       ],
     },
-    s2_taunt: {
-      id: 's2_taunt',
-      title: 'Шепот във вятъра',
+    s2_ladder: {
+      id: 's2_ladder',
+      title: 'Заедно сме по-силни',
       lines: [
-        L('shushumiga', 'Шшш… малкото мишле с картата. Знам всичко за теб. Знам какво яде за закуска. Знам дори, че се страхуваш от височини.'),
-        L('mishkontin', 'Не се страхувам от височини!', 'surprised'),
-        L('shushumiga', 'Ще видим, мишле. Ще видим, когато погледнеш надолу от моста.'),
+        L('iskritsa', 'Прав е. Ако го оставим там, ще станем като него. А ние не сме такива.'),
+        L('fieldmouse', 'Добре. Ще ти помогнем — не защото го заслужаваш, а защото ние избираме да бъдем по-добри.'),
+        L('narrator', 'Катериците донесоха най-дългите лози. Зайците — здрави клони. Полевките и полските мишки вързаха всичко на място. „Виж само!“ — каза Искрица. — „Преди часове всички се криеха едни от други.“'),
+        L('narrator', 'Зъбодробко се изкачи по въжената стълба. Видя всички животни заедно — не изплашени, а спокойни и твърди. И нещо в него се пречупи. Когато никой не се плаши от теб, ти вече не си страшен.'),
+        L('fieldmum', 'Не се връщай тук! Махай се дълбоко в гората и не се показвай повече!'),
+      ],
+      after: [{ a: 'dialogue', id: 's2_after' }],
+    },
+    s2_leave: {
+      id: 's2_leave',
+      lines: [
+        L('iskritsa', 'Мишконтин… Ако го оставим там, няма ли да станем като него?', 'surprised'),
+        L('narrator', 'Дълго никой не каза нищо. Накрая полевките тихо спуснаха няколко лози в дупката и се обърнаха. На сутринта дупката беше празна.'),
+      ],
+      after: [{ a: 'dialogue', id: 's2_after' }],
+    },
+    s2_after: {
+      id: 's2_after',
+      lines: [
+        L('narrator', 'Животните ликуваха, подскачаха и пееха.'),
+        L('oldsquirrel', 'Вие ни спасихте! За вас ще пеем песни и няма да ви забравим!', 'happy'),
+        L('fieldmouse', 'Миналата вечер ви чух да си говорите за пътя към Тъмните тунели. Ако наистина искате да ги откриете, трябва да стигнете до Каньона.'),
+        L('fieldmouse', 'Наближавате. Вървете право през скалите, после покрай изсъхналия дъб. Успех, приятели!'),
+      ],
+      after: [
+        { a: 'removeObj', id: 'zubodrobko' },
+        { a: 'flag', flag: 'zub_done' },
+        { a: 'questDone', id: 'tyrant' },
+        { a: 'troops', cid: 'hare', n: 2 },
+        { a: 'quest', id: 'canyon', title: 'Към Каньона', text: 'Вървете право през скалите (през прохода, където стоеше Зъбодробко), после покрай Изсъхналия дъб.' },
+        { a: 'reveal', x: 27, y: 4, r: 4 },
       ],
     },
-    s2_outpost: {
-      id: 's2_outpost',
-      title: 'Сивата застава',
+    s2_belegor: {
+      id: 's2_belegor',
+      title: 'Белегор',
       lines: [
-        L('narrator', 'Сивото знаме падна. На негово място някой закачи зелено наметало — малко, но много гордо.'),
-        L('mishkontin', 'Мостът е свободен! Нагоре, към портата!', 'happy'),
+        L('belegor', 'Мишлето от мелницата е минало оттук. Виждам следите му. И следите на още една мишка.'),
+        L('belegor', 'Построете лагер. Сложете мрежи по дърветата. Крал Мортис не обича да чака.'),
+        L('narrator', 'Белегор е разположил лагера си на югоизток. След две седмици ще тръгне на лов сам.'),
       ],
     },
-    s2_shushumiga_beaten: {
-      id: 's2_shushumiga_beaten',
+    s2_camp: {
+      id: 's2_camp',
+      title: 'Лагерът на Белегор',
       lines: [
-        L('shushumiga', 'Шшш… това не беше по плана. Нищо. Кралят вече е при стените на Сиренград. Ти закъсня, мишле.'),
-        L('narrator', 'И Шушумига изчезна в мъглата, както изчезват шепотите.'),
+        L('narrator', 'В лагера има празни клетки, ръждиви капани и купчини откраднати трохи. На земята е надраскана карта: каньон, черни скали и един тунел.'),
+        L('mishkontin', 'Тунелите на Мортис… Значи наистина е близо.', 'map'),
+      ],
+      after: [{ a: 'res', res: { acorns: 2000, cheese: 3 } }],
+    },
+    s2_goal: {
+      id: 's2_goal',
+      title: 'Изсъхналият дъб',
+      lines: [
+        L('narrator', 'Изсъхналият дъб стърчеше като стар пазач. Отвъд него земята ставаше каменлива, а дърветата — все по-редки.'),
+        L('mishkontin', 'Първо трябва да помогнем на гризачите. Не можем да ги оставим със Зъбодробко.', undefined, hasNot('zub_done')),
       ],
     },
-    s2_gate: {
-      id: 's2_gate',
-      title: 'Старата порта',
-      bg: 'img/bg-siren.webp',
+    s2_victory: {
+      id: 's2_victory',
+      title: 'Мъдростта на търпението',
+      bg: 'img/bg-hills.webp',
       lines: [
-        L('narrator', 'Старата порта беше висока колкото десет мечока и стара колкото планината. По средата ѝ имаше вдлъбнатина с формата на буквата „М“.'),
-        L('mishkontin', 'Медальонът…', 'map'),
-        L('narrator', 'Мишконтин постави медальона в каменното легло. Нещо щракна дълбоко в скалата и портата се отвори с дълга въздишка.'),
-        L('belagor', 'Най-сетне. Знаех си, че ще дойдеш, малки Пазителю.'),
-        L('mishkontin', 'Белагор?! Значи сте истински!', 'surprised'),
-        L('belagor', 'Почти. Останаха ми само перата и паметта. Слушай: Мортис обсажда Сиренград от главния път. Тази нощ портата е единственият път към града.'),
-        L('belagor', 'И още нещо… Аз познавам Мортис. Отдавна. Но това е история за друга вечер.'),
-      ],
-    },
-    s2_end: {
-      id: 's2_end',
-      title: 'През портата',
-      lines: [
-        L('narrator', 'Мишконтин мина през Старата порта и тя се затвори зад него с тихо „щрак“.'),
-        L('narrator', 'Искрица вървеше до него и броеше на ум жълъдите си. „За всеки случай“, каза тя.', undefined, has('iskritsa_joined')),
-        L('narrator', 'Някъде високо над тях кръжеше прилеп. Пазеше ги.', undefined, has('letokril_friend')),
-        L('narrator', 'А Гризан, бившият капитан, хъркаше гръмко в обоза — за първи път сит.', undefined, has('grizan_friend')),
-        L('mishkontin', 'Сиренград… Издръж още малко. Идваме.', 'map'),
+        L('narrator', 'Има моменти, в които сърцето ти иска да тича. Да действа веднага. Да спасява. Но има и други — тихи и важни, в които най-смелото нещо е да останеш неподвижен. Да наблюдаваш. Да изчакаш.'),
+        L('iskritsa', 'Утре ще стигнем до Каньона. Обещай ми, че няма да правиш нищо прибързано.'),
+        L('mishkontin', 'Ще се опитам. Но лапите ми вече искат да тичат.', 'happy'),
+        L('narrator', 'Зад тях, дълбоко в гората, един голям пор вървеше с наведена глава. Никой вече не се страхуваше от него.', undefined, has('zub_forgiven')),
       ],
     },
   },

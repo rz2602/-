@@ -22,6 +22,7 @@ import {
   maxSp,
   skill,
   virtueRank,
+  VIRTUE_INFO,
 } from './hero';
 import { distances, guardingMonster, heroAt, inBounds, objectAt, pathFromDist, reveal, revealAround, stepCost, terrainDef, tileAt, townAt } from './map';
 import { chance, shuffle } from './rng';
@@ -30,20 +31,21 @@ import { recruitFromDwelling, weeklyGrowth } from './town';
 import type { Army, CampaignState, Difficulty, GameState, Hero, HeroCarry, MapObject, PlayerId, Resources, SpellId, Town } from './types';
 import { RES_KEYS } from './types';
 
-export const SAVE_V = 1;
+/** v2: the campaign follows the book (new chapters, creatures and resources); v1 saves are not loaded. */
+export const SAVE_V = 2;
 
 export const RES_INFO: Record<keyof Resources, { name: string; icon: string }> = {
-  acorns: { name: 'Жълъди', icon: '🌰' },
-  wood: { name: 'Дърво', icon: '🌲' },
-  stone: { name: 'Камък', icon: '🧱' },
+  acorns: { name: 'Трохи', icon: '🍞' },
+  wood: { name: 'Клонки', icon: '🌲' },
+  stone: { name: 'Камъчета', icon: '🪨' },
   cheese: { name: 'Сирене', icon: '🧀' },
 };
 
 export const MINE_INFO: Record<keyof Resources, { name: string; perDay: number }> = {
-  acorns: { name: 'Жълъдова хралупа', perDay: 400 },
-  wood: { name: 'Дъскорезница', perDay: 2 },
-  stone: { name: 'Кариера', perDay: 2 },
-  cheese: { name: 'Мандра', perDay: 1 },
+  acorns: { name: 'Изоставеният хамбар', perDay: 400 },
+  wood: { name: 'Сечището', perDay: 2 },
+  stone: { name: 'Каменоломната', perDay: 2 },
+  cheese: { name: 'Мандрата в долината', perDay: 1 },
 };
 
 const DIFFICULTY: Record<Difficulty, { aiIncome: number; neutral: number; playerBonus: number }> = {
@@ -53,7 +55,7 @@ const DIFFICULTY: Record<Difficulty, { aiIncome: number; neutral: number; player
 };
 
 export function newCampaign(difficulty: Difficulty = 'normal'): CampaignState {
-  return { completed: [], carry: {}, flags: {}, virtues: { courage: 0, kindness: 0, wisdom: 0 }, items: [], difficulty };
+  return { completed: [], carry: {}, flags: {}, virtues: { courage: 0, honesty: 0, kindness: 0, wisdom: 0 }, items: [], difficulty };
 }
 
 // ---------------------------------------------------------------------------
@@ -282,8 +284,8 @@ export function dailyIncome(s: GameState, pid: PlayerId): Resources {
   for (const o of s.objects) if (!o.done && o.kind === 'mine' && o.owner === pid) r[o.res] += MINE_INFO[o.res].perDay;
   for (const h of playerHeroes(s, pid)) {
     r.acorns += [0, 100, 200, 300][skill(h, 'estates')];
-    if (h.specialty === 'builder') r.wood += 2;
-    if (h.specialty === 'hoarder') r.acorns += 150;
+    if (h.specialty === 'gatherer') r.acorns += 150;
+    if (h.specialty === 'king') r.cheese += 1;
   }
   const bonus = s.players[pid].incomeBonus;
   if (bonus !== 1) for (const k of RES_KEYS) r[k] = Math.round(r[k] * bonus);
@@ -294,7 +296,7 @@ export function dailyIncome(s: GameState, pid: PlayerId): Resources {
 // Days
 // ---------------------------------------------------------------------------
 
-const WEEK_NAMES = ['на мишката', 'на таралежа', 'на катерицата', 'на бухала', 'на мечока', 'на жълъда', 'на мъха', 'на светулката'];
+const WEEK_NAMES = ['на мишката', 'на полевката', 'на катерицата', 'на заека', 'на орела', 'на трохите', 'на здравеца', 'на светулката'];
 
 /** Ends the human turn: the caller then runs the AI turn and finally `startNewDay`. */
 export function endPlayerTurn(s: GameState): void {
@@ -335,7 +337,8 @@ export function startNewDay(s: GameState): void {
 export type StepOutcome = 'moved' | 'blocked' | 'battle' | 'stop';
 
 /** Objects that are interacted with from the neighbouring tile (the hero does not step on them). */
-function interactsFromAdjacent(o: MapObject): boolean {
+function interactsFromAdjacent(s: GameState, o: MapObject): boolean {
+  if (o.kind === 'trap') return !!s.flags.traps_seen;
   return ['resource', 'chest', 'artifact', 'monster', 'npc', 'sign', 'questItem', 'gate', 'goal'].includes(o.kind);
 }
 
@@ -367,7 +370,7 @@ export function heroStep(s: GameState, h: Hero, x: number, y: number): StepOutco
   }
 
   const o = objectAt(s, x, y);
-  if (o && interactsFromAdjacent(o)) {
+  if (o && interactsFromAdjacent(s, o)) {
     h.mp = Math.max(0, h.mp - cost);
     return interactAdjacent(s, h, o);
   }
@@ -477,6 +480,9 @@ function interactAdjacent(s: GameState, h: Hero, o: MapObject): StepOutcome {
       }
       if (human) s.prompt = { kind: 'info', title: o.label, text: o.lockedText, icon: '🔒' };
       return 'stop';
+    case 'trap':
+      if (human) s.prompt = { kind: 'info', title: 'Ръждясал капан', text: 'Видя го, докато наблюдаваше каньона. Заобиколи го.', icon: '🪤' };
+      return 'stop';
     case 'goal':
       if (!human) return 'stop';
       if (o.needHero && h.id !== o.needHero) {
@@ -517,6 +523,13 @@ function interactOn(s: GameState, h: Hero, o: MapObject): void {
       break;
     case 'shrine':
       visitShrine(s, h, o);
+      break;
+    case 'trap':
+      if (!human) break;
+      o.done = true;
+      for (const st of h.army) if (st) st.n = Math.max(1, st.n - Math.ceil(st.n * o.pct));
+      h.mp = 0;
+      toast(s, `Капан! Ръждясалите зъби щракнаха — ${h.name} губи част от отряда си.`, '🪤');
       break;
     case 'event':
       if (o.onlyHuman && !human) break;
@@ -615,7 +628,7 @@ export function resolvePrompt(s: GameState, choice: number): void {
     o.done = true;
     if (choice === 0) {
       s.players[h.owner].res.acorns += p.acorns;
-      toast(s, `+${p.acorns} 🌰`, '🌰');
+      toast(s, `+${p.acorns} 🍞`, '🍞');
     } else {
       const xp = gainXp(s, h, p.xp);
       toast(s, `+${xp} опит за ${h.name}`, '⭐');
@@ -862,7 +875,7 @@ function applyAction(s: GameState, ac: Action): void {
       break;
     case 'virtue':
       s.virtues[ac.v] = (s.virtues[ac.v] ?? 0) + ac.n;
-      toast(s, `${ac.n > 0 ? '+' : ''}${ac.n} ${{ courage: 'Смелост', kindness: 'Доброта', wisdom: 'Мъдрост' }[ac.v]}`, { courage: '🦁', kindness: '💚', wisdom: '🦉' }[ac.v]);
+      toast(s, `${ac.n > 0 ? '+' : ''}${ac.n} ${VIRTUE_INFO[ac.v].name}`, VIRTUE_INFO[ac.v].icon);
       break;
     case 'res':
       gain(s.players[ac.who ?? 'player'].res, ac.res);
@@ -995,7 +1008,7 @@ export function checkEnd(s: GameState): void {
   }
   const mish = s.heroes.find((h) => h.id === 'mishkontin');
   if (mish && !mish.alive) {
-    endScenario(s, 'lost', 'Мишконтин падна в битка и плъховете го отведоха в Мрачната нора.');
+    endScenario(s, 'lost', 'Мишконтин падна в битка и плъховете го отведоха в Тъмните тунели.');
     return;
   }
   if (playerHeroes(s, 'player').length === 0 && playerTowns(s, 'player').length === 0) endScenario(s, 'lost', 'Горският съюз загуби всички свои герои и градове.');

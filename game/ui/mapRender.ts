@@ -300,7 +300,7 @@ export function drawObject(ctx: CanvasRenderingContext2D, s: GameState, o: MapOb
     case 'resource':
       shadow(0.25);
       drawEmoji(ctx, RES_INFO[o.res].icon, cx, cy + T * 0.08, T * 0.5);
-      if (o.res === 'acorns') drawEmoji(ctx, '🌰', cx + T * 0.18, cy + T * 0.18, T * 0.34);
+      if (o.res === 'acorns') drawEmoji(ctx, '🍞', cx + T * 0.18, cy + T * 0.18, T * 0.34);
       break;
     case 'chest':
       shadow(0.28);
@@ -346,7 +346,6 @@ export function drawObject(ctx: CanvasRenderingContext2D, s: GameState, o: MapOb
       const p = HERO_PORTRAITS[o.npc] ?? null;
       shadow(0.32);
       const bob = Math.sin(time / 400 + o.y) * T * 0.03;
-      if (o.npc === 'troshko') drawEmoji(ctx, '🛒', cx - T * 0.26, cy + T * 0.16, T * 0.42);
       drawToken(ctx, cx, cy + bob, T * 0.34, p?.icon ?? npcIcon(o.npc), { fill: '#6a5a3a', ring: '#f0d58a', badge: p?.badge });
       if (!o.doneFlag || !s.flags[o.doneFlag]) {
         const pulse = 1 + Math.sin(time / 200) * 0.12;
@@ -384,6 +383,11 @@ export function drawObject(ctx: CanvasRenderingContext2D, s: GameState, o: MapOb
       drawEmoji(ctx, '⛩️', cx, cy, T * 0.66);
       break;
     }
+    case 'trap':
+      if (!s.flags.traps_seen) break;
+      shadow(0.26);
+      drawEmoji(ctx, '🪤', cx, cy + T * 0.04, T * 0.5);
+      break;
     case 'event': {
       const a = 0.3 + 0.3 * Math.sin(time / 350 + o.x);
       ctx.fillStyle = `rgba(255,255,220,${a})`;
@@ -396,7 +400,7 @@ export function drawObject(ctx: CanvasRenderingContext2D, s: GameState, o: MapOb
 }
 
 function npcIcon(npc: string): string {
-  return { mouselings: '🐭', troshko: '🦔', letokril: '🦇', belagor: '🦉', iskritsa: '🐿️', borko: '🐹' }[npc] ?? '🧑';
+  return { cells: '⛓️', lever: '⚙️', fire: '🔥', squirrels: '🐿️', voles: '🐹', hares: '🐇' }[npc] ?? '🐭';
 }
 
 export function drawTownAt(ctx: CanvasRenderingContext2D, t: Town, px: number, py: number, T: number): void {
