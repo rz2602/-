@@ -18,6 +18,7 @@
   --honey:#e0a956;
   --line:rgba(241,236,220,.14);
   --obj:min(54vh,40vw);
+  --ph:min(80vh,58vw);
   --pad:clamp(16px,5vw,72px);
 }
 *{box-sizing:border-box;margin:0;padding:0}
@@ -50,10 +51,18 @@ body::after{content:"";position:fixed;inset:-50%;z-index:60;pointer-events:none;
     radial-gradient(ellipse 55% 60% at 30% 45%,rgba(224,169,86,.10),transparent 70%),
     radial-gradient(ellipse 80% 80% at 50% 50%,#17140f 0%,var(--bg) 70%)}
 .scene{position:absolute;inset:0}
-.obj{position:absolute;width:var(--obj);height:var(--obj);left:calc(50% - var(--obj)/2);top:calc(47% - var(--obj)/2);
-  filter:drop-shadow(-24px 30px 40px rgba(0,0,0,.65))}
-.obj svg{width:100%;height:100%;overflow:visible;display:block}
-.side{position:absolute;top:calc(47% - var(--obj)*.3);font-family:"Cormorant Garamond",Georgia,serif;font-style:italic;font-weight:500;
+/* photo stage: each product photo sits centred, its edges dissolve into the page black */
+.obj{position:absolute;z-index:1;left:50%;top:47%;height:var(--ph);aspect-ratio:var(--ar);max-width:none;transform:translate(-50%,-50%);overflow:hidden;
+  -webkit-mask-image:radial-gradient(ellipse 50% 50% at 50% 50%,#000 62%,transparent 100%);mask-image:radial-gradient(ellipse 50% 50% at 50% 50%,#000 62%,transparent 100%)}
+.obj img{display:block;width:100%;height:100%;object-fit:cover;max-width:none}
+.obj .sheen{position:absolute;inset:0;width:40%;background:linear-gradient(100deg,transparent,rgba(255,236,190,.16),transparent);mix-blend-mode:screen;transform:translateX(-120%);pointer-events:none}
+.ripple{position:absolute;width:8%;aspect-ratio:1;border:2px solid var(--yellow);border-radius:50%;transform:translate(-50%,-50%);opacity:0;pointer-events:none}
+.scrim{position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:linear-gradient(to top,rgba(14,13,11,.88) 0%,rgba(14,13,11,.45) 26%,transparent 46%),
+             linear-gradient(to right,rgba(14,13,11,.55) 0%,transparent 32%,transparent 68%,rgba(14,13,11,.55) 100%)}
+.side,.copy,.scroll-hint{z-index:3}
+.side,.copy{text-shadow:0 2px 24px rgba(0,0,0,.6)}
+.side{position:absolute;top:calc(47% - var(--obj)*.36);font-family:"Cormorant Garamond",Georgia,serif;font-style:italic;font-weight:500;
   font-size:clamp(40px,6.2vw,104px);line-height:1;color:var(--ink);white-space:nowrap}
 .side.l{left:var(--pad)}
 .side.r{right:var(--pad)}
@@ -131,8 +140,8 @@ footer{padding:34px var(--pad);border-top:1px solid var(--line);display:flex;jus
   .brand span{display:none}
   .top-right{gap:12px}
   .counter{min-width:48px}
-  .obj{top:calc(42% - var(--obj)/2)}
-  .side{top:calc(42% - var(--obj)/2 - 1.25em);font-size:clamp(26px,8vw,44px)}
+  .obj{top:40%;height:auto;width:140vw}
+  .side{top:calc(40% - 47vw - .4em);font-size:clamp(26px,8vw,44px)}
   .copy{bottom:clamp(22px,5vh,44px)}
   .h1{font-size:clamp(34px,10.5vw,46px)}
   .h2{font-size:30px}
@@ -152,38 +161,6 @@ footer{padding:34px var(--pad);border-top:1px solid var(--line);display:flex;jus
 </head>
 <body>
 
-<!-- shared gradients -->
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <defs>
-    <linearGradient id="brass" x1="0" y1="0" x2="1" y2=".35">
-      <stop offset="0" stop-color="#fbe2a4"/><stop offset=".13" stop-color="#e2ab58"/>
-      <stop offset=".36" stop-color="#9a6224"/><stop offset=".62" stop-color="#4a2c10"/>
-      <stop offset=".86" stop-color="#22150a"/><stop offset="1" stop-color="#120b05"/>
-    </linearGradient>
-    <linearGradient id="brassV" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#f6d48e"/><stop offset=".3" stop-color="#b57b35"/>
-      <stop offset=".7" stop-color="#4a2c10"/><stop offset="1" stop-color="#1a1008"/>
-    </linearGradient>
-    <linearGradient id="brassText" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#fff0c4"/><stop offset=".45" stop-color="#e2ab58"/><stop offset="1" stop-color="#7a4818"/>
-    </linearGradient>
-    <radialGradient id="face" cx=".32" cy=".3" r=".85">
-      <stop offset="0" stop-color="#2b2118"/><stop offset="1" stop-color="#0b0906"/>
-    </radialGradient>
-    <radialGradient id="wax" cx=".34" cy=".3" r=".8">
-      <stop offset="0" stop-color="#f3b351"/><stop offset=".42" stop-color="#bb631a"/><stop offset="1" stop-color="#4f1f05"/>
-    </radialGradient>
-    <linearGradient id="paper" x1="0" y1="0" x2="1" y2=".2">
-      <stop offset="0" stop-color="#f5ecd5"/><stop offset=".55" stop-color="#cfc4a8"/><stop offset="1" stop-color="#5d5546"/>
-    </linearGradient>
-    <linearGradient id="sheen" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#fff3d0" stop-opacity="0"/><stop offset=".5" stop-color="#fff3d0" stop-opacity=".38"/><stop offset="1" stop-color="#fff3d0" stop-opacity="0"/>
-    </linearGradient>
-    <pattern id="comb" width="24" height="41.57" patternUnits="userSpaceOnUse">
-      <path d="M12 0l12 6.93v13.86L12 27.71 0 20.79V6.93zM0 34.64l12 6.93M24 34.64l-12 6.93M12 27.71v13.86" fill="none" stroke="#e0a956" stroke-width=".8"/>
-    </pattern>
-  </defs>
-</svg>
 
 <header class="top">
   <a class="brand" href="#story" aria-label="Honey Badger International">
@@ -205,24 +182,9 @@ footer{padding:34px var(--pad);border-top:1px solid var(--line);display:flex;jus
 
   <!-- 1 · Medallion: who we are -->
   <div class="scene" id="s1">
-    <div class="obj">
-      <svg viewBox="0 0 400 400" role="img" aria-label="Honey Badger International medallion">
-        <defs><path id="ringPath" d="M200 200m-176 0a176 176 0 1 1 352 0a176 176 0 1 1-352 0"/>
-          <clipPath id="hexClip"><polygon points="200,50 329.9,125 329.9,275 200,350 70.1,275 70.1,125"/></clipPath></defs>
-        <g class="ring">
-          <circle cx="200" cy="200" r="192" fill="none" stroke="url(#brassV)" stroke-width="1.2" opacity=".6"/>
-          <text font-family="Manrope,sans-serif" font-weight="800" font-size="13" letter-spacing="5.2" fill="#d9c9a3"><textPath href="#ringPath" textLength="1095">HONEY BADGER · INTERNATIONAL · EUROPE ⇄ GCC · HONEY BADGER · INTERNATIONAL · EUROPE ⇄ GCC ·</textPath></text>
-        </g>
-        <polygon points="200,50 329.9,125 329.9,275 200,350 70.1,275 70.1,125" fill="url(#brass)"/>
-        <polygon points="200,66 316,133 316,267 200,334 84,267 84,133" fill="url(#face)"/>
-        <polygon points="200,66 316,133 316,267 200,334 84,267 84,133" fill="url(#comb)" opacity=".13"/>
-        <polygon points="200,74 309,137 309,263 200,326 91,263 91,137" fill="none" stroke="#e0a956" stroke-opacity=".35" stroke-width="1"/>
-        <text x="200" y="232" text-anchor="middle" font-family="'Cormorant Garamond',Georgia,serif" font-weight="600" font-size="104" fill="url(#brassText)">HB</text>
-        <line x1="150" y1="250" x2="250" y2="250" stroke="#e0a956" stroke-opacity=".6"/>
-        <text x="200" y="272" text-anchor="middle" font-family="Manrope,sans-serif" font-weight="800" font-size="10.5" letter-spacing="4.2" fill="#d9c9a3">INTERNATIONAL</text>
-        <text x="200" y="128" text-anchor="middle" font-family="Manrope,sans-serif" font-weight="800" font-size="9" letter-spacing="3.6" fill="#a59d8b">EST · EU ⇄ GCC</text>
-        <g clip-path="url(#hexClip)"><rect class="sheen" x="-180" y="0" width="120" height="400" fill="url(#sheen)" transform="skewX(-18)"/></g>
-      </svg>
+    <div class="obj" style="--ar:1536/1024">
+      <img src="images/medallion.jpg" alt="Brass hexagonal Honey Badger International medallion with HB monogram" width="1536" height="1024" decoding="async">
+      <div class="sheen"></div>
     </div>
     <div class="side l" data-i18n="s1l">Europe</div>
     <div class="side r" data-i18n="s1r">Gulf</div>
@@ -237,33 +199,9 @@ footer{padding:34px var(--pad);border-top:1px solid var(--line);display:flex;jus
 
   <!-- 2 · Compass: we find -->
   <div class="scene" id="s2">
-    <div class="obj">
-      <svg viewBox="0 0 400 400" role="img" aria-label="Brass compass">
-        <circle cx="200" cy="36" r="17" fill="none" stroke="url(#brassV)" stroke-width="7"/>
-        <rect x="186" y="46" width="28" height="18" rx="4" fill="url(#brassV)"/>
-        <g class="bezel">
-          <circle cx="200" cy="210" r="150" fill="url(#brass)"/>
-          <circle cx="200" cy="210" r="138" fill="none" stroke="#2a1a0a" stroke-width="3"/>
-        </g>
-        <circle cx="200" cy="210" r="130" fill="url(#face)"/>
-        <g id="ticks" stroke="#d9c9a3"></g>
-        <g font-family="'Cormorant Garamond',Georgia,serif" font-weight="600" font-size="26" fill="#f1ecdc" text-anchor="middle">
-          <text x="200" y="128">N</text><text x="290" y="219">E</text><text x="200" y="310">S</text><text x="110" y="219">W</text>
-        </g>
-        <g font-family="Manrope,sans-serif" font-weight="800" font-size="9" letter-spacing="2.5" fill="#f2e66e">
-          <text x="128" y="160" text-anchor="middle" transform="rotate(-45 128 160)">EUROPE</text>
-          <text x="272" y="266" text-anchor="middle" transform="rotate(-45 272 266)">GCC</text>
-        </g>
-        <g class="needle">
-          <polygon points="200,98 212,210 188,210" fill="#f2e66e"/>
-          <polygon points="200,98 200,210 188,210" fill="#c4b445"/>
-          <polygon points="200,322 212,210 188,210" fill="#6d6253"/>
-          <polygon points="200,322 200,210 188,210" fill="#4a4237"/>
-        </g>
-        <circle cx="200" cy="210" r="11" fill="url(#brassV)"/>
-        <circle cx="200" cy="210" r="3.5" fill="#1a1008"/>
-        <ellipse cx="150" cy="150" rx="70" ry="40" fill="#fff3d0" opacity=".05" transform="rotate(-35 150 150)"/>
-      </svg>
+    <div class="obj" style="--ar:1672/941">
+      <img src="images/compass.jpg" alt="Open antique brass pocket compass" width="1672" height="941" decoding="async">
+      <div class="sheen"></div>
     </div>
     <div class="side l" data-i18n="s2l">Seek</div>
     <div class="side r" data-i18n="s2r">Find</div>
@@ -275,31 +213,9 @@ footer{padding:34px var(--pad);border-top:1px solid var(--line);display:flex;jus
 
   <!-- 3 · Scales: we balance -->
   <div class="scene" id="s3">
-    <div class="obj">
-      <svg viewBox="0 0 400 400" role="img" aria-label="Brass balance scale">
-        <path d="M128 372h144l-18-20h-108z" fill="url(#brass)"/>
-        <rect x="150" y="344" width="100" height="10" rx="3" fill="url(#brassV)"/>
-        <rect x="193" y="104" width="14" height="242" rx="4" fill="url(#brassV)"/>
-        <circle cx="200" cy="92" r="13" fill="url(#brass)"/>
-        <g class="beam">
-          <rect x="56" y="125" width="288" height="9" rx="4.5" fill="url(#brassV)"/>
-          <circle cx="60" cy="129.5" r="7" fill="url(#brass)"/><circle cx="340" cy="129.5" r="7" fill="url(#brass)"/>
-        </g>
-        <circle cx="200" cy="129.5" r="10" fill="url(#brass)"/>
-        <g class="pan pan-l">
-          <g stroke="#b9853f" stroke-width="1.6"><line x1="0" y1="0" x2="-48" y2="112"/><line x1="0" y1="0" x2="48" y2="112"/><line x1="0" y1="0" x2="0" y2="114"/></g>
-          <rect x="-26" y="78" width="52" height="34" rx="2" fill="#6b4a26"/><rect x="-26" y="78" width="52" height="34" rx="2" fill="none" stroke="#2c1b0b" stroke-width="2"/>
-          <path d="M-26 90h52M-26 100h52" stroke="#2c1b0b" stroke-width="1.5"/>
-          <path d="M-62 112q62 44 124 0z" fill="url(#brass)"/>
-          <text x="0" y="146" text-anchor="middle" font-family="Manrope,sans-serif" font-weight="800" font-size="9" letter-spacing="2.5" fill="#d9c9a3" class="pan-label" data-i18n="seller">SELLER</text>
-        </g>
-        <g class="pan pan-r">
-          <g stroke="#b9853f" stroke-width="1.6"><line x1="0" y1="0" x2="-48" y2="112"/><line x1="0" y1="0" x2="48" y2="112"/><line x1="0" y1="0" x2="0" y2="94"/></g>
-          <g fill="url(#brassText)" stroke="#5a3510" stroke-width="1"><ellipse cx="0" cy="108" rx="22" ry="6"/><ellipse cx="0" cy="101" rx="22" ry="6"/><ellipse cx="0" cy="94" rx="22" ry="6"/><ellipse cx="4" cy="87" rx="22" ry="6"/></g>
-          <path d="M-62 112q62 44 124 0z" fill="url(#brass)"/>
-          <text x="0" y="146" text-anchor="middle" font-family="Manrope,sans-serif" font-weight="800" font-size="9" letter-spacing="2.5" fill="#d9c9a3" class="pan-label" data-i18n="buyer">BUYER</text>
-        </g>
-      </svg>
+    <div class="obj" style="--ar:1536/1024">
+      <img src="images/scales.jpg" alt="Brass balance scale with a wooden crate and a stack of gold coins" width="1536" height="1024" decoding="async">
+      <div class="sheen"></div>
     </div>
     <div class="side l" data-i18n="s3l">Seller</div>
     <div class="side r" data-i18n="s3r">Buyer</div>
@@ -311,31 +227,9 @@ footer{padding:34px var(--pad);border-top:1px solid var(--line);display:flex;jus
 
   <!-- 4 · Dallah: we bridge cultures -->
   <div class="scene" id="s4">
-    <div class="obj">
-      <svg viewBox="0 0 400 400" role="img" aria-label="Arabic coffee pot (dallah)">
-        <g class="steam" fill="none" stroke="#f1ecdc" stroke-width="2.4" stroke-linecap="round" opacity=".55">
-          <path d="M92 92c-12-16 10-28-2-44s8-28 0-42"/>
-          <path d="M104 96c-10-14 12-26 2-40s6-22 2-34"/>
-          <path d="M80 98c-10-12 6-22-4-34s4-20-2-30"/>
-        </g>
-        <g class="pot">
-          <path d="M238 146c66 8 70 96 14 122" fill="none" stroke="url(#brassV)" stroke-width="11" stroke-linecap="round"/>
-          <path d="M172 192c-32-14-56-42-76-80l-8-14 14 8c22 32 46 52 74 62z" fill="url(#brass)"/>
-          <path d="M150 362h100l-10-14h-80z" fill="url(#brass)"/>
-          <path d="M160 348c-50-10-48-92 8-108h64c56 16 58 98 8 108z" fill="url(#brass)"/>
-          <path d="M140 300c40 8 80 8 120 0" fill="none" stroke="#2a1a0a" stroke-width="2" opacity=".6"/>
-          <path d="M146 318c36 7 72 7 108 0" fill="none" stroke="#f6d48e" stroke-width="1" opacity=".35"/>
-          <path d="M168 240c12-10 14-22 10-38h44c-4 16-2 28 10 38z" fill="url(#brass)"/>
-          <path d="M178 202c-18-20-26-50-28-70h100c-2 20-10 50-28 70z" fill="url(#brass)"/>
-          <path d="M162 170h76" stroke="#2a1a0a" stroke-width="2" opacity=".5"/>
-          <rect x="144" y="122" width="112" height="11" rx="4" fill="url(#brassV)"/>
-          <path d="M156 122c4-26 84-26 88 0z" fill="url(#brass)"/>
-          <circle cx="200" cy="94" r="8" fill="url(#brass)"/>
-          <path d="M196 88l4-32 4 32z" fill="url(#brassV)"/>
-          <circle cx="200" cy="54" r="5.5" fill="url(#brass)"/>
-        </g>
-        <g fill="#f1ecdc" opacity=".08"><ellipse cx="160" cy="280" rx="14" ry="40"/></g>
-      </svg>
+    <div class="obj" style="--ar:1536/1024">
+      <img src="images/dallah.jpg" alt="Hammered brass Arabic coffee pot (dallah) with steam" width="1536" height="1024" decoding="async">
+      <div class="sheen"></div>
     </div>
     <div class="side l" data-i18n="s4l">Trust</div>
     <div class="side r" data-i18n="s4r">Respect</div>
@@ -347,27 +241,10 @@ footer{padding:34px var(--pad);border-top:1px solid var(--line);display:flex;jus
 
   <!-- 5 · Seal: we close -->
   <div class="scene" id="s5">
-    <div class="obj">
-      <svg viewBox="0 0 400 400" role="img" aria-label="Contract with wax seal">
-        <g transform="rotate(-5 200 200)">
-          <rect x="92" y="40" width="216" height="300" rx="3" fill="url(#paper)"/>
-          <g stroke="#6b6352" stroke-width="3" stroke-linecap="round" opacity=".55">
-            <path d="M120 82h118"/><path d="M120 108h160M120 124h150M120 140h160M120 156h128"/>
-            <path d="M120 184h160M120 200h144M120 216h156M120 232h96"/>
-          </g>
-          <text x="120" y="70" font-family="Oswald,sans-serif" font-weight="700" font-size="13" letter-spacing="2" fill="#3a3326" data-i18n="contract">AGREEMENT</text>
-          <path class="sig" d="M122 296c14-30 22-30 18-8s10 6 18-10 6 22 18 6 14-4 26 0" fill="none" stroke="#1f2a44" stroke-width="2.6" stroke-linecap="round"/>
-          <path d="M120 306h96" stroke="#6b6352" stroke-width="1.2" opacity=".6"/>
-        </g>
-        <circle class="ripple" cx="262" cy="282" r="64" fill="none" stroke="#f2e66e" stroke-width="2" opacity="0"/>
-        <g class="seal">
-          <path id="waxBlob" fill="url(#wax)"/>
-          <circle cx="262" cy="282" r="44" fill="none" stroke="#5a2508" stroke-width="3" opacity=".7"/>
-          <circle cx="262" cy="282" r="38" fill="none" stroke="#f6c070" stroke-width="1" opacity=".35"/>
-          <text x="262" y="297" text-anchor="middle" font-family="'Cormorant Garamond',Georgia,serif" font-weight="600" font-size="42" fill="#6a2a07" opacity=".85">HB</text>
-          <text x="261" y="296" text-anchor="middle" font-family="'Cormorant Garamond',Georgia,serif" font-weight="600" font-size="42" fill="#f3b351" opacity=".35">HB</text>
-        </g>
-      </svg>
+    <div class="obj" style="--ar:1672/941">
+      <img src="images/seal.jpg" alt="Signed paper with a gold wax seal stamped HB" width="1672" height="941" decoding="async">
+      <div class="sheen"></div>
+      <span class="ripple" style="left:55.3%;top:78%"></span>
     </div>
     <div class="side l" data-i18n="s5l">Signed</div>
     <div class="side r" data-i18n="s5r">Sealed</div>
@@ -377,6 +254,7 @@ footer{padding:34px var(--pad);border-top:1px solid var(--line);display:flex;jus
     </div>
   </div>
 
+  <div class="scrim" aria-hidden="true"></div>
   <div class="progress" aria-hidden="true"></div>
 </section>
 
@@ -530,34 +408,6 @@ document.querySelectorAll("[data-set-lang]").forEach(b => b.addEventListener("cl
 })();
 document.getElementById("yr").textContent = new Date().getFullYear();
 
-/* ---------- procedural SVG bits ---------- */
-(function ticks(){
-  const g = document.getElementById("ticks"), ns = "http://www.w3.org/2000/svg";
-  for (let i = 0; i < 72; i++){
-    const a = i * 5 * Math.PI / 180, r1 = 124, r2 = i % 18 === 0 ? 104 : i % 2 === 0 ? 112 : 117;
-    const l = document.createElementNS(ns, "line");
-    l.setAttribute("x1", 200 + r1 * Math.sin(a)); l.setAttribute("y1", 210 - r1 * Math.cos(a));
-    l.setAttribute("x2", 200 + r2 * Math.sin(a)); l.setAttribute("y2", 210 - r2 * Math.cos(a));
-    l.setAttribute("stroke-width", i % 18 === 0 ? 2.4 : 1); l.setAttribute("opacity", i % 2 ? .45 : .8);
-    g.appendChild(l);
-  }
-})();
-(function wax(){
-  const cx = 262, cy = 282, n = 30, pts = [];
-  for (let i = 0; i < n; i++){
-    const a = i / n * Math.PI * 2;
-    const r = 60 + Math.sin(i * 2.7) * 3.2 + Math.cos(i * 5.3) * 2.6 + (i % 4 === 0 ? 4 : 0);
-    pts.push([cx + r * Math.cos(a), cy + r * Math.sin(a)]);
-  }
-  let d = `M${pts[0][0].toFixed(1)} ${pts[0][1].toFixed(1)}`;
-  for (let i = 0; i < n; i++){
-    const p = pts[(i + 1) % n], q = pts[i];
-    const mx = (q[0] + p[0]) / 2, my = (q[1] + p[1]) / 2;
-    d += ` Q${q[0].toFixed(1)} ${q[1].toFixed(1)} ${mx.toFixed(1)} ${my.toFixed(1)}`;
-  }
-  document.getElementById("waxBlob").setAttribute("d", d + "Z");
-})();
-
 /* ---------- contact form ---------- */
 document.getElementById("brief").addEventListener("submit", e => {
   e.preventDefault();
@@ -579,6 +429,7 @@ document.getElementById("brief").addEventListener("submit", e => {
   const cur = document.getElementById("cur");
   const bar = document.querySelector(".progress");
 
+  gsap.set(".obj", { xPercent: -50, yPercent: -50, x: 0, y: 0 });
   const tl = gsap.timeline({
     defaults: { ease: "none" },
     scrollTrigger: {
@@ -606,47 +457,32 @@ document.getElementById("brief").addEventListener("submit", e => {
         .fromTo(copy, { autoAlpha: 0, y: 46 },             { autoAlpha: 1, y: 0, duration: 2.4, ease: "power2.out" }, t - 1);
     }
 
-    // ---- the one main movement of each scene
+    // ---- the one main movement of each scene (the photo inside its frame)
+    const img = obj.querySelector("img"), sheen = obj.querySelector(".sheen");
     if (i === 0){
-      tl.fromTo(s.querySelector(".ring"),  { rotation: 0 },  { rotation: 140, svgOrigin: "200 200", duration: 9 }, 0)
-        .fromTo(s.querySelector(".sheen"), { x: -40 },     { x: 560, duration: 6, ease: "power1.inOut" }, .5)
-        .fromTo(obj, { scale: 1 }, { scale: 1.06, duration: 6 }, 0);
+      tl.fromTo(img,   { scale: 1 },        { scale: 1.08, duration: 7 }, 0)
+        .fromTo(sheen, { xPercent: -120 },  { xPercent: 300, duration: 6, ease: "power1.inOut" }, .5);
       if (hint) tl.to(hint, { autoAlpha: 0, duration: 1 }, .3);
     }
-    if (i === 1){
-      tl.fromTo(s.querySelector(".needle"), { rotation: -45 }, { rotation: 135, svgOrigin: "200 210", duration: 6, ease: "power2.inOut" }, t + .5)
-        .fromTo(s.querySelector(".bezel"),  { rotation: -12 }, { rotation: 6,   svgOrigin: "200 210", duration: 7 }, t);
+    if (i === 1){   // push in toward the dial
+      tl.fromTo(img,   { scale: 1, transformOrigin: "50% 62%" }, { scale: 1.22, duration: 7, ease: "power1.inOut" }, t - .5)
+        .fromTo(sheen, { xPercent: -120 }, { xPercent: 300, duration: 5, ease: "power1.inOut" }, t + 1);
     }
-    if (i === 2){
-      const beam = s.querySelector(".beam"), pl = s.querySelector(".pan-l"), pr = s.querySelector(".pan-r");
-      const P = { a: 15 };
-      const place = () => {
-        const rad = P.a * Math.PI / 180, L = 140;
-        beam.setAttribute("transform", `rotate(${P.a} 200 129.5)`);
-        pl.setAttribute("transform", `translate(${200 - L * Math.cos(rad)} ${129.5 - L * Math.sin(rad)})`);
-        pr.setAttribute("transform", `translate(${200 + L * Math.cos(rad)} ${129.5 + L * Math.sin(rad)})`);
-      };
-      place();
-      tl.fromTo(P, { a: 15 }, { a: -6, duration: 3, ease: "power2.inOut", onUpdate: place }, t)
-        .fromTo(P, { a: -6 }, { a: 0, duration: 3, ease: "power2.out", onUpdate: place, immediateRender: false }, t + 3);
+    if (i === 2){   // pull back to reveal the balance
+      tl.fromTo(img, { scale: 1.32, transformOrigin: "50% 40%" }, { scale: 1, duration: 7.5, ease: "power2.out" }, t - 2);
     }
-    if (i === 3){
-      const steam = s.querySelectorAll(".steam path");
-      steam.forEach(p => { const len = p.getTotalLength(); p.style.strokeDasharray = len; p.style.strokeDashoffset = len; });
-      tl.fromTo(s.querySelector(".pot"), { rotation: 0 }, { rotation: -7, svgOrigin: "200 362", duration: 4, ease: "power1.inOut" }, t)
-        .fromTo(steam, { strokeDashoffset: (k, p) => p.getTotalLength(), y: 10 }, { strokeDashoffset: 0, y: -16, duration: 5, stagger: .5 }, t + .5);
+    if (i === 3){   // drift toward the steaming spout
+      tl.fromTo(img, { scale: 1, transformOrigin: "24% 40%" }, { scale: 1.16, duration: 7, ease: "power1.inOut" }, t - .5);
     }
-    if (i === 4){
-      tl.fromTo(s.querySelector(".sig"), { strokeDasharray: 260, strokeDashoffset: 260 }, { strokeDashoffset: 0, duration: 2.4 }, t)
-        .fromTo(s.querySelector(".seal"), { autoAlpha: 0, scale: 2.3, svgOrigin: "262 282" }, { autoAlpha: 1, scale: 1, svgOrigin: "262 282", duration: 2.4, ease: "power3.in" }, t + 2.2)
-        .fromTo(s.querySelector(".ripple"), { attr: { r: 62 }, opacity: .9 }, { attr: { r: 140 }, opacity: 0, duration: 2.6, ease: "power2.out" }, t + 4.6)
-        .fromTo(obj, { scale: 1 }, { scale: .96, duration: .5, yoyo: true, repeat: 1 }, t + 4.5)
+    if (i === 4){   // from the seal close-up back to the whole agreement, then the stamp ripple
+      tl.fromTo(img, { scale: 1.45, transformOrigin: "55% 78%" }, { scale: 1, duration: 5, ease: "power2.inOut" }, t - 1.5)
+        .fromTo(s.querySelector(".ripple"), { scale: .6, opacity: .9 }, { scale: 3.2, opacity: 0, duration: 2.6, ease: "power2.out" }, t + 3.6)
         .to({}, { duration: 3 }, t + 7.2); // hold the final frame
     }
 
     // ---- out (crossfades with the next scene's in)
     if (i < last){
-      tl.fromTo(obj,  { autoAlpha: 1, scale: i === 0 ? 1.06 : 1, y: 0 }, { autoAlpha: 0, scale: 1.3, y: -50, duration: 2.6, ease: "power2.in", immediateRender: false }, t + 6.8)
+      tl.fromTo(obj,  { autoAlpha: 1, scale: 1, y: 0 }, { autoAlpha: 0, scale: 1.3, y: -50, duration: 2.6, ease: "power2.in", immediateRender: false }, t + 6.8)
         .fromTo([l, r], { autoAlpha: 1 }, { autoAlpha: 0, duration: 1.8, immediateRender: false }, t + 6.8)
         .fromTo(l, { xPercent: 0 }, { xPercent: -25, duration: 1.8, immediateRender: false }, t + 6.8)
         .fromTo(r, { xPercent: 0 }, { xPercent: 25, duration: 1.8, immediateRender: false }, t + 6.8)
