@@ -54,6 +54,7 @@ body::after{content:"";position:fixed;inset:-50%;z-index:60;pointer-events:none;
 /* photo stage: each product photo sits centred, its edges dissolve into the page black */
 .obj{position:absolute;z-index:1;left:50%;top:47%;height:var(--ph);aspect-ratio:var(--ar);max-width:none;transform:translate(-50%,-50%);overflow:hidden;
   -webkit-mask-image:radial-gradient(ellipse 50% 50% at 50% 50%,#000 62%,transparent 100%);mask-image:radial-gradient(ellipse 50% 50% at 50% 50%,#000 62%,transparent 100%)}
+.intro .obj{height:min(88vh,64vw)}
 .obj img{display:block;width:100%;height:100%;object-fit:cover;max-width:none}
 .obj .sheen{position:absolute;inset:0;width:40%;background:linear-gradient(100deg,transparent,rgba(255,236,190,.16),transparent);mix-blend-mode:screen;transform:translateX(-120%);pointer-events:none}
 .ripple{position:absolute;width:8%;aspect-ratio:1;border:2px solid var(--yellow);border-radius:50%;transform:translate(-50%,-50%);opacity:0;pointer-events:none}
@@ -141,6 +142,7 @@ footer{padding:34px var(--pad);border-top:1px solid var(--line);display:flex;jus
   .top-right{gap:12px}
   .counter{min-width:48px}
   .obj{top:40%;height:auto;width:140vw}
+  .intro .obj{top:46%;height:auto;width:125vw}
   .side{top:calc(40% - 47vw - .4em);font-size:clamp(26px,8vw,44px)}
   .copy{bottom:clamp(22px,5vh,44px)}
   .h1{font-size:clamp(34px,10.5vw,46px)}
@@ -172,7 +174,7 @@ footer{padding:34px var(--pad);border-top:1px solid var(--line);display:flex;jus
       <button type="button" data-set-lang="en" aria-pressed="true">EN</button>
       <button type="button" data-set-lang="bg" aria-pressed="false">BG</button>
     </div>
-    <span class="counter" aria-hidden="true"><span id="cur">01</span> / 05</span>
+    <span class="counter" aria-hidden="true"><span id="cur">01</span> / 06</span>
   </div>
 </header>
 
@@ -180,8 +182,17 @@ footer{padding:34px var(--pad);border-top:1px solid var(--line);display:flex;jus
 <!-- ================= PINNED STORY ================= -->
 <section id="story" aria-label="Story">
 
+  <!-- 0 · Brand opener -->
+  <div class="scene intro" id="s0" data-m="intro">
+    <div class="obj" style="--ar:1536/1024">
+      <img src="images/hero.jpg" alt="Honey Badger International logo: brass HB medallion beside a honey badger" width="1536" height="1024" decoding="async" fetchpriority="high">
+      <div class="sheen"></div>
+    </div>
+    <div class="scroll-hint"><span data-i18n="scroll">Scroll</span><i></i></div>
+  </div>
+
   <!-- 1 · Medallion: who we are -->
-  <div class="scene" id="s1">
+  <div class="scene" id="s1" data-m="medallion">
     <div class="obj" style="--ar:1536/1024">
       <img src="images/medallion.jpg" alt="Brass hexagonal Honey Badger International medallion with HB monogram" width="1536" height="1024" decoding="async">
       <div class="sheen"></div>
@@ -194,11 +205,10 @@ footer{padding:34px var(--pad);border-top:1px solid var(--line);display:flex;jus
       <p data-i18n="s1p">We connect sellers and buyers between Europe and the Gulf — and stay at the table until the deal is closed.</p>
       <p class="note" data-i18n="s1n"><b>Why the honey badger?</b> The most persistent animal in nature. It never lets go.</p>
     </div>
-    <div class="scroll-hint"><span data-i18n="scroll">Scroll</span><i></i></div>
   </div>
 
   <!-- 2 · Compass: we find -->
-  <div class="scene" id="s2">
+  <div class="scene" id="s2" data-m="compass">
     <div class="obj" style="--ar:1672/941">
       <img src="images/compass.jpg" alt="Open antique brass pocket compass" width="1672" height="941" decoding="async">
       <div class="sheen"></div>
@@ -212,7 +222,7 @@ footer{padding:34px var(--pad);border-top:1px solid var(--line);display:flex;jus
   </div>
 
   <!-- 3 · Scales: we balance -->
-  <div class="scene" id="s3">
+  <div class="scene" id="s3" data-m="scales">
     <div class="obj" style="--ar:1536/1024">
       <img src="images/scales.jpg" alt="Brass balance scale with a wooden crate and a stack of gold coins" width="1536" height="1024" decoding="async">
       <div class="sheen"></div>
@@ -226,7 +236,7 @@ footer{padding:34px var(--pad);border-top:1px solid var(--line);display:flex;jus
   </div>
 
   <!-- 4 · Dallah: we bridge cultures -->
-  <div class="scene" id="s4">
+  <div class="scene" id="s4" data-m="dallah">
     <div class="obj" style="--ar:1536/1024">
       <img src="images/dallah.jpg" alt="Hammered brass Arabic coffee pot (dallah) with steam" width="1536" height="1024" decoding="async">
       <div class="sheen"></div>
@@ -240,7 +250,7 @@ footer{padding:34px var(--pad);border-top:1px solid var(--line);display:flex;jus
   </div>
 
   <!-- 5 · Seal: we close -->
-  <div class="scene" id="s5">
+  <div class="scene" id="s5" data-m="seal">
     <div class="obj" style="--ar:1672/941">
       <img src="images/seal.jpg" alt="Signed paper with a gold wax seal stamped HB" width="1672" height="941" decoding="async">
       <div class="sheen"></div>
@@ -433,7 +443,7 @@ document.getElementById("brief").addEventListener("submit", e => {
   const tl = gsap.timeline({
     defaults: { ease: "none" },
     scrollTrigger: {
-      trigger: "#story", start: "top top", end: () => "+=" + window.innerHeight * 7,
+      trigger: "#story", start: "top top", end: () => "+=" + window.innerHeight * 8.4,
       pin: true, scrub: 0.8, anticipatePin: 1, invalidateOnRefresh: true,
       onUpdate: self => {
         const t = self.progress * tl.duration();
@@ -447,34 +457,39 @@ document.getElementById("brief").addEventListener("submit", e => {
   scenes.forEach((s, i) => {
     const t = i * D;
     const obj = s.querySelector(".obj"), l = s.querySelector(".side.l"), r = s.querySelector(".side.r"), copy = s.querySelector(".copy");
-    const hint = s.querySelector(".scroll-hint");
+    const hint = s.querySelector(".scroll-hint"), m = s.dataset.m;
+    const sides = [l, r].filter(Boolean);
 
     // ---- in (scene 1 is already on screen at the top)
     if (i > 0){
       tl.fromTo(obj,  { autoAlpha: 0, scale: .62, y: 70 }, { autoAlpha: 1, scale: 1, y: 0, duration: 3, ease: "power2.out" }, t - 2)
-        .fromTo(l,    { autoAlpha: 0, xPercent: -35 },     { autoAlpha: 1, xPercent: 0, duration: 2.6, ease: "power2.out" }, t - 1.4)
-        .fromTo(r,    { autoAlpha: 0, xPercent: 35 },      { autoAlpha: 1, xPercent: 0, duration: 2.6, ease: "power2.out" }, t - 1.4)
-        .fromTo(copy, { autoAlpha: 0, y: 46 },             { autoAlpha: 1, y: 0, duration: 2.4, ease: "power2.out" }, t - 1);
+      if (l) tl.fromTo(l, { autoAlpha: 0, xPercent: -35 }, { autoAlpha: 1, xPercent: 0, duration: 2.6, ease: "power2.out" }, t - 1.4);
+      if (r) tl.fromTo(r, { autoAlpha: 0, xPercent: 35 },  { autoAlpha: 1, xPercent: 0, duration: 2.6, ease: "power2.out" }, t - 1.4);
+      if (copy) tl.fromTo(copy, { autoAlpha: 0, y: 46 },   { autoAlpha: 1, y: 0, duration: 2.4, ease: "power2.out" }, t - 1);
     }
 
     // ---- the one main movement of each scene (the photo inside its frame)
     const img = obj.querySelector("img"), sheen = obj.querySelector(".sheen");
-    if (i === 0){
-      tl.fromTo(img,   { scale: 1 },        { scale: 1.08, duration: 7 }, 0)
+    if (m === "intro"){   // slow push in toward the badger
+      tl.fromTo(img,   { scale: 1, transformOrigin: "68% 45%" }, { scale: 1.1, duration: 7 }, 0)
         .fromTo(sheen, { xPercent: -120 },  { xPercent: 300, duration: 6, ease: "power1.inOut" }, .5);
       if (hint) tl.to(hint, { autoAlpha: 0, duration: 1 }, .3);
     }
-    if (i === 1){   // push in toward the dial
+    if (m === "medallion"){
+      tl.fromTo(img,   { scale: 1 },        { scale: 1.08, duration: 7 }, t - .5)
+        .fromTo(sheen, { xPercent: -120 },  { xPercent: 300, duration: 6, ease: "power1.inOut" }, t + .5);
+    }
+    if (m === "compass"){   // push in toward the dial
       tl.fromTo(img,   { scale: 1, transformOrigin: "50% 62%" }, { scale: 1.22, duration: 7, ease: "power1.inOut" }, t - .5)
         .fromTo(sheen, { xPercent: -120 }, { xPercent: 300, duration: 5, ease: "power1.inOut" }, t + 1);
     }
-    if (i === 2){   // pull back to reveal the balance
+    if (m === "scales"){   // pull back to reveal the balance
       tl.fromTo(img, { scale: 1.32, transformOrigin: "50% 40%" }, { scale: 1, duration: 7.5, ease: "power2.out" }, t - 2);
     }
-    if (i === 3){   // drift toward the steaming spout
+    if (m === "dallah"){   // drift toward the steaming spout
       tl.fromTo(img, { scale: 1, transformOrigin: "24% 40%" }, { scale: 1.16, duration: 7, ease: "power1.inOut" }, t - .5);
     }
-    if (i === 4){   // from the seal close-up back to the whole agreement, then the stamp ripple
+    if (m === "seal"){   // from the seal close-up back to the whole agreement, then the stamp ripple
       tl.fromTo(img, { scale: 1.45, transformOrigin: "55% 78%" }, { scale: 1, duration: 5, ease: "power2.inOut" }, t - 1.5)
         .fromTo(s.querySelector(".ripple"), { scale: .6, opacity: .9 }, { scale: 3.2, opacity: 0, duration: 2.6, ease: "power2.out" }, t + 3.6)
         .to({}, { duration: 3 }, t + 7.2); // hold the final frame
@@ -483,17 +498,17 @@ document.getElementById("brief").addEventListener("submit", e => {
     // ---- out (crossfades with the next scene's in)
     if (i < last){
       tl.fromTo(obj,  { autoAlpha: 1, scale: 1, y: 0 }, { autoAlpha: 0, scale: 1.3, y: -50, duration: 2.6, ease: "power2.in", immediateRender: false }, t + 6.8)
-        .fromTo([l, r], { autoAlpha: 1 }, { autoAlpha: 0, duration: 1.8, immediateRender: false }, t + 6.8)
-        .fromTo(l, { xPercent: 0 }, { xPercent: -25, duration: 1.8, immediateRender: false }, t + 6.8)
-        .fromTo(r, { xPercent: 0 }, { xPercent: 25, duration: 1.8, immediateRender: false }, t + 6.8)
-        .fromTo(copy, { autoAlpha: 1, y: 0 }, { autoAlpha: 0, y: -34, duration: 1.8, immediateRender: false }, t + 6.6);
+      if (sides.length) tl.fromTo(sides, { autoAlpha: 1 }, { autoAlpha: 0, duration: 1.8, immediateRender: false }, t + 6.8);
+      if (l) tl.fromTo(l, { xPercent: 0 }, { xPercent: -25, duration: 1.8, immediateRender: false }, t + 6.8);
+      if (r) tl.fromTo(r, { xPercent: 0 }, { xPercent: 25, duration: 1.8, immediateRender: false }, t + 6.8);
+      if (copy) tl.fromTo(copy, { autoAlpha: 1, y: 0 }, { autoAlpha: 0, y: -34, duration: 1.8, immediateRender: false }, t + 6.6);
     }
   });
 
   // gentle entrance for the first frame
   if (!matchMedia("(prefers-reduced-motion: reduce)").matches && window.scrollY < 10){
-    gsap.from("#s1 .obj", { autoAlpha: 0, y: 40, duration: 1.4, ease: "power3.out", clearProps: "opacity,visibility" });
-    gsap.from(["#s1 .side.l", "#s1 .side.r", "#s1 .copy > *"], { autoAlpha: 0, y: 24, duration: 1, stagger: .08, delay: .3, ease: "power2.out", clearProps: "all" });
+    gsap.from("#s0 img", { autoAlpha: 0, scale: 1.04, duration: 1.8, ease: "power3.out", clearProps: "opacity,visibility" });
+    gsap.from("#s0 .scroll-hint", { autoAlpha: 0, duration: 1, delay: 1, clearProps: "opacity,visibility" });
   }
   document.fonts && document.fonts.ready.then(() => ScrollTrigger.refresh());
 })();
