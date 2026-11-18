@@ -1,0 +1,666 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Honey Badger International</title>
+<meta name="description" content="Honey Badger International connects sellers and buyers across Europe and the GCC — trade brokerage in every sector of business.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Manrope:wght@400;500;700;800&family=Oswald:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0e0d0b;
+  --bg-2:#151310;
+  --ink:#f1ecdc;
+  --muted:#a59d8b;
+  --yellow:#f2e66e;
+  --honey:#e0a956;
+  --line:rgba(241,236,220,.14);
+  --obj:min(54vh,40vw);
+  --pad:clamp(16px,5vw,72px);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--bg);-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--ink);font-family:Manrope,system-ui,sans-serif;font-size:17px;line-height:1.55;overflow-x:hidden}
+a{color:inherit}
+::selection{background:var(--yellow);color:var(--bg)}
+
+/* film grain */
+body::after{content:"";position:fixed;inset:-50%;z-index:60;pointer-events:none;opacity:.08;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");}
+
+/* ---------- header ---------- */
+.top{position:fixed;inset:0 0 auto 0;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:22px var(--pad);
+  font-size:12px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;pointer-events:none;
+  background:linear-gradient(rgba(14,13,11,.92) 35%,rgba(14,13,11,0))}
+.top > *{pointer-events:auto}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none;white-space:nowrap}
+.brand svg{width:26px;height:26px;flex:none}
+.top-right{display:flex;align-items:center;gap:22px}
+.lang{display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.lang button{all:unset;cursor:pointer;padding:6px 11px;font-size:11px;letter-spacing:.16em;color:var(--muted)}
+.lang button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.lang button:focus-visible{outline:2px solid var(--yellow);outline-offset:-2px}
+.counter{font-variant-numeric:tabular-nums;min-width:62px;text-align:right}
+
+/* ---------- pinned story ---------- */
+#story{position:relative;height:100vh;height:100svh;overflow:hidden;
+  background:
+    radial-gradient(ellipse 55% 60% at 30% 45%,rgba(224,169,86,.10),transparent 70%),
+    radial-gradient(ellipse 80% 80% at 50% 50%,#17140f 0%,var(--bg) 70%)}
+.scene{position:absolute;inset:0}
+.obj{position:absolute;width:var(--obj);height:var(--obj);left:calc(50% - var(--obj)/2);top:calc(47% - var(--obj)/2);
+  filter:drop-shadow(-24px 30px 40px rgba(0,0,0,.65))}
+.obj svg{width:100%;height:100%;overflow:visible;display:block}
+.side{position:absolute;top:calc(47% - var(--obj)*.3);font-family:"Cormorant Garamond",Georgia,serif;font-style:italic;font-weight:500;
+  font-size:clamp(40px,6.2vw,104px);line-height:1;color:var(--ink);white-space:nowrap}
+.side.l{left:var(--pad)}
+.side.r{right:var(--pad)}
+.copy{position:absolute;left:var(--pad);bottom:clamp(28px,8vh,90px);max-width:min(400px,calc(100vw - 2*var(--pad)))}
+.eyebrow{font-size:11px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:var(--ink);margin-bottom:12px}
+.h1{font-family:Oswald,Impact,sans-serif;font-weight:700;text-transform:uppercase;font-size:clamp(36px,min(4.6vw,7vh),66px);line-height:1.04;letter-spacing:.005em}
+.mark{display:inline-block;line-height:1.02;background:var(--yellow);color:var(--bg);padding:0 .08em;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.h2{display:flex;align-items:center;gap:14px;font-family:Oswald,Impact,sans-serif;font-weight:700;text-transform:uppercase;font-size:clamp(32px,3.4vw,48px);line-height:1}
+.num{display:inline-grid;place-items:center;flex:none;width:1.08em;height:1.08em;background:var(--yellow);color:var(--bg);font-size:.9em}
+.copy p{margin-top:14px;font-size:clamp(15px,1.2vw,18px);color:var(--ink)}
+.copy p.note{font-size:14px;color:var(--muted);margin-top:10px}
+.copy p.note b{color:var(--ink)}
+@media (max-height:820px) and (min-width:701px){.copy p.note{display:none}}
+
+.scroll-hint{position:absolute;right:var(--pad);bottom:clamp(28px,8vh,90px);font-size:11px;font-weight:800;letter-spacing:.3em;text-transform:uppercase;display:flex;align-items:center;gap:10px}
+.scroll-hint i{display:block;width:1px;height:38px;background:linear-gradient(var(--ink),transparent);animation:drip 1.8s ease-in-out infinite}
+@keyframes drip{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+.progress{position:absolute;left:0;bottom:0;height:2px;width:100%;background:var(--yellow);transform:scaleX(0);transform-origin:left;z-index:5}
+
+/* ---------- regular sections ---------- */
+section.block{padding:clamp(80px,14vh,160px) var(--pad);border-top:1px solid var(--line);position:relative}
+.wrap{max-width:1180px;margin:0 auto}
+.kicker{font-size:12px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;margin-bottom:18px;color:var(--muted)}
+.big{font-family:Oswald,Impact,sans-serif;font-weight:700;text-transform:uppercase;font-size:clamp(40px,6vw,88px);line-height:.98;max-width:14ch}
+.lead{max-width:56ch;margin-top:22px;font-size:clamp(16px,1.4vw,19px);color:var(--ink)}
+
+.sectors{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-top:56px;border-radius:14px;overflow:hidden}
+.sector{background:var(--bg);padding:28px 24px 30px;min-height:190px;display:flex;flex-direction:column;justify-content:space-between;transition:background .35s}
+.sector:hover{background:var(--bg-2)}
+.sector small{font-family:Oswald,sans-serif;font-weight:600;font-size:14px;letter-spacing:.12em;color:var(--honey)}
+.sector h3{font-family:"Cormorant Garamond",Georgia,serif;font-weight:600;font-size:clamp(24px,2vw,30px);line-height:1.1}
+
+.corridor{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:clamp(18px,4vw,60px);margin-top:56px}
+.pole h3{font-family:"Cormorant Garamond",Georgia,serif;font-style:italic;font-weight:500;font-size:clamp(48px,7vw,104px);line-height:1}
+.pole p{margin-top:10px;color:var(--muted);font-size:15px}
+.pole.r{text-align:right}
+.lane{width:clamp(60px,18vw,260px);height:2px;background:repeating-linear-gradient(90deg,var(--line) 0 8px,transparent 8px 14px);position:relative}
+.lane::before,.lane::after{content:"";position:absolute;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--yellow);animation:run 3.2s ease-in-out infinite}
+.lane::after{animation-direction:reverse;background:var(--honey)}
+@keyframes run{0%{left:0}50%{left:calc(100% - 10px)}100%{left:0}}
+
+.steps{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;margin-top:56px}
+.step{background:#000;border-left:4px solid var(--yellow);padding:26px 28px}
+.step small{display:block;font-size:11px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:var(--yellow);margin-bottom:10px}
+.step h3{font-family:Oswald,sans-serif;font-weight:700;text-transform:uppercase;font-size:26px;line-height:1.1;margin-bottom:8px}
+.step p{color:var(--ink);opacity:.85;font-size:16px}
+
+.contact{display:grid;grid-template-columns:1fr 1fr;gap:clamp(30px,6vw,90px);align-items:start}
+form{display:grid;gap:14px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+label{display:grid;gap:6px;font-size:11px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+input,select,textarea{font:inherit;font-size:16px;letter-spacing:0;text-transform:none;color:var(--ink);background:var(--bg-2);border:1px solid var(--line);border-radius:10px;padding:13px 14px;width:100%}
+textarea{min-height:120px;resize:vertical}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--yellow);outline-offset:1px;border-color:transparent}
+.roles{display:flex;gap:10px}
+.roles label{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;border:1px solid var(--line);border-radius:10px;padding:13px;color:var(--ink);letter-spacing:.14em}
+.roles input{width:auto;accent-color:var(--yellow)}
+.roles label:has(input:checked){background:var(--ink);color:var(--bg)}
+button.cta{all:unset;cursor:pointer;justify-self:start;background:var(--yellow);color:var(--bg);font-family:Oswald,sans-serif;font-weight:700;font-size:18px;letter-spacing:.08em;text-transform:uppercase;padding:16px 28px;border-radius:2px;transition:transform .2s}
+button.cta:hover{transform:translateY(-2px)}
+button.cta:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+.sent{color:var(--yellow);font-weight:700;min-height:1.5em}
+
+footer{padding:34px var(--pad);border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:12px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+
+/* ---------- responsive ---------- */
+@media (max-width:900px){
+  .sectors{grid-template-columns:repeat(2,1fr)}
+  .contact{grid-template-columns:1fr}
+}
+@media (max-width:700px){
+  :root{--obj:min(68vw,40vh)}
+  body{font-size:16px}
+  .top{padding:16px var(--pad);font-size:10.5px;letter-spacing:.16em}
+  .brand span{display:none}
+  .top-right{gap:12px}
+  .counter{min-width:48px}
+  .obj{top:calc(42% - var(--obj)/2)}
+  .side{top:calc(42% - var(--obj)/2 - 1.25em);font-size:clamp(26px,8vw,44px)}
+  .copy{bottom:clamp(22px,5vh,44px)}
+  .h1{font-size:clamp(34px,10.5vw,46px)}
+  .h2{font-size:30px}
+  .copy p{font-size:15px;margin-top:10px}
+  .scroll-hint{display:none}
+  .steps{grid-template-columns:1fr}
+  .row{grid-template-columns:1fr}
+  .corridor{grid-template-columns:1fr;text-align:center}
+  .pole.r{text-align:center}
+  .lane{margin:0 auto;width:2px;height:70px;background:repeating-linear-gradient(180deg,var(--line) 0 8px,transparent 8px 14px)}
+  .lane::before,.lane::after{left:-4px;animation-name:runv}
+  @keyframes runv{0%{top:0}50%{top:calc(100% - 10px)}100%{top:0}}
+}
+@media (max-width:420px){ .sectors{grid-template-columns:1fr} .sector{min-height:130px} }
+@media (prefers-reduced-motion:reduce){ .scroll-hint i,.lane::before,.lane::after{animation:none} }
+</style>
+</head>
+<body>
+
+<!-- shared gradients -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="brass" x1="0" y1="0" x2="1" y2=".35">
+      <stop offset="0" stop-color="#fbe2a4"/><stop offset=".13" stop-color="#e2ab58"/>
+      <stop offset=".36" stop-color="#9a6224"/><stop offset=".62" stop-color="#4a2c10"/>
+      <stop offset=".86" stop-color="#22150a"/><stop offset="1" stop-color="#120b05"/>
+    </linearGradient>
+    <linearGradient id="brassV" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#f6d48e"/><stop offset=".3" stop-color="#b57b35"/>
+      <stop offset=".7" stop-color="#4a2c10"/><stop offset="1" stop-color="#1a1008"/>
+    </linearGradient>
+    <linearGradient id="brassText" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fff0c4"/><stop offset=".45" stop-color="#e2ab58"/><stop offset="1" stop-color="#7a4818"/>
+    </linearGradient>
+    <radialGradient id="face" cx=".32" cy=".3" r=".85">
+      <stop offset="0" stop-color="#2b2118"/><stop offset="1" stop-color="#0b0906"/>
+    </radialGradient>
+    <radialGradient id="wax" cx=".34" cy=".3" r=".8">
+      <stop offset="0" stop-color="#f3b351"/><stop offset=".42" stop-color="#bb631a"/><stop offset="1" stop-color="#4f1f05"/>
+    </radialGradient>
+    <linearGradient id="paper" x1="0" y1="0" x2="1" y2=".2">
+      <stop offset="0" stop-color="#f5ecd5"/><stop offset=".55" stop-color="#cfc4a8"/><stop offset="1" stop-color="#5d5546"/>
+    </linearGradient>
+    <linearGradient id="sheen" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#fff3d0" stop-opacity="0"/><stop offset=".5" stop-color="#fff3d0" stop-opacity=".38"/><stop offset="1" stop-color="#fff3d0" stop-opacity="0"/>
+    </linearGradient>
+    <pattern id="comb" width="24" height="41.57" patternUnits="userSpaceOnUse">
+      <path d="M12 0l12 6.93v13.86L12 27.71 0 20.79V6.93zM0 34.64l12 6.93M24 34.64l-12 6.93M12 27.71v13.86" fill="none" stroke="#e0a956" stroke-width=".8"/>
+    </pattern>
+  </defs>
+</svg>
+
+<header class="top">
+  <a class="brand" href="#story" aria-label="Honey Badger International">
+    <svg viewBox="0 0 26 26" aria-hidden="true"><polygon points="13,1 23.4,7 23.4,19 13,25 2.6,19 2.6,7" fill="none" stroke="currentColor" stroke-width="2"/><polygon points="13,7 18.2,10 18.2,16 13,19 7.8,16 7.8,10" fill="#f2e66e"/></svg>
+    <span>Honey Badger International</span>
+  </a>
+  <div class="top-right">
+    <div class="lang" role="group" aria-label="Language">
+      <button type="button" data-set-lang="en" aria-pressed="true">EN</button>
+      <button type="button" data-set-lang="bg" aria-pressed="false">BG</button>
+    </div>
+    <span class="counter" aria-hidden="true"><span id="cur">01</span> / 05</span>
+  </div>
+</header>
+
+<main>
+<!-- ================= PINNED STORY ================= -->
+<section id="story" aria-label="Story">
+
+  <!-- 1 · Medallion: who we are -->
+  <div class="scene" id="s1">
+    <div class="obj">
+      <svg viewBox="0 0 400 400" role="img" aria-label="Honey Badger International medallion">
+        <defs><path id="ringPath" d="M200 200m-176 0a176 176 0 1 1 352 0a176 176 0 1 1-352 0"/>
+          <clipPath id="hexClip"><polygon points="200,50 329.9,125 329.9,275 200,350 70.1,275 70.1,125"/></clipPath></defs>
+        <g class="ring">
+          <circle cx="200" cy="200" r="192" fill="none" stroke="url(#brassV)" stroke-width="1.2" opacity=".6"/>
+          <text font-family="Manrope,sans-serif" font-weight="800" font-size="13" letter-spacing="5.2" fill="#d9c9a3"><textPath href="#ringPath" textLength="1095">HONEY BADGER · INTERNATIONAL · EUROPE ⇄ GCC · HONEY BADGER · INTERNATIONAL · EUROPE ⇄ GCC ·</textPath></text>
+        </g>
+        <polygon points="200,50 329.9,125 329.9,275 200,350 70.1,275 70.1,125" fill="url(#brass)"/>
+        <polygon points="200,66 316,133 316,267 200,334 84,267 84,133" fill="url(#face)"/>
+        <polygon points="200,66 316,133 316,267 200,334 84,267 84,133" fill="url(#comb)" opacity=".13"/>
+        <polygon points="200,74 309,137 309,263 200,326 91,263 91,137" fill="none" stroke="#e0a956" stroke-opacity=".35" stroke-width="1"/>
+        <text x="200" y="232" text-anchor="middle" font-family="'Cormorant Garamond',Georgia,serif" font-weight="600" font-size="104" fill="url(#brassText)">HB</text>
+        <line x1="150" y1="250" x2="250" y2="250" stroke="#e0a956" stroke-opacity=".6"/>
+        <text x="200" y="272" text-anchor="middle" font-family="Manrope,sans-serif" font-weight="800" font-size="10.5" letter-spacing="4.2" fill="#d9c9a3">INTERNATIONAL</text>
+        <text x="200" y="128" text-anchor="middle" font-family="Manrope,sans-serif" font-weight="800" font-size="9" letter-spacing="3.6" fill="#a59d8b">EST · EU ⇄ GCC</text>
+        <g clip-path="url(#hexClip)"><rect class="sheen" x="-180" y="0" width="120" height="400" fill="url(#sheen)" transform="skewX(-18)"/></g>
+      </svg>
+    </div>
+    <div class="side l" data-i18n="s1l">Europe</div>
+    <div class="side r" data-i18n="s1r">Gulf</div>
+    <div class="copy">
+      <div class="eyebrow" data-i18n="s1eye">Trade brokerage · Europe ⇄ GCC</div>
+      <h1 class="h1" data-i18n="s1h">Fearless<br>in every<br><span class="mark">deal</span></h1>
+      <p data-i18n="s1p">We connect sellers and buyers between Europe and the Gulf — and stay at the table until the deal is closed.</p>
+      <p class="note" data-i18n="s1n"><b>Why the honey badger?</b> The most persistent animal in nature. It never lets go.</p>
+    </div>
+    <div class="scroll-hint"><span data-i18n="scroll">Scroll</span><i></i></div>
+  </div>
+
+  <!-- 2 · Compass: we find -->
+  <div class="scene" id="s2">
+    <div class="obj">
+      <svg viewBox="0 0 400 400" role="img" aria-label="Brass compass">
+        <circle cx="200" cy="36" r="17" fill="none" stroke="url(#brassV)" stroke-width="7"/>
+        <rect x="186" y="46" width="28" height="18" rx="4" fill="url(#brassV)"/>
+        <g class="bezel">
+          <circle cx="200" cy="210" r="150" fill="url(#brass)"/>
+          <circle cx="200" cy="210" r="138" fill="none" stroke="#2a1a0a" stroke-width="3"/>
+        </g>
+        <circle cx="200" cy="210" r="130" fill="url(#face)"/>
+        <g id="ticks" stroke="#d9c9a3"></g>
+        <g font-family="'Cormorant Garamond',Georgia,serif" font-weight="600" font-size="26" fill="#f1ecdc" text-anchor="middle">
+          <text x="200" y="128">N</text><text x="290" y="219">E</text><text x="200" y="310">S</text><text x="110" y="219">W</text>
+        </g>
+        <g font-family="Manrope,sans-serif" font-weight="800" font-size="9" letter-spacing="2.5" fill="#f2e66e">
+          <text x="128" y="160" text-anchor="middle" transform="rotate(-45 128 160)">EUROPE</text>
+          <text x="272" y="266" text-anchor="middle" transform="rotate(-45 272 266)">GCC</text>
+        </g>
+        <g class="needle">
+          <polygon points="200,98 212,210 188,210" fill="#f2e66e"/>
+          <polygon points="200,98 200,210 188,210" fill="#c4b445"/>
+          <polygon points="200,322 212,210 188,210" fill="#6d6253"/>
+          <polygon points="200,322 200,210 188,210" fill="#4a4237"/>
+        </g>
+        <circle cx="200" cy="210" r="11" fill="url(#brassV)"/>
+        <circle cx="200" cy="210" r="3.5" fill="#1a1008"/>
+        <ellipse cx="150" cy="150" rx="70" ry="40" fill="#fff3d0" opacity=".05" transform="rotate(-35 150 150)"/>
+      </svg>
+    </div>
+    <div class="side l" data-i18n="s2l">Seek</div>
+    <div class="side r" data-i18n="s2r">Find</div>
+    <div class="copy">
+      <h2 class="h2"><span class="num">1</span><span data-i18n="s2h">We find</span></h2>
+      <p data-i18n="s2p">We search both markets for the counterpart that truly fits: verified, serious and ready to trade.</p>
+    </div>
+  </div>
+
+  <!-- 3 · Scales: we balance -->
+  <div class="scene" id="s3">
+    <div class="obj">
+      <svg viewBox="0 0 400 400" role="img" aria-label="Brass balance scale">
+        <path d="M128 372h144l-18-20h-108z" fill="url(#brass)"/>
+        <rect x="150" y="344" width="100" height="10" rx="3" fill="url(#brassV)"/>
+        <rect x="193" y="104" width="14" height="242" rx="4" fill="url(#brassV)"/>
+        <circle cx="200" cy="92" r="13" fill="url(#brass)"/>
+        <g class="beam">
+          <rect x="56" y="125" width="288" height="9" rx="4.5" fill="url(#brassV)"/>
+          <circle cx="60" cy="129.5" r="7" fill="url(#brass)"/><circle cx="340" cy="129.5" r="7" fill="url(#brass)"/>
+        </g>
+        <circle cx="200" cy="129.5" r="10" fill="url(#brass)"/>
+        <g class="pan pan-l">
+          <g stroke="#b9853f" stroke-width="1.6"><line x1="0" y1="0" x2="-48" y2="112"/><line x1="0" y1="0" x2="48" y2="112"/><line x1="0" y1="0" x2="0" y2="114"/></g>
+          <rect x="-26" y="78" width="52" height="34" rx="2" fill="#6b4a26"/><rect x="-26" y="78" width="52" height="34" rx="2" fill="none" stroke="#2c1b0b" stroke-width="2"/>
+          <path d="M-26 90h52M-26 100h52" stroke="#2c1b0b" stroke-width="1.5"/>
+          <path d="M-62 112q62 44 124 0z" fill="url(#brass)"/>
+          <text x="0" y="146" text-anchor="middle" font-family="Manrope,sans-serif" font-weight="800" font-size="9" letter-spacing="2.5" fill="#d9c9a3" class="pan-label" data-i18n="seller">SELLER</text>
+        </g>
+        <g class="pan pan-r">
+          <g stroke="#b9853f" stroke-width="1.6"><line x1="0" y1="0" x2="-48" y2="112"/><line x1="0" y1="0" x2="48" y2="112"/><line x1="0" y1="0" x2="0" y2="94"/></g>
+          <g fill="url(#brassText)" stroke="#5a3510" stroke-width="1"><ellipse cx="0" cy="108" rx="22" ry="6"/><ellipse cx="0" cy="101" rx="22" ry="6"/><ellipse cx="0" cy="94" rx="22" ry="6"/><ellipse cx="4" cy="87" rx="22" ry="6"/></g>
+          <path d="M-62 112q62 44 124 0z" fill="url(#brass)"/>
+          <text x="0" y="146" text-anchor="middle" font-family="Manrope,sans-serif" font-weight="800" font-size="9" letter-spacing="2.5" fill="#d9c9a3" class="pan-label" data-i18n="buyer">BUYER</text>
+        </g>
+      </svg>
+    </div>
+    <div class="side l" data-i18n="s3l">Seller</div>
+    <div class="side r" data-i18n="s3r">Buyer</div>
+    <div class="copy">
+      <h2 class="h2"><span class="num">2</span><span data-i18n="s3h">We balance</span></h2>
+      <p data-i18n="s3p">One deal, two sides. We negotiate terms that work for both the seller and the buyer — price, volume, delivery, payment.</p>
+    </div>
+  </div>
+
+  <!-- 4 · Dallah: we bridge cultures -->
+  <div class="scene" id="s4">
+    <div class="obj">
+      <svg viewBox="0 0 400 400" role="img" aria-label="Arabic coffee pot (dallah)">
+        <g class="steam" fill="none" stroke="#f1ecdc" stroke-width="2.4" stroke-linecap="round" opacity=".55">
+          <path d="M92 92c-12-16 10-28-2-44s8-28 0-42"/>
+          <path d="M104 96c-10-14 12-26 2-40s6-22 2-34"/>
+          <path d="M80 98c-10-12 6-22-4-34s4-20-2-30"/>
+        </g>
+        <g class="pot">
+          <path d="M238 146c66 8 70 96 14 122" fill="none" stroke="url(#brassV)" stroke-width="11" stroke-linecap="round"/>
+          <path d="M172 192c-32-14-56-42-76-80l-8-14 14 8c22 32 46 52 74 62z" fill="url(#brass)"/>
+          <path d="M150 362h100l-10-14h-80z" fill="url(#brass)"/>
+          <path d="M160 348c-50-10-48-92 8-108h64c56 16 58 98 8 108z" fill="url(#brass)"/>
+          <path d="M140 300c40 8 80 8 120 0" fill="none" stroke="#2a1a0a" stroke-width="2" opacity=".6"/>
+          <path d="M146 318c36 7 72 7 108 0" fill="none" stroke="#f6d48e" stroke-width="1" opacity=".35"/>
+          <path d="M168 240c12-10 14-22 10-38h44c-4 16-2 28 10 38z" fill="url(#brass)"/>
+          <path d="M178 202c-18-20-26-50-28-70h100c-2 20-10 50-28 70z" fill="url(#brass)"/>
+          <path d="M162 170h76" stroke="#2a1a0a" stroke-width="2" opacity=".5"/>
+          <rect x="144" y="122" width="112" height="11" rx="4" fill="url(#brassV)"/>
+          <path d="M156 122c4-26 84-26 88 0z" fill="url(#brass)"/>
+          <circle cx="200" cy="94" r="8" fill="url(#brass)"/>
+          <path d="M196 88l4-32 4 32z" fill="url(#brassV)"/>
+          <circle cx="200" cy="54" r="5.5" fill="url(#brass)"/>
+        </g>
+        <g fill="#f1ecdc" opacity=".08"><ellipse cx="160" cy="280" rx="14" ry="40"/></g>
+      </svg>
+    </div>
+    <div class="side l" data-i18n="s4l">Trust</div>
+    <div class="side r" data-i18n="s4r">Respect</div>
+    <div class="copy">
+      <h2 class="h2"><span class="num">3</span><span data-i18n="s4h">We bridge cultures</span></h2>
+      <p data-i18n="s4p">Business in the Gulf begins with trust and a cup of coffee. We know the customs, the languages and the rhythm of both regions.</p>
+    </div>
+  </div>
+
+  <!-- 5 · Seal: we close -->
+  <div class="scene" id="s5">
+    <div class="obj">
+      <svg viewBox="0 0 400 400" role="img" aria-label="Contract with wax seal">
+        <g transform="rotate(-5 200 200)">
+          <rect x="92" y="40" width="216" height="300" rx="3" fill="url(#paper)"/>
+          <g stroke="#6b6352" stroke-width="3" stroke-linecap="round" opacity=".55">
+            <path d="M120 82h118"/><path d="M120 108h160M120 124h150M120 140h160M120 156h128"/>
+            <path d="M120 184h160M120 200h144M120 216h156M120 232h96"/>
+          </g>
+          <text x="120" y="70" font-family="Oswald,sans-serif" font-weight="700" font-size="13" letter-spacing="2" fill="#3a3326" data-i18n="contract">AGREEMENT</text>
+          <path class="sig" d="M122 296c14-30 22-30 18-8s10 6 18-10 6 22 18 6 14-4 26 0" fill="none" stroke="#1f2a44" stroke-width="2.6" stroke-linecap="round"/>
+          <path d="M120 306h96" stroke="#6b6352" stroke-width="1.2" opacity=".6"/>
+        </g>
+        <circle class="ripple" cx="262" cy="282" r="64" fill="none" stroke="#f2e66e" stroke-width="2" opacity="0"/>
+        <g class="seal">
+          <path id="waxBlob" fill="url(#wax)"/>
+          <circle cx="262" cy="282" r="44" fill="none" stroke="#5a2508" stroke-width="3" opacity=".7"/>
+          <circle cx="262" cy="282" r="38" fill="none" stroke="#f6c070" stroke-width="1" opacity=".35"/>
+          <text x="262" y="297" text-anchor="middle" font-family="'Cormorant Garamond',Georgia,serif" font-weight="600" font-size="42" fill="#6a2a07" opacity=".85">HB</text>
+          <text x="261" y="296" text-anchor="middle" font-family="'Cormorant Garamond',Georgia,serif" font-weight="600" font-size="42" fill="#f3b351" opacity=".35">HB</text>
+        </g>
+      </svg>
+    </div>
+    <div class="side l" data-i18n="s5l">Signed</div>
+    <div class="side r" data-i18n="s5r">Sealed</div>
+    <div class="copy">
+      <h2 class="h2"><span class="num">4</span><span data-i18n="s5h">We close</span></h2>
+      <p data-i18n="s5p">From the first introduction to the signed contract — discreet, documented, done.</p>
+    </div>
+  </div>
+
+  <div class="progress" aria-hidden="true"></div>
+</section>
+
+<!-- ================= SECTORS ================= -->
+<section class="block" id="sectors">
+  <div class="wrap">
+    <div class="kicker" data-i18n="secK">Sectors</div>
+    <h2 class="big" data-i18n="secH">Every sector. <span class="mark">One</span> broker.</h2>
+    <p class="lead" data-i18n="secP">Whatever you sell or source, we find the other side of the table — from a single shipment to long-term supply.</p>
+    <div class="sectors">
+      <div class="sector"><small>01</small><h3 data-i18n="c1">Food &amp; Agriculture</h3></div>
+      <div class="sector"><small>02</small><h3 data-i18n="c2">Construction &amp; Building Materials</h3></div>
+      <div class="sector"><small>03</small><h3 data-i18n="c3">Energy &amp; Commodities</h3></div>
+      <div class="sector"><small>04</small><h3 data-i18n="c4">Industrial Machinery</h3></div>
+      <div class="sector"><small>05</small><h3 data-i18n="c5">Healthcare &amp; Pharma</h3></div>
+      <div class="sector"><small>06</small><h3 data-i18n="c6">Luxury &amp; Consumer Goods</h3></div>
+      <div class="sector"><small>07</small><h3 data-i18n="c7">Automotive &amp; Logistics</h3></div>
+      <div class="sector"><small>08</small><h3 data-i18n="c8">Technology &amp; Services</h3></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CORRIDOR ================= -->
+<section class="block" id="corridor">
+  <div class="wrap">
+    <div class="kicker" data-i18n="corK">The corridor</div>
+    <h2 class="big" data-i18n="corH">Two regions. <span class="mark">One</span> table.</h2>
+    <div class="corridor">
+      <div class="pole"><h3 data-i18n="corL">Europe</h3><p data-i18n="corLp">Manufacturers, producers and suppliers across the continent.</p></div>
+      <div class="lane" aria-hidden="true"></div>
+      <div class="pole r"><h3>GCC</h3><p data-i18n="corRp">UAE · Saudi Arabia · Qatar · Kuwait · Bahrain · Oman</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= HOW ================= -->
+<section class="block" id="how">
+  <div class="wrap">
+    <div class="kicker" data-i18n="howK">How we work</div>
+    <h2 class="big" data-i18n="howH">Four steps to a <span class="mark">signed</span> deal</h2>
+    <div class="steps">
+      <div class="step"><small data-i18n="st">Step 01</small><h3 data-i18n="h1t">Brief</h3><p data-i18n="h1p">Tell us what you sell or what you need — product, volume, target market.</p></div>
+      <div class="step"><small data-i18n="st2">Step 02</small><h3 data-i18n="h2t">Match</h3><p data-i18n="h2p">We shortlist and verify counterparts on the other side and make the introduction.</p></div>
+      <div class="step"><small data-i18n="st3">Step 03</small><h3 data-i18n="h3t">Negotiate</h3><p data-i18n="h3p">We mediate price, terms and logistics so both sides walk away satisfied.</p></div>
+      <div class="step"><small data-i18n="st4">Step 04</small><h3 data-i18n="h4t">Close</h3><p data-i18n="h4p">Contract, delivery and follow-up — we stay with you until the deal is done.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CONTACT ================= -->
+<section class="block" id="contact">
+  <div class="wrap contact">
+    <div>
+      <div class="kicker" data-i18n="conK">Contact</div>
+      <h2 class="big" data-i18n="conH">Have something to <span class="mark">sell</span> or to buy?</h2>
+      <p class="lead" data-i18n="conP">Send us a short brief. We reply within two business days, in English, Bulgarian or Arabic.</p>
+    </div>
+    <form id="brief" novalidate>
+      <div class="roles" role="radiogroup">
+        <label><input type="radio" name="role" value="Seller" checked><span data-i18n="rS">I sell</span></label>
+        <label><input type="radio" name="role" value="Buyer"><span data-i18n="rB">I buy</span></label>
+      </div>
+      <div class="row">
+        <label><span data-i18n="fN">Name</span><input name="name" autocomplete="name" required></label>
+        <label><span data-i18n="fC">Company</span><input name="company" autocomplete="organization"></label>
+      </div>
+      <div class="row">
+        <label><span data-i18n="fE">Email</span><input name="email" type="email" autocomplete="email" required></label>
+        <label><span data-i18n="fS">Sector</span>
+          <select name="sector">
+            <option data-i18n="c1">Food &amp; Agriculture</option><option data-i18n="c2">Construction &amp; Building Materials</option>
+            <option data-i18n="c3">Energy &amp; Commodities</option><option data-i18n="c4">Industrial Machinery</option>
+            <option data-i18n="c5">Healthcare &amp; Pharma</option><option data-i18n="c6">Luxury &amp; Consumer Goods</option>
+            <option data-i18n="c7">Automotive &amp; Logistics</option><option data-i18n="c8">Technology &amp; Services</option>
+            <option data-i18n="cO">Other</option>
+          </select>
+        </label>
+      </div>
+      <label><span data-i18n="fM">What are you looking for?</span><textarea name="message"></textarea></label>
+      <button class="cta" type="submit" data-i18n="send">Send brief</button>
+      <div class="sent" id="sent" aria-live="polite"></div>
+    </form>
+  </div>
+</section>
+</main>
+
+<footer>
+  <span>© <span id="yr">2026</span> Honey Badger International</span>
+  <span>Europe ⇄ GCC</span>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+/* ---------- settings ---------- */
+const CONTACT_EMAIL = "info@example.com"; // TODO: replace with the real company address
+
+/* ---------- translations ---------- */
+const BG = {
+  s1l:"Европа", s1r:"Заливът",
+  s1eye:"Търговско посредничество · Европа ⇄ GCC",
+  s1h:'Безстрашни<br>във всяка<br><span class="mark">сделка</span>',
+  s1p:"Свързваме продавачи и купувачи между Европа и страните от Залива — и оставаме на масата, докато сделката не бъде сключена.",
+  s1n:"<b>Защо медоед?</b> Най-упоритото животно в природата. Никога не се отказва.",
+  scroll:"Скрол",
+  s2l:"Търсим", s2r:"Намираме", s2h:"Намираме",
+  s2p:"Търсим и в двата пазара отсрещната страна, която наистина пасва: проверена, сериозна и готова за търговия.",
+  s3l:"Продавач", s3r:"Купувач", s3h:"Балансираме", seller:"ПРОДАВАЧ", buyer:"КУПУВАЧ",
+  s3p:"Една сделка, две страни. Договаряме условия, които работят и за продавача, и за купувача — цена, обем, доставка, плащане.",
+  s4l:"Доверие", s4r:"Уважение", s4h:"Свързваме култури",
+  s4p:"Бизнесът в Залива започва с доверие и чаша кафе. Познаваме обичаите, езиците и ритъма и на двата региона.",
+  s5l:"Подписано", s5r:"Подпечатано", s5h:"Затваряме", contract:"ДОГОВОР",
+  s5p:"От първото запознанство до подписания договор — дискретно, документирано, докрай.",
+  secK:"Сфери", secH:'Всяка сфера. <span class="mark">Един</span> посредник.',
+  secP:"Каквото и да продавате или търсите, намираме другата страна на масата — от единична доставка до дългосрочни договори.",
+  c1:"Храни и земеделие", c2:"Строителство и материали", c3:"Енергия и суровини", c4:"Индустриално оборудване",
+  c5:"Здравеопазване и фарма", c6:"Луксозни и потребителски стоки", c7:"Автомобили и логистика", c8:"Технологии и услуги", cO:"Друго",
+  corK:"Коридорът", corH:'Два региона. <span class="mark">Една</span> маса.', corL:"Европа",
+  corLp:"Производители, преработватели и доставчици от целия континент.",
+  corRp:"ОАЕ · Саудитска Арабия · Катар · Кувейт · Бахрейн · Оман",
+  howK:"Как работим", howH:'Четири стъпки до <span class="mark">подписана</span> сделка',
+  st:"Стъпка 01", st2:"Стъпка 02", st3:"Стъпка 03", st4:"Стъпка 04",
+  h1t:"Заявка", h1p:"Кажете ни какво продавате или от какво имате нужда — продукт, обем, целеви пазар.",
+  h2t:"Съвпадение", h2p:"Подбираме и проверяваме партньори от другата страна и ви запознаваме.",
+  h3t:"Преговори", h3p:"Посредничим за цена, условия и логистика, така че и двете страни да са доволни.",
+  h4t:"Сделка", h4p:"Договор, доставка и последващи грижи — оставаме с вас, докато сделката приключи.",
+  conK:"Контакт", conH:'Имате какво да <span class="mark">продадете</span> или да купите?',
+  conP:"Изпратете ни кратко запитване. Отговаряме до два работни дни — на български, английски или арабски.",
+  rS:"Продавам", rB:"Купувам", fN:"Име", fC:"Фирма", fE:"Имейл", fS:"Сфера", fM:"Какво търсите?", send:"Изпрати запитване",
+  thanks:"Благодарим! Отваряме имейла ви, за да изпратите запитването."
+};
+const EN = {}; // filled from the page's original markup
+document.querySelectorAll("[data-i18n]").forEach(el => { const k = el.dataset.i18n; if (!(k in EN)) EN[k] = el.innerHTML; });
+EN.thanks = "Thank you! Your email app is opening so you can send the brief.";
+let lang = "en";
+
+function setLang(l){
+  lang = l;
+  const dict = l === "bg" ? BG : EN;
+  document.querySelectorAll("[data-i18n]").forEach(el => { const v = dict[el.dataset.i18n]; if (v != null) el.innerHTML = v; });
+  document.documentElement.lang = l; document.documentElement.dataset.lang = l;
+  document.querySelectorAll("[data-set-lang]").forEach(b => b.setAttribute("aria-pressed", b.dataset.setLang === l));
+  try { localStorage.setItem("hbi-lang", l); } catch(e){}
+  if (window.ScrollTrigger) ScrollTrigger.refresh();
+}
+document.querySelectorAll("[data-set-lang]").forEach(b => b.addEventListener("click", () => setLang(b.dataset.setLang)));
+(function initLang(){
+  let l = new URLSearchParams(location.search).get("lang");
+  if (!l) { try { l = localStorage.getItem("hbi-lang"); } catch(e){} }
+  if (l === "bg") setLang("bg");
+})();
+document.getElementById("yr").textContent = new Date().getFullYear();
+
+/* ---------- procedural SVG bits ---------- */
+(function ticks(){
+  const g = document.getElementById("ticks"), ns = "http://www.w3.org/2000/svg";
+  for (let i = 0; i < 72; i++){
+    const a = i * 5 * Math.PI / 180, r1 = 124, r2 = i % 18 === 0 ? 104 : i % 2 === 0 ? 112 : 117;
+    const l = document.createElementNS(ns, "line");
+    l.setAttribute("x1", 200 + r1 * Math.sin(a)); l.setAttribute("y1", 210 - r1 * Math.cos(a));
+    l.setAttribute("x2", 200 + r2 * Math.sin(a)); l.setAttribute("y2", 210 - r2 * Math.cos(a));
+    l.setAttribute("stroke-width", i % 18 === 0 ? 2.4 : 1); l.setAttribute("opacity", i % 2 ? .45 : .8);
+    g.appendChild(l);
+  }
+})();
+(function wax(){
+  const cx = 262, cy = 282, n = 30, pts = [];
+  for (let i = 0; i < n; i++){
+    const a = i / n * Math.PI * 2;
+    const r = 60 + Math.sin(i * 2.7) * 3.2 + Math.cos(i * 5.3) * 2.6 + (i % 4 === 0 ? 4 : 0);
+    pts.push([cx + r * Math.cos(a), cy + r * Math.sin(a)]);
+  }
+  let d = `M${pts[0][0].toFixed(1)} ${pts[0][1].toFixed(1)}`;
+  for (let i = 0; i < n; i++){
+    const p = pts[(i + 1) % n], q = pts[i];
+    const mx = (q[0] + p[0]) / 2, my = (q[1] + p[1]) / 2;
+    d += ` Q${q[0].toFixed(1)} ${q[1].toFixed(1)} ${mx.toFixed(1)} ${my.toFixed(1)}`;
+  }
+  document.getElementById("waxBlob").setAttribute("d", d + "Z");
+})();
+
+/* ---------- contact form ---------- */
+document.getElementById("brief").addEventListener("submit", e => {
+  e.preventDefault();
+  const f = new FormData(e.target);
+  if (!f.get("name") || !f.get("email")) { e.target.reportValidity(); return; }
+  const body = `Role: ${f.get("role")}\nName: ${f.get("name")}\nCompany: ${f.get("company")}\nEmail: ${f.get("email")}\nSector: ${f.get("sector")}\n\n${f.get("message")}`;
+  document.getElementById("sent").textContent = (lang === "bg" ? BG : EN).thanks;
+  location.href = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent("Brief — " + f.get("role") + " — " + f.get("sector"))}&body=${encodeURIComponent(body)}`;
+});
+
+/* ---------- the scroll story ---------- */
+(function story(){
+  if (!window.gsap || !window.ScrollTrigger) return; // page still reads fine without motion
+  gsap.registerPlugin(ScrollTrigger);
+
+  const D = 10;                         // timeline units per scene
+  const scenes = gsap.utils.toArray(".scene");
+  const last = scenes.length - 1;
+  const cur = document.getElementById("cur");
+  const bar = document.querySelector(".progress");
+
+  const tl = gsap.timeline({
+    defaults: { ease: "none" },
+    scrollTrigger: {
+      trigger: "#story", start: "top top", end: () => "+=" + window.innerHeight * 7,
+      pin: true, scrub: 0.8, anticipatePin: 1, invalidateOnRefresh: true,
+      onUpdate: self => {
+        const t = self.progress * tl.duration();
+        const i = Math.min(last, Math.max(0, Math.floor((t + 1.2) / D)));
+        cur.textContent = String(i + 1).padStart(2, "0");
+        bar.style.transform = `scaleX(${self.progress})`;
+      }
+    }
+  });
+
+  scenes.forEach((s, i) => {
+    const t = i * D;
+    const obj = s.querySelector(".obj"), l = s.querySelector(".side.l"), r = s.querySelector(".side.r"), copy = s.querySelector(".copy");
+    const hint = s.querySelector(".scroll-hint");
+
+    // ---- in (scene 1 is already on screen at the top)
+    if (i > 0){
+      tl.fromTo(obj,  { autoAlpha: 0, scale: .62, y: 70 }, { autoAlpha: 1, scale: 1, y: 0, duration: 3, ease: "power2.out" }, t - 2)
+        .fromTo(l,    { autoAlpha: 0, xPercent: -35 },     { autoAlpha: 1, xPercent: 0, duration: 2.6, ease: "power2.out" }, t - 1.4)
+        .fromTo(r,    { autoAlpha: 0, xPercent: 35 },      { autoAlpha: 1, xPercent: 0, duration: 2.6, ease: "power2.out" }, t - 1.4)
+        .fromTo(copy, { autoAlpha: 0, y: 46 },             { autoAlpha: 1, y: 0, duration: 2.4, ease: "power2.out" }, t - 1);
+    }
+
+    // ---- the one main movement of each scene
+    if (i === 0){
+      tl.fromTo(s.querySelector(".ring"),  { rotation: 0 },  { rotation: 140, svgOrigin: "200 200", duration: 9 }, 0)
+        .fromTo(s.querySelector(".sheen"), { x: -40 },     { x: 560, duration: 6, ease: "power1.inOut" }, .5)
+        .fromTo(obj, { scale: 1 }, { scale: 1.06, duration: 6 }, 0);
+      if (hint) tl.to(hint, { autoAlpha: 0, duration: 1 }, .3);
+    }
+    if (i === 1){
+      tl.fromTo(s.querySelector(".needle"), { rotation: -45 }, { rotation: 135, svgOrigin: "200 210", duration: 6, ease: "power2.inOut" }, t + .5)
+        .fromTo(s.querySelector(".bezel"),  { rotation: -12 }, { rotation: 6,   svgOrigin: "200 210", duration: 7 }, t);
+    }
+    if (i === 2){
+      const beam = s.querySelector(".beam"), pl = s.querySelector(".pan-l"), pr = s.querySelector(".pan-r");
+      const P = { a: 15 };
+      const place = () => {
+        const rad = P.a * Math.PI / 180, L = 140;
+        beam.setAttribute("transform", `rotate(${P.a} 200 129.5)`);
+        pl.setAttribute("transform", `translate(${200 - L * Math.cos(rad)} ${129.5 - L * Math.sin(rad)})`);
+        pr.setAttribute("transform", `translate(${200 + L * Math.cos(rad)} ${129.5 + L * Math.sin(rad)})`);
+      };
+      place();
+      tl.fromTo(P, { a: 15 }, { a: -6, duration: 3, ease: "power2.inOut", onUpdate: place }, t)
+        .fromTo(P, { a: -6 }, { a: 0, duration: 3, ease: "power2.out", onUpdate: place, immediateRender: false }, t + 3);
+    }
+    if (i === 3){
+      const steam = s.querySelectorAll(".steam path");
+      steam.forEach(p => { const len = p.getTotalLength(); p.style.strokeDasharray = len; p.style.strokeDashoffset = len; });
+      tl.fromTo(s.querySelector(".pot"), { rotation: 0 }, { rotation: -7, svgOrigin: "200 362", duration: 4, ease: "power1.inOut" }, t)
+        .fromTo(steam, { strokeDashoffset: (k, p) => p.getTotalLength(), y: 10 }, { strokeDashoffset: 0, y: -16, duration: 5, stagger: .5 }, t + .5);
+    }
+    if (i === 4){
+      tl.fromTo(s.querySelector(".sig"), { strokeDasharray: 260, strokeDashoffset: 260 }, { strokeDashoffset: 0, duration: 2.4 }, t)
+        .fromTo(s.querySelector(".seal"), { autoAlpha: 0, scale: 2.3, svgOrigin: "262 282" }, { autoAlpha: 1, scale: 1, svgOrigin: "262 282", duration: 2.4, ease: "power3.in" }, t + 2.2)
+        .fromTo(s.querySelector(".ripple"), { attr: { r: 62 }, opacity: .9 }, { attr: { r: 140 }, opacity: 0, duration: 2.6, ease: "power2.out" }, t + 4.6)
+        .fromTo(obj, { scale: 1 }, { scale: .96, duration: .5, yoyo: true, repeat: 1 }, t + 4.5)
+        .to({}, { duration: 3 }, t + 7.2); // hold the final frame
+    }
+
+    // ---- out (crossfades with the next scene's in)
+    if (i < last){
+      tl.fromTo(obj,  { autoAlpha: 1, scale: i === 0 ? 1.06 : 1, y: 0 }, { autoAlpha: 0, scale: 1.3, y: -50, duration: 2.6, ease: "power2.in", immediateRender: false }, t + 6.8)
+        .fromTo([l, r], { autoAlpha: 1 }, { autoAlpha: 0, duration: 1.8, immediateRender: false }, t + 6.8)
+        .fromTo(l, { xPercent: 0 }, { xPercent: -25, duration: 1.8, immediateRender: false }, t + 6.8)
+        .fromTo(r, { xPercent: 0 }, { xPercent: 25, duration: 1.8, immediateRender: false }, t + 6.8)
+        .fromTo(copy, { autoAlpha: 1, y: 0 }, { autoAlpha: 0, y: -34, duration: 1.8, immediateRender: false }, t + 6.6);
+    }
+  });
+
+  // gentle entrance for the first frame
+  if (!matchMedia("(prefers-reduced-motion: reduce)").matches && window.scrollY < 10){
+    gsap.from("#s1 .obj", { autoAlpha: 0, y: 40, duration: 1.4, ease: "power3.out", clearProps: "opacity,visibility" });
+    gsap.from(["#s1 .side.l", "#s1 .side.r", "#s1 .copy > *"], { autoAlpha: 0, y: 24, duration: 1, stagger: .08, delay: .3, ease: "power2.out", clearProps: "all" });
+  }
+  document.fonts && document.fonts.ready.then(() => ScrollTrigger.refresh());
+})();
+</script>
+</body>
+</html>
