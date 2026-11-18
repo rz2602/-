@@ -54,7 +54,8 @@ body::after{content:"";position:fixed;inset:-50%;z-index:60;pointer-events:none;
 /* photo stage: each product photo sits centred, its edges dissolve into the page black */
 .obj{position:absolute;z-index:1;left:50%;top:47%;height:var(--ph);aspect-ratio:var(--ar);max-width:none;transform:translate(-50%,-50%);overflow:hidden;
   -webkit-mask-image:radial-gradient(ellipse 50% 50% at 50% 50%,#000 62%,transparent 100%);mask-image:radial-gradient(ellipse 50% 50% at 50% 50%,#000 62%,transparent 100%)}
-.intro .obj{height:min(88vh,64vw)}
+.intro .obj{height:min(80vh,60vw);-webkit-mask-image:radial-gradient(ellipse 50% 50% at 50% 50%,#000 80%,transparent 100%);mask-image:radial-gradient(ellipse 50% 50% at 50% 50%,#000 80%,transparent 100%)}
+.obj canvas{position:absolute;inset:0;width:100%;height:100%}
 .obj img{display:block;width:100%;height:100%;object-fit:cover;max-width:none}
 .obj .sheen{position:absolute;inset:0;width:40%;background:linear-gradient(100deg,transparent,rgba(255,236,190,.16),transparent);mix-blend-mode:screen;transform:translateX(-120%);pointer-events:none}
 .ripple{position:absolute;width:8%;aspect-ratio:1;border:2px solid var(--yellow);border-radius:50%;transform:translate(-50%,-50%);opacity:0;pointer-events:none}
@@ -142,7 +143,7 @@ footer{padding:34px var(--pad);border-top:1px solid var(--line);display:flex;jus
   .top-right{gap:12px}
   .counter{min-width:48px}
   .obj{top:40%;height:auto;width:140vw}
-  .intro .obj{top:46%;height:auto;width:125vw}
+  .intro .obj{top:44%;height:auto;width:104vw}
   .side{top:calc(40% - 47vw - .4em);font-size:clamp(26px,8vw,44px)}
   .copy{bottom:clamp(22px,5vh,44px)}
   .h1{font-size:clamp(34px,10.5vw,46px)}
@@ -184,8 +185,9 @@ footer{padding:34px var(--pad);border-top:1px solid var(--line);display:flex;jus
 
   <!-- 0 · Brand opener -->
   <div class="scene intro" id="s0" data-m="intro">
-    <div class="obj" style="--ar:1536/1024">
-      <img src="images/hero.jpg" alt="Honey Badger International logo: brass HB medallion beside a honey badger" width="1536" height="1024" decoding="async" fetchpriority="high">
+    <div class="obj" style="--ar:1200/676">
+      <img src="frames/hb_000.webp" alt="Honey Badger International logo: brass HB medallion beside a honey badger" width="1200" height="676" decoding="async" fetchpriority="high">
+      <canvas id="badger" width="1200" height="676" aria-hidden="true"></canvas>
       <div class="sheen"></div>
     </div>
     <div class="scroll-hint"><span data-i18n="scroll">Scroll</span><i></i></div>
@@ -434,6 +436,8 @@ document.getElementById("brief").addEventListener("submit", e => {
   gsap.registerPlugin(ScrollTrigger);
 
   const D = 10;                         // timeline units per scene
+  const X = 5;                          // extra units for the opener, so the head turn gets room
+  const startOf = i => i * D + (i > 0 ? X : 0);
   const scenes = gsap.utils.toArray(".scene");
   const last = scenes.length - 1;
   const cur = document.getElementById("cur");
@@ -443,11 +447,11 @@ document.getElementById("brief").addEventListener("submit", e => {
   const tl = gsap.timeline({
     defaults: { ease: "none" },
     scrollTrigger: {
-      trigger: "#story", start: "top top", end: () => "+=" + window.innerHeight * 8.4,
+      trigger: "#story", start: "top top", end: () => "+=" + window.innerHeight * 9.4,
       pin: true, scrub: 0.8, anticipatePin: 1, invalidateOnRefresh: true,
       onUpdate: self => {
         const t = self.progress * tl.duration();
-        const i = Math.min(last, Math.max(0, Math.floor((t + 1.2) / D)));
+        let i = 0; while (i < last && startOf(i + 1) <= t + 1.2) i++;
         cur.textContent = String(i + 1).padStart(2, "0");
         bar.style.transform = `scaleX(${self.progress})`;
       }
@@ -455,7 +459,7 @@ document.getElementById("brief").addEventListener("submit", e => {
   });
 
   scenes.forEach((s, i) => {
-    const t = i * D;
+    const t = startOf(i), o = t + 6.8 + (i === 0 ? X : 0);
     const obj = s.querySelector(".obj"), l = s.querySelector(".side.l"), r = s.querySelector(".side.r"), copy = s.querySelector(".copy");
     const hint = s.querySelector(".scroll-hint"), m = s.dataset.m;
     const sides = [l, r].filter(Boolean);
@@ -470,8 +474,24 @@ document.getElementById("brief").addEventListener("submit", e => {
 
     // ---- the one main movement of each scene (the photo inside its frame)
     const img = obj.querySelector("img"), sheen = obj.querySelector(".sheen");
-    if (m === "intro"){   // slow push in toward the badger
-      tl.fromTo(img,   { scale: 1, transformOrigin: "68% 45%" }, { scale: 1.1, duration: 7 }, 0)
+    if (m === "intro"){   // the badger turns its head to the viewer, frame by frame
+      const cv = obj.querySelector("canvas"), ctx = cv.getContext("2d");
+      const N = 90, frames = [], F = { f: 0 };
+      let shown = -1;
+      const draw = () => {
+        const k = Math.round(F.f);
+        if (k === shown) return;
+        // nearest frame already loaded, so a fast scroll never shows a blank
+        for (let j = k; j >= 0; j--) { const im = frames[j]; if (im && im.complete && im.naturalWidth) { ctx.drawImage(im, 0, 0, cv.width, cv.height); shown = j === k ? k : -1; return; } }
+      };
+      for (let j = 0; j < N; j++) {
+        const im = new Image(); im.decoding = "async";
+        im.src = `frames/hb_${String(j).padStart(3, "0")}.webp`;
+        if (j === 0) im.onload = draw;
+        frames.push(im);
+      }
+      tl.fromTo(F, { f: 0 }, { f: N - 1, duration: 9.5, ease: "none", onUpdate: draw }, .3)
+        .fromTo(cv, { scale: 1, transformOrigin: "68% 45%" }, { scale: 1.06, duration: 11 }, 0)
         .fromTo(sheen, { xPercent: -120 },  { xPercent: 300, duration: 6, ease: "power1.inOut" }, .5);
       if (hint) tl.to(hint, { autoAlpha: 0, duration: 1 }, .3);
     }
@@ -497,17 +517,17 @@ document.getElementById("brief").addEventListener("submit", e => {
 
     // ---- out (crossfades with the next scene's in)
     if (i < last){
-      tl.fromTo(obj,  { autoAlpha: 1, scale: 1, y: 0 }, { autoAlpha: 0, scale: 1.3, y: -50, duration: 2.6, ease: "power2.in", immediateRender: false }, t + 6.8)
-      if (sides.length) tl.fromTo(sides, { autoAlpha: 1 }, { autoAlpha: 0, duration: 1.8, immediateRender: false }, t + 6.8);
-      if (l) tl.fromTo(l, { xPercent: 0 }, { xPercent: -25, duration: 1.8, immediateRender: false }, t + 6.8);
-      if (r) tl.fromTo(r, { xPercent: 0 }, { xPercent: 25, duration: 1.8, immediateRender: false }, t + 6.8);
-      if (copy) tl.fromTo(copy, { autoAlpha: 1, y: 0 }, { autoAlpha: 0, y: -34, duration: 1.8, immediateRender: false }, t + 6.6);
+      tl.fromTo(obj,  { autoAlpha: 1, scale: 1, y: 0 }, { autoAlpha: 0, scale: 1.3, y: -50, duration: 2.6, ease: "power2.in", immediateRender: false }, o)
+      if (sides.length) tl.fromTo(sides, { autoAlpha: 1 }, { autoAlpha: 0, duration: 1.8, immediateRender: false }, o);
+      if (l) tl.fromTo(l, { xPercent: 0 }, { xPercent: -25, duration: 1.8, immediateRender: false }, o);
+      if (r) tl.fromTo(r, { xPercent: 0 }, { xPercent: 25, duration: 1.8, immediateRender: false }, o);
+      if (copy) tl.fromTo(copy, { autoAlpha: 1, y: 0 }, { autoAlpha: 0, y: -34, duration: 1.8, immediateRender: false }, o - .2);
     }
   });
 
   // gentle entrance for the first frame
   if (!matchMedia("(prefers-reduced-motion: reduce)").matches && window.scrollY < 10){
-    gsap.from("#s0 img", { autoAlpha: 0, scale: 1.04, duration: 1.8, ease: "power3.out", clearProps: "opacity,visibility" });
+    gsap.from("#s0 .obj > *", { autoAlpha: 0, scale: 1.04, duration: 1.8, ease: "power3.out", clearProps: "opacity,visibility" });
     gsap.from("#s0 .scroll-hint", { autoAlpha: 0, duration: 1, delay: 1, clearProps: "opacity,visibility" });
   }
   document.fonts && document.fonts.ready.then(() => ScrollTrigger.refresh());
