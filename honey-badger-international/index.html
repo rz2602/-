@@ -78,6 +78,12 @@ body::after{content:"";position:fixed;inset:-50%;z-index:60;pointer-events:none;
 .copy p.note{font-size:14px;color:var(--muted);margin-top:10px}
 .copy p.note b{color:var(--ink)}
 @media (max-height:820px) and (min-width:701px){.copy p.note{display:none}}
+/* opener on wide screens: video on the right, the story's thesis on the left */
+@media (min-width:701px){
+  .intro .obj{left:64%;height:min(68vh,34vw)}
+  .intro .side{display:none}
+  .intro .copy{bottom:auto;top:calc(50% - 150px);max-width:min(380px,30vw)}
+}
 
 .scroll-hint{position:absolute;right:var(--pad);bottom:clamp(28px,8vh,90px);font-size:11px;font-weight:800;letter-spacing:.3em;text-transform:uppercase;display:flex;align-items:center;gap:10px}
 .scroll-hint i{display:block;width:1px;height:38px;background:linear-gradient(var(--ink),transparent);animation:drip 1.8s ease-in-out infinite}
@@ -175,7 +181,7 @@ footer{padding:34px var(--pad);border-top:1px solid var(--line);display:flex;jus
       <button type="button" data-set-lang="en" aria-pressed="true">EN</button>
       <button type="button" data-set-lang="bg" aria-pressed="false">BG</button>
     </div>
-    <span class="counter" aria-hidden="true"><span id="cur">01</span> / 06</span>
+    <span class="counter" aria-hidden="true"><span id="cur">01</span> / 05</span>
   </div>
 </header>
 
@@ -183,20 +189,11 @@ footer{padding:34px var(--pad);border-top:1px solid var(--line);display:flex;jus
 <!-- ================= PINNED STORY ================= -->
 <section id="story" aria-label="Story">
 
-  <!-- 0 · Brand opener -->
-  <div class="scene intro" id="s0" data-m="intro">
+  <!-- 1 · Opener: the badger turns to the viewer -->
+  <div class="scene intro" id="s1" data-m="intro">
     <div class="obj" style="--ar:1200/676">
       <img src="frames/hb_000.webp" alt="Honey Badger International logo: brass HB medallion beside a honey badger" width="1200" height="676" decoding="async" fetchpriority="high">
       <canvas id="badger" width="1200" height="676" aria-hidden="true"></canvas>
-      <div class="sheen"></div>
-    </div>
-    <div class="scroll-hint"><span data-i18n="scroll">Scroll</span><i></i></div>
-  </div>
-
-  <!-- 1 · Medallion: who we are -->
-  <div class="scene" id="s1" data-m="medallion">
-    <div class="obj" style="--ar:1536/1024">
-      <img src="images/medallion.jpg" alt="Brass hexagonal Honey Badger International medallion with HB monogram" width="1536" height="1024" decoding="async">
       <div class="sheen"></div>
     </div>
     <div class="side l" data-i18n="s1l">Europe</div>
@@ -207,6 +204,7 @@ footer{padding:34px var(--pad);border-top:1px solid var(--line);display:flex;jus
       <p data-i18n="s1p">We connect sellers and buyers between Europe and the Gulf — and stay at the table until the deal is closed.</p>
       <p class="note" data-i18n="s1n"><b>Why the honey badger?</b> The most persistent animal in nature. It never lets go.</p>
     </div>
+    <div class="scroll-hint"><span data-i18n="scroll">Scroll</span><i></i></div>
   </div>
 
   <!-- 2 · Compass: we find -->
@@ -447,7 +445,7 @@ document.getElementById("brief").addEventListener("submit", e => {
   const tl = gsap.timeline({
     defaults: { ease: "none" },
     scrollTrigger: {
-      trigger: "#story", start: "top top", end: () => "+=" + window.innerHeight * 9.4,
+      trigger: "#story", start: "top top", end: () => "+=" + window.innerHeight * 8,
       pin: true, scrub: 0.8, anticipatePin: 1, invalidateOnRefresh: true,
       onUpdate: self => {
         const t = self.progress * tl.duration();
@@ -491,7 +489,7 @@ document.getElementById("brief").addEventListener("submit", e => {
         frames.push(im);
       }
       tl.fromTo(F, { f: 0 }, { f: N - 1, duration: 9.5, ease: "none", onUpdate: draw }, .3)
-        .fromTo(cv, { scale: 1, transformOrigin: "68% 45%" }, { scale: 1.06, duration: 11 }, 0)
+        .fromTo(cv, { scale: 1, transformOrigin: "68% 45%" }, { scale: 1.03, duration: 11 }, 0)
         .fromTo(sheen, { xPercent: -120 },  { xPercent: 300, duration: 6, ease: "power1.inOut" }, .5);
       if (hint) tl.to(hint, { autoAlpha: 0, duration: 1 }, .3);
     }
@@ -527,8 +525,8 @@ document.getElementById("brief").addEventListener("submit", e => {
 
   // gentle entrance for the first frame
   if (!matchMedia("(prefers-reduced-motion: reduce)").matches && window.scrollY < 10){
-    gsap.from("#s0 .obj > *", { autoAlpha: 0, scale: 1.04, duration: 1.8, ease: "power3.out", clearProps: "opacity,visibility" });
-    gsap.from("#s0 .scroll-hint", { autoAlpha: 0, duration: 1, delay: 1, clearProps: "opacity,visibility" });
+    gsap.from("#s1 .obj > *", { autoAlpha: 0, scale: 1.04, duration: 1.8, ease: "power3.out", clearProps: "opacity,visibility" });
+    gsap.from(["#s1 .side", "#s1 .copy > *", "#s1 .scroll-hint"], { autoAlpha: 0, duration: 1, delay: 1, clearProps: "opacity,visibility" });
   }
   document.fonts && document.fonts.ready.then(() => ScrollTrigger.refresh());
 })();
